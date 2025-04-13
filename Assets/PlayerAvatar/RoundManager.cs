@@ -19,11 +19,13 @@ public class RoundManager : NetworkBehaviour
     public Vector3 attackSpawnPos;
     public Vector3 defenceSpawnPos;
 
+    public int Round = 1;
+
     // Start is called before the first frame update
     void Awake()
     {       
         rm = this;
-        Invoke("StartGetPlayers", 2f);
+        Invoke("StartGetPlayers", 1.5f);
     }
 
     private void Update()
@@ -31,6 +33,19 @@ public class RoundManager : NetworkBehaviour
 
        
     }
+
+    public void RoundEnd(GameObject loser)
+    {
+        Round++;
+
+        GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
+
+        ResetRound();
+        RpcResetWeapons();
+        GiveCredits(winner, loser);
+        GiveRound(winner);
+    }
+
 
 
     public void ResetRound()
@@ -67,6 +82,8 @@ public class RoundManager : NetworkBehaviour
         // ëäéËÇÃÉvÉåÉCÉÑÅ[ÇéÊìæ
         otherPlayer = PlayerManager.GetOtherPlayer();
 
+        Debug.Log(gameObject,PlayerManager.GetOtherPlayer().transform);
+
         players.Add(myPlayer);
         players.Add(otherPlayer);
 
@@ -89,9 +106,32 @@ public class RoundManager : NetworkBehaviour
         
     }
 
+    [Server]
+    public void GiveCredits(GameObject winner, GameObject loser)
+    {
+        winner.GetComponent<CreditManager>().ResetCurrentPaying();
+        loser.GetComponent<CreditManager>().ResetCurrentPaying();
+        winner.GetComponent<CreditManager>().AddCredit(1000 + Round * 300);
+        loser.GetComponent<CreditManager>().AddCredit(1000 + Round * 100);
 
+    }
 
-    
+    [Server]
+    public void GiveRound(GameObject winner)
+    {
+
+        winner.GetComponent<CreditManager>().GiveRound();
+
+    }
+
+    [ClientRpc]
+    public void RpcResetWeapons()
+    {
+        myPlayer.GetComponent<ShootManager>().ResetZoom();
+        myPlayer.GetComponent<WeaponManager>().SwitchWeapon(WeaponManager.WeaponType.Lover);
+
+    }
+
 
     public GameObject GetMyPlayer()
     {

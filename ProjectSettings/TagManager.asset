@@ -5,17 +5,21 @@ TagManager:
   serializedVersion: 2
   tags:
   - CinemachineTarget
+  - Canvas
+  - PlayerMesh
+  - Head
+  - Body
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
+  - Body
+  - Invisible
+  - Filter
   - 
-  - 
-  - Character
-  - Ground
   - 
   - 
   - 

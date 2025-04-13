@@ -29,7 +29,7 @@ public class HpMaster : NetworkBehaviour
             isDead = true;
             hp = 0;
             Debug.Log($"{netId} ‚ÌƒvƒŒƒCƒ„[‚ª“|‚³‚ê‚½");
-            RoundManager.rm.ResetRound();
+            RoundManager.rm.RoundEnd(gameObject);
         }
     }
 

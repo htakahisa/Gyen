@@ -34,7 +34,7 @@ public class ServerCheckShoot : NetworkBehaviour
         RaycastHit[] results = new RaycastHit[10]; // 検出可能な最大数
 
         Ray ray = new Ray(position, direction);
-        if (tpc.GetSpeed() == 0f)
+        if (tpc.GetSpeed() == 0f && tpc.Grounded)
         {
             int hitCount = Physics.RaycastNonAlloc(ray, results, 100, hitMask);
             // 距離順にソート（もし順序が狂っている場合の保険）

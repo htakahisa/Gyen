@@ -1,7 +1,7 @@
 ﻿using Mirror;
+using System.Collections;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
-using UnityEngine.InputSystem;
 #endif
 
 /* Note: animations are called via the controller for both the character and capsule using animator null checks
@@ -10,9 +10,7 @@ using UnityEngine.InputSystem;
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
-#if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
-    [RequireComponent(typeof(PlayerInput))]
-#endif
+
     public class ThirdPersonController : NetworkBehaviour
     {
         [Header("Player")]
@@ -99,11 +97,9 @@ namespace StarterAssets
         private int _animIDMotionSpeed;
 
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
-        private PlayerInput _playerInput;
 #endif
         private Animator _animator;
         private CharacterController _controller;
-        private StarterAssetsInputs _input;
         private GameObject _mainCamera;
         private GameObject _UiCamera;
 
@@ -117,20 +113,14 @@ namespace StarterAssets
         private float xRotation = 0f; // 上下回転の累積値
 
         private float _airTime;
-        private bool IsCurrentDeviceMouse
-        {
-            get
-            {
-#if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
-                return _playerInput.currentControlScheme == "KeyboardMouse";
-#else
-				return false;
-#endif
-            }
-        }
+
+        private float _dashSound = 0.4f;
+
+        private Vector3 _lastMoveDirection = Vector3.zero;
 
 
-   
+
+
 
         public override void OnStartAuthority() 
         {
@@ -146,8 +136,6 @@ namespace StarterAssets
             }
 
             myBody.layer = 7;
-            PlayerInput playerInput = GetComponent<PlayerInput>();
-            playerInput.enabled = true;
             _CameraComponent.enabled = true;
             _UiCameraComponent.enabled = true;
             _audioListener.enabled = true;
@@ -158,9 +146,7 @@ namespace StarterAssets
             
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
-            _input = GetComponent<StarterAssetsInputs>();
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
-            _playerInput = GetComponent<PlayerInput>();
 #else
 			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif
@@ -217,84 +203,94 @@ namespace StarterAssets
         private void CameraRotation()
         {
             // マウス入力を取得
-            float mouseX = _input.look.x;
-            float mouseY = _input.look.y;
+            float mouseX = Input.GetAxis("Mouse X");
+            float mouseY = Input.GetAxis("Mouse Y");
 
+            xRotation = 0;
             // 上下方向の回転（カメラの俯仰）
             xRotation -= mouseY;
             xRotation = Mathf.Clamp(xRotation, -90f, 90f); // 上下の回転角度を制限
 
-            // カメラに上下回転を適用
-            _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-            // プレイヤー身体に左右回転を適用
-            transform.Rotate(Vector3.up * mouseX);
+            if (mouseX != 0 || mouseY != 0)
+            {
+                // カメラに上下回転を適用
+                _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
+
+                // プレイヤー身体に左右回転を適用
+                transform.Rotate(Vector3.up * mouseX);
+                
+            }
 
         }
 
         private void Move()
         {
-            // set target speed based on move speed, sprint speed and if sprint is pressed
-            float targetSpeed = _input.walk ? MoveSpeed : SprintSpeed;
+            bool walk = Input.GetKey(KeyCode.LeftShift);
 
-            // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
+            // **Input.GetAxis ではなく、Input.GetKey で即時判定**
+            float horiMove =
+                (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) ? -1.0f :
+                (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) ? 1.0f : 0.0f;
 
-            // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
-            // if there is no input, set the target speed to 0
-            if (_input.move == Vector2.zero) targetSpeed = 0.0f;
+            float verMove =
+                (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) ? 1.0f :
+                (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) ? -1.0f : 0.0f;
 
-            // a reference to the players current horizontal velocity
-            float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+            bool isMove = (horiMove != 0 || verMove != 0);
 
-            float speedOffset = 0.1f;
-            float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
-
-            // accelerate or decelerate to target speed
-            if (currentHorizontalSpeed < targetSpeed - speedOffset ||
-                currentHorizontalSpeed > targetSpeed + speedOffset)
+            // **地上にいる場合のみ移動方向と速度を更新**
+            if (Grounded)
             {
-                // creates curved result rather than a linear one giving a more organic speed change
-                // note T in Lerp is clamped, so we don't need to clamp our speed
-                _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude,
-                    Time.deltaTime * SpeedChangeRate);
+                // **目標速度を設定（入力がない場合は即座に0）**
+                float targetSpeed = isMove ? (walk ? MoveSpeed : SprintSpeed) : 0.0f;
 
-                // round speed to 3 decimal places
-                _speed = Mathf.Round(_speed * 1000f) / 1000f;
-            }
-            else
-            {
+                // **Lerpを使わず、即座に速度を適用**
                 _speed = targetSpeed;
+                _animationBlend = targetSpeed;
+
+                // **移動方向計算（正規化 + 速度適用）**
+                Vector3 newMoveDirection = (transform.right * horiMove + transform.forward * verMove).normalized;
+                if (newMoveDirection != Vector3.zero)
+                {
+                    _lastMoveDirection = newMoveDirection;
+                }
             }
 
-            _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
-            if (_animationBlend < 0.01f) _animationBlend = 0f;
+            // **移動ベクトルを計算（空中では最後の移動方向を維持）**
+            Vector3 moveDirection = _lastMoveDirection * _speed;
+            moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
 
+            // **ダッシュ音の処理**
+            if (_speed > 0)
+            {
+                _dashSound -= Time.deltaTime;
+                if (_dashSound <= 0 && !walk)
+                {
+                    OnFootstep();
+                    _dashSound = 0.4f;
+                }
+            }
+            else if (_dashSound <= 0.4f)
+            {
+                _dashSound += Time.deltaTime;
+            }
 
-            // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
-            // if there is a move input rotate player when the player is moving
-
-
-
-            // 移動方向計算
-            Vector3 moveDirection = (transform.right * _input.move.x + transform.forward * _input.move.y).normalized * _speed + new Vector3(0, _verticalVelocity, 0);
-
-
+            // **CharacterControllerで移動**
             _controller.Move(moveDirection * Time.deltaTime);
-            
 
-
-
-            // update animator if using character
+            // **アニメーター更新**
             if (_hasAnimator)
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
-                _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+                _animator.SetFloat(_animIDMotionSpeed, _speed);
             }
         }
 
-
         private void JumpAndGravity()
         {
+            bool jump = Input.GetKey(KeyCode.Space);
+
             if (Grounded)
             {
                 // 空中に0.7秒以上いた場合にOnLand()を呼び出す
@@ -321,7 +317,7 @@ namespace StarterAssets
                 }
 
                 // Jump
-                if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+                if (jump && _jumpTimeoutDelta <= 0.0f)
                 {
                     // the square root of H * -2 * G = how much velocity needed to reach desired height
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
@@ -338,7 +334,7 @@ namespace StarterAssets
                 {
                     _jumpTimeoutDelta -= Time.deltaTime;
                 }
-                _input.jump = false;
+                jump = false;
             }
             else
             {
@@ -363,7 +359,7 @@ namespace StarterAssets
                 }
 
                 // if we are not grounded, do not jump
-                _input.jump = false;
+                jump = false;
             }
 
             // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
@@ -373,12 +369,20 @@ namespace StarterAssets
             }
         }
 
+
+
+
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {
             if (lfAngle < -360f) lfAngle += 360f;
             if (lfAngle > 360f) lfAngle -= 360f;
             return Mathf.Clamp(lfAngle, lfMin, lfMax);
         }
+
+
+
+
+ 
 
         private void OnDrawGizmosSelected()
         {
@@ -394,17 +398,16 @@ namespace StarterAssets
                 GroundedRadius);
         }
 
-        private void OnFootstep(AnimationEvent animationEvent)
+        private void OnFootstep()
         {
-            if (!_input.walk && Grounded)
+            if (Grounded)
             {
-                if (animationEvent.animatorClipInfo.weight > 0.5f)
+
+                if (FootstepAudioClips.Length > 0)
                 {
-                    if (FootstepAudioClips.Length > 0)
-                    {
                         var index = Random.Range(0, FootstepAudioClips.Length);
                         AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
-                    }
+                    
                 }
             }
         }
@@ -439,7 +442,6 @@ namespace StarterAssets
         {
             _controller.enabled = false;
             transform.position = newPos;
-            Debug.Log(transform.position);
             _controller.enabled = true;
         }
     }

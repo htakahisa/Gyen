@@ -30,14 +30,15 @@ public class PlayerManager : NetworkBehaviour
 
     public static GameObject GetLocalPlayer()
     {
-        return Players.Find(p => p.isLocalPlayer).gameObject;
+        PlayerManager player = Players.Find(p => p.isLocalPlayer);
+        return player != null ? player.gameObject : null;
     }
 
     public static GameObject GetOtherPlayer()
     {
         GameObject localPlayer = GetLocalPlayer();
-        if (localPlayer == null) return null;
+        if (localPlayer == null || Players.Count <= 1) return null;
 
-        return Players.Find(p => p != localPlayer).gameObject;
+        return Players.Find(p => p.gameObject != localPlayer)?.gameObject;
     }
 }

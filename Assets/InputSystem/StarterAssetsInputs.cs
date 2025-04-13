@@ -1,4 +1,6 @@
 using Mirror;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 using UnityEngine.InputSystem;
@@ -15,6 +17,7 @@ namespace StarterAssets
 		public bool walk;
 		public bool shoot;
 		public bool changeMain;
+		public bool buy;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -51,9 +54,14 @@ namespace StarterAssets
 		{
 			ShootInput(value.isPressed);
 		}
+
 		public void OnChangeMain(InputValue value)
 		{
 			OnChangeMainInput(value.isPressed);
+		}
+		public void OnBuy(InputValue value)
+		{
+			OnBuyInput(value.isPressed);
 		}
 
 #endif
@@ -81,10 +89,15 @@ namespace StarterAssets
 		public void ShootInput(bool newShootState)
 		{
 			shoot = newShootState;
+
 		}
 		public void OnChangeMainInput(bool newChangeState)
 		{
 			changeMain = newChangeState;
+		}
+		public void OnBuyInput(bool newBuyState)
+		{
+			buy = newBuyState;
 		}
 
 		private void OnApplicationFocus(bool hasFocus)

@@ -43,7 +43,7 @@
                 },
                 {
                     "name": "Shoot",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "a02288ac-e4f0-409d-9c7b-0e1a21933e14",
                     "expectedControlType": "Button",
                     "processors": "",
@@ -54,6 +54,15 @@
                     "name": "ChangeMain",
                     "type": "Button",
                     "id": "99e338b0-8a09-4310-8955-33e0fb12cdb2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Buy",
+                    "type": "Button",
+                    "id": "50455efa-7125-4097-8705-067dbb421c5b",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -256,6 +265,17 @@
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "ChangeMain",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aa4c0d35-fa1a-4508-b402-e2cfc6f0c32c",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "Buy",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
