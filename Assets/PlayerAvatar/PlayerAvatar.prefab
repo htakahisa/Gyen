@@ -366,7 +366,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 874658293c580a549bc6caae98dae13e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWeapon: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
 --- !u!114 &2703531899104429282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,6 +385,8 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   credit: 800
+  currentPaying: 0
+  rounds: 0
 --- !u!114 &7819251824073484213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -567,7 +571,7 @@ MonoBehaviour:
   syncInterval: 0
   hitMask:
     serializedVersion: 2
-    m_Bits: 72
+    m_Bits: 584
 --- !u!1 &1482437206847472307
 GameObject:
   m_ObjectHideFlags: 0

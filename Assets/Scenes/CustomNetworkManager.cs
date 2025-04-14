@@ -84,7 +84,7 @@ public class CustomNetworkManager : NetworkManager
 
         if (conn == attacker)
         {
-            spawnPos = new Vector3(-11.13689f, 5.322976f, -1);            
+            spawnPos = new Vector3(-11.13689f, 5.322976f, 1.0f);            
             rm.attackSpawnPos = spawnPos;
         }
         else

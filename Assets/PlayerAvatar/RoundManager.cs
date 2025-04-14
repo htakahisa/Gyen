@@ -20,11 +20,14 @@ public class RoundManager : NetworkBehaviour
     public Vector3 defenceSpawnPos;
 
     public int Round = 1;
+    public Phase CurrentPhase;
 
     // Start is called before the first frame update
     void Awake()
     {       
         rm = this;
+        CurrentPhase = Phase.BUY;
+        Invoke("SwitchBattlePhase", 15f);
         Invoke("StartGetPlayers", 1.5f);
     }
 
@@ -44,6 +47,15 @@ public class RoundManager : NetworkBehaviour
         RpcResetWeapons();
         GiveCredits(winner, loser);
         GiveRound(winner);
+
+        CurrentPhase = Phase.BUY;
+        Invoke("SwitchBattlePhase", 15f);
+
+    }
+
+    public void SwitchBattlePhase()
+    {
+        CurrentPhase = Phase.BATTLE;
     }
 
 
@@ -142,4 +154,11 @@ public class RoundManager : NetworkBehaviour
     {
         return otherPlayer;
     }
+
+    public enum Phase
+    {
+        BUY,
+        BATTLE,
+    }
+
 }

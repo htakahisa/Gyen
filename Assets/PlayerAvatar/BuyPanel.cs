@@ -31,18 +31,26 @@ public class BuyPanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.B))
+        if (RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY)
         {
-            panel.SetActive(!panel.activeSelf);
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                panel.SetActive(!panel.activeSelf);
 
-            if (isCursorLocked)
-            {
-                UnlockCursor();
+                if (isCursorLocked)
+                {
+                    UnlockCursor();
+                }
+                else
+                {
+                    LockCursor();
+                }
             }
-            else
-            {
-                LockCursor();
-            }
+        }
+        else
+        {
+            panel.SetActive(false);
+            LockCursor();
         }
     }
 

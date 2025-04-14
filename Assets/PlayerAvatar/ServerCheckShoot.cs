@@ -52,12 +52,23 @@ public class ServerCheckShoot : NetworkBehaviour
                 GameObject hit = results[i].collider.gameObject;
 
                 // 地面チェック（先に減衰率を計算）
+                if (hit.layer == 9)
+                {
+                    currentDamageRate *= 0f;
+                    Debug.Log($"地面通過: 減衰率 {currentDamageRate}");
+                    continue; // 地面自体にはダメージを与えない
+                }
+
+
+                // 地面チェック（先に減衰率を計算）
                 if (hit.layer == 3)
                 {
                     currentDamageRate *= 0.5f;
                     Debug.Log($"地面通過: 減衰率 {currentDamageRate}");
                     continue; // 地面自体にはダメージを与えない
                 }
+
+
 
                 // 敵へのダメージ処理
                 if (hit.layer == 6)
@@ -74,6 +85,7 @@ public class ServerCheckShoot : NetworkBehaviour
                         }
                     }
                 }
+          
             }
         }
     }
