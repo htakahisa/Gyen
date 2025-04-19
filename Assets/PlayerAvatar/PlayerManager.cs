@@ -6,12 +6,31 @@ public class PlayerManager : NetworkBehaviour
 {
     public static readonly List<PlayerManager> Players = new List<PlayerManager>();
 
+    public static bool hasLoaded = false;
+
     public void Update()
     {
         if (!Players.Contains(this))
         {
             Players.Add(this);
         }
+
+        int needPlayersCount = 100;
+
+        if(RoundManager.rm.Mode == "1VS1")
+        {
+            needPlayersCount = 2;
+        }
+        if (RoundManager.rm.Mode == "Practice")
+        {
+            needPlayersCount = 1;
+        }
+       
+        if(GetLocalPlayer() != null && GetOtherPlayer() != null)
+        {
+            hasLoaded = true;
+        }
+
     }
 
 

@@ -16,20 +16,14 @@ public class CustomNetworkManager : NetworkManager
     // 接続したクライアントのリスト
     private List<NetworkConnectionToClient> pendingConnections = new List<NetworkConnectionToClient>();
 
-    public void Awake()
-    {
-#if UNITY_EDITOR
-
-        
-
-#endif
-    }
 
 
     public override void OnServerConnect(NetworkConnectionToClient conn)
     {
+        base.OnServerConnect(conn); // この呼び出しを忘れない
         playersInLobby++;
         Debug.Log($"Player connect. Total players: {playersInLobby}");
+        Debug.Log($"Player connect for connection {conn.connectionId}");
 
         pendingConnections.Add(conn);
 
@@ -53,6 +47,24 @@ public class CustomNetworkManager : NetworkManager
         
     }
 
+    // ホストとしてゲームを開始するメソッド
+    public void StartHost()
+    {
+        NetworkManager networkManager = GetComponent<NetworkManager>();
+
+        // 既に接続されている場合は何もしない
+        if (NetworkServer.active || NetworkClient.isConnected)
+        {
+            Debug.LogWarning("既に接続されています。");
+            return;
+        }
+
+        // ホストとして開始（サーバーを起動し、ローカルクライアントを接続）
+        networkManager.StartHost();
+
+        Debug.Log("ホストとしてゲームを開始しました。");
+    }
+
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
         base.OnServerDisconnect(conn);
@@ -62,15 +74,35 @@ public class CustomNetworkManager : NetworkManager
         Debug.Log($"Player left. Total players: {playersInLobby}");
     }
 
+    public void StartPractice()
+    {
+
+        StartHost();
+
+        if (playersInLobby == 0)
+        {
+            return;
+        }
+
+        StartCoroutine(StartBattle(pendingConnections[0]));
+    }
+
+
     private IEnumerator StartBattle(NetworkConnectionToClient conn)
     {
         Debug.Log("e");
         yield return new WaitForSeconds(2f); // 少し待機（演出用）
-        // 全員をバトルシーンへ移動
-        ServerChangeScene(battleSceneName);
+        ServerSceneChange();
         yield return new WaitForSeconds(1f);
         ServerSpawnPlayer(conn);
         
+    }
+
+    [ServerCallback]
+    private void ServerSceneChange()
+    {
+        // 全員をバトルシーンへ移動
+        ServerChangeScene(battleSceneName);
     }
 
 

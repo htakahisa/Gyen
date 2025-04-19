@@ -6,6 +6,8 @@ public class HpMaster : NetworkBehaviour
     [SyncVar(hook = nameof(OnHpChanged))]
     public int hp = 100; // 各プレイヤーのHP
 
+    public float armer = 1; // 各プレイヤーのHP
+
     [SyncVar]
     public bool isDead = false;
 
@@ -22,14 +24,24 @@ public class HpMaster : NetworkBehaviour
             return;
         }
 
+        int correctedDamage = (int)(damage * armer);
+
         if (hp <= 0) return;
-        hp -= damage;
+        hp -= correctedDamage;
         if (hp <= 0)
         {
             isDead = true;
             hp = 0;
             Debug.Log($"{netId} のプレイヤーが倒された");
-            RoundManager.rm.RoundEnd(gameObject);
+            if (RoundManager.rm.Mode == "1VS1")
+            {
+                RoundManager.rm.RoundEnd(gameObject);
+            }
+            if (RoundManager.rm.Mode == "Practice")
+            {
+                ResetHp();
+                transform.position = new Vector3(Random.Range(-8.53f, 2.77f), 0.01000023f, Random.Range(1.20f, 3.27f));
+            }
         }
     }
 

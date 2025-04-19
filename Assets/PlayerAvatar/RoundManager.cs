@@ -22,19 +22,38 @@ public class RoundManager : NetworkBehaviour
     public int Round = 1;
     public Phase CurrentPhase;
 
+    public string Mode = "1VS1";
+
+    public bool hasLoaded = false;
+
     // Start is called before the first frame update
     void Awake()
-    {       
+    {
         rm = this;
         CurrentPhase = Phase.BUY;
-        Invoke("SwitchBattlePhase", 15f);
-        Invoke("StartGetPlayers", 1.5f);
+        if (SceneManager.GetActiveScene().name == "Battle")
+        {
+            Mode = "1VS1";
+        }
+        if (SceneManager.GetActiveScene().name == "Practice")
+        {
+            Mode = "Practice";
+        }
+        if (Mode == "1VS1")
+        {
+            Invoke("RpcSwitchBattlePhase", 15f);
+        }
+
+
     }
 
     private void Update()
     {
-
-       
+        if (!hasLoaded && PlayerManager.hasLoaded)
+        {
+            StartGetPlayers();
+            hasLoaded = true;
+        }
     }
 
     public void RoundEnd(GameObject loser)
@@ -48,12 +67,19 @@ public class RoundManager : NetworkBehaviour
         GiveCredits(winner, loser);
         GiveRound(winner);
 
-        CurrentPhase = Phase.BUY;
-        Invoke("SwitchBattlePhase", 15f);
+        RpcSwitchBuyPhase();
+        Invoke("RpcSwitchBattlePhase", 15f);
 
     }
 
-    public void SwitchBattlePhase()
+    [ClientRpc]
+    public void RpcSwitchBuyPhase()
+    {
+        CurrentPhase = Phase.BUY;
+    }
+
+    [ClientRpc]
+    public void RpcSwitchBattlePhase()
     {
         CurrentPhase = Phase.BATTLE;
     }
@@ -94,11 +120,15 @@ public class RoundManager : NetworkBehaviour
         // ëäéËÇÃÉvÉåÉCÉÑÅ[ÇéÊìæ
         otherPlayer = PlayerManager.GetOtherPlayer();
 
-        Debug.Log(gameObject,PlayerManager.GetOtherPlayer().transform);
 
         players.Add(myPlayer);
         players.Add(otherPlayer);
 
+        myPlayer.GetComponent<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
+        if (Mode == "Practice")
+        {
+            myPlayer.GetComponent<CreditManager>().AddCredit(99999 - 800);
+        }
     }
 
     [Server]
@@ -115,7 +145,7 @@ public class RoundManager : NetworkBehaviour
 
         attacker.GetComponent<HpMaster>().ResetHp();
         defender.GetComponent<HpMaster>().ResetHp();
-        
+
     }
 
     [Server]
@@ -140,8 +170,9 @@ public class RoundManager : NetworkBehaviour
     public void RpcResetWeapons()
     {
         myPlayer.GetComponent<ShootManager>().ResetZoom();
-        myPlayer.GetComponent<WeaponManager>().SwitchWeapon(WeaponManager.WeaponType.Lover);
-
+        myPlayer.GetComponent<ShootManager>().StopAllCoroutines();
+        myPlayer.GetComponent<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
+        myPlayer.GetComponent<ShootManager>().isBursting = false;
     }
 
 

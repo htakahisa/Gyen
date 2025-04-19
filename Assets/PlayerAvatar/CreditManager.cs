@@ -10,7 +10,10 @@ public class CreditManager : NetworkBehaviour
     public int credit = 800;
 
     [SyncVar]
-    public int currentPaying = 0;
+    public int currentWeaponPaying = 0;
+
+    [SyncVar]
+    public int currentArmerPaying = 0;
 
     [SyncVar]
     public int rounds = 0;
@@ -37,10 +40,20 @@ public class CreditManager : NetworkBehaviour
     public void CmdBuyWeapon(int value)
     {
 
-        credit += currentPaying;
+        credit += currentWeaponPaying;
         credit -= value;
-        currentPaying = value;
+        currentWeaponPaying = value;
         
+    }
+
+    [Command]
+    public void CmdBuyArmer(int value)
+    {
+
+        credit += currentArmerPaying;
+        credit -= value;
+        currentArmerPaying = value;
+
     }
 
     [Server]
@@ -49,14 +62,15 @@ public class CreditManager : NetworkBehaviour
         rounds++;
     }
 
-    public bool CanBuy(int cost)
+    public bool CanBuy(int cost, bool isWeapon)
     {
-        return cost <= credit + currentPaying;
+        return cost <= credit + (isWeapon ? currentWeaponPaying : currentArmerPaying);
     }
 
     public void ResetCurrentPaying()
     {
-        currentPaying = 0;
+        currentWeaponPaying = 0;
+        currentArmerPaying = 0;
     }
 
 }
