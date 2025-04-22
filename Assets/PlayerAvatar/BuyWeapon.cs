@@ -22,10 +22,10 @@ public class BuyWeapon : MonoBehaviour
 
     public void Buy()
     {
-        if (RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost))       
+        if (RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, true))       
         {
             RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CmdBuyWeapon(cost);
-            RoundManager.rm.GetMyPlayer().GetComponent<WeaponManager>().SwitchWeapon(name);
+            RoundManager.rm.GetMyPlayer().GetComponent<WeaponManager>().BuyWeapon(name);
         }
     }
 

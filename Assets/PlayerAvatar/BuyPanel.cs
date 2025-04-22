@@ -12,16 +12,23 @@ public class BuyPanel : MonoBehaviour
 
     public GameObject panel;
 
-    private bool isCursorLocked = true;
+    public bool isCursorLocked = true;
+
+    public static BuyPanel buyPanel;
+
+    private bool hasLoaded = false;
 
     // Start is called before the first frame update
     void Awake()
     {
+        buyPanel = this;
         panel.SetActive(false);
         // 初期状態でカーソルをロックし、非表示にする
         LockCursor();
-        Invoke("StartGetPlayer", 2f);
+        
     }
+
+
 
     void StartGetPlayer()
     {
@@ -31,6 +38,15 @@ public class BuyPanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (RoundManager.rm != null)
+        {
+            if (RoundManager.rm.hasLoaded && PlayerManager.hasLoaded && !hasLoaded)
+            {
+                StartGetPlayer();
+                hasLoaded = true;
+            }
+        }
+
         if (RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY)
         {
             if (Input.GetKeyDown(KeyCode.B))

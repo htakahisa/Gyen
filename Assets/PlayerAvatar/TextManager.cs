@@ -9,6 +9,8 @@ public class TextManager : MonoBehaviour
 
     public TextMeshProUGUI creditText;
     public TextMeshProUGUI roundText;
+    public TextMeshProUGUI magazineText;
+    public TextMeshProUGUI magazineSizeText;
 
     // Start is called before the first frame update
     void Start()
@@ -22,7 +24,12 @@ public class TextManager : MonoBehaviour
         if (RoundManager.rm.GetMyPlayer() != null)
         {
             creditText.text = "Credit : " + RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().credit;
-            roundText.text = RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().rounds + " " + RoundManager.rm.GetOtherPlayer().GetComponent<CreditManager>().rounds;
+            if (RoundManager.rm.Mode == "1VS1")
+            {
+                roundText.text = RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().rounds + " " + RoundManager.rm.GetOtherPlayer().GetComponent<CreditManager>().rounds;
+            }
+            magazineText.text =  RoundManager.rm.GetMyPlayer().GetComponent<WeaponManager>().magazine.ToString();
+            magazineSizeText.text = "/" + RoundManager.rm.GetMyPlayer().GetComponent<WeaponManager>().GetCurrentWeaponData().magazineSize;
         }
     }
 }

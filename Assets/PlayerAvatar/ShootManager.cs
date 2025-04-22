@@ -28,23 +28,26 @@ namespace StarterAssets
 
         private Coroutine zoomCoroutine;
 
-        private bool isBursting;
+        public bool isBursting;
+
+        public AudioManager audioManager;
+
+        private bool hasLoaded = false;
 
         // Start is called before the first frame update
         public override void OnStartAuthority()
         {
+         
+            weaponManager = GetComponent<WeaponManager>();
+            weaponManager.SwitchWeapon(WeaponType.Liet);
             if (_mainCamera == null)
             {
                 _CameraComponent = GetComponentInChildren<Camera>();
                 _mainCamera = _CameraComponent.gameObject;
 
             }
-
-            weaponManager = GetComponent<WeaponManager>();
-            weaponManager.SwitchWeapon(WeaponType.Liet);
-            Invoke("StartGetTpc", 2f);
-
         }
+
 
         public void StartGetTpc()
         {
@@ -55,6 +58,15 @@ namespace StarterAssets
             // Update is called once per frame
         private void Update()
         {
+            if (RoundManager.rm != null)
+            {
+                if (RoundManager.rm.hasLoaded && PlayerManager.hasLoaded && !hasLoaded)
+                {
+                    StartGetTpc();
+                    hasLoaded = true;
+                }
+            }
+
             if (!isLocalPlayer) return;
 
 
@@ -64,7 +76,16 @@ namespace StarterAssets
                 weaponManager.SwitchWeapon(WeaponType.Hazard);
             }
 
-            Shoot();
+            // ïêäÌÉäÉçÅ[Éh
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                weaponManager.Reload();
+            }
+
+            if (BuyPanel.buyPanel.isCursorLocked)
+            {
+                Shoot();
+            }
 
             if (Input.GetMouseButtonDown(1))
             {
@@ -100,20 +121,21 @@ namespace StarterAssets
 
         }
 
-        private IEnumerator BurstFire()
+        public IEnumerator BurstFire()
         {
             isBursting = true;
             WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
 
             for (int i = 0; i < currentWeapon.burst; i++)
             {
-                ShootWeapon();
+                    ShootWeapon();
 
-                // ç≈å„ÇÃéÀåÇå„ÇÕë“ã@ÇµÇ»Ç¢
-                if (i < currentWeapon.burst - 1)
-                {
-                    yield return new WaitForSeconds(currentWeapon.rate);
-                }
+                    // ç≈å„ÇÃéÀåÇå„ÇÕë“ã@ÇµÇ»Ç¢
+                    if (i < currentWeapon.burst - 1)
+                    {
+                        yield return new WaitForSeconds(currentWeapon.rate);
+                    }
+                
             }
 
             yield return new WaitForSeconds(currentWeapon.rate * 2);
@@ -156,16 +178,21 @@ namespace StarterAssets
 
         private void ShootWeapon()
         {
-            lastAttackTime = Time.time;
-            WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
-            if (currentWeapon != null)
+            if (weaponManager.magazine >= 1)
             {
-                Vector3 direction = _mainCamera.transform.forward;
-                if (!currentWeapon.isNeedZoom || IsZooming)
+                audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(gameObject.GetComponent<CharacterController>().center), 0.06f);
+                weaponManager.magazine--;
+                lastAttackTime = Time.time;
+                WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
+                if (currentWeapon != null)
                 {
-                    GetComponent<ServerCheckShoot>().CmdGetShoot(gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage);
+                    Vector3 direction = _mainCamera.transform.forward;
+                    if (!currentWeapon.isNeedZoom || IsZooming)
+                    {
+                        GetComponent<ServerCheckShoot>().CmdGetShoot(gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage);
+                    }
+                    StartCoroutine(RecoilCoroutine(0.1f, new Vector3(-currentWeapon.Yrecoil, currentWeapon.Xrecoil, 0f)));
                 }
-                StartCoroutine(RecoilCoroutine(0.1f, new Vector3(-currentWeapon.Yrecoil, currentWeapon.Xrecoil, 0f)));
             }
         }
 
@@ -202,9 +229,14 @@ namespace StarterAssets
             }
 
             if (!shoot) return false;
-            
-             // åªç›éûçèÇ∆ç≈å„ÇÃçUåÇéûçèÇî‰är
-             float timeSinceLastAttack = Time.time - lastAttackTime;
+
+            if (weaponManager.magazine <= 0) return false;
+
+            if (weaponManager.isReloading) return false;
+
+
+            // åªç›éûçèÇ∆ç≈å„ÇÃçUåÇéûçèÇî‰är
+            float timeSinceLastAttack = Time.time - lastAttackTime;
 
             return timeSinceLastAttack >= currentWeapon.rate;
             

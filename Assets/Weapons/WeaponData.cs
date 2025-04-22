@@ -14,19 +14,19 @@ public class WeaponData
 
     public float Yrecoil;
 
-    public float magazineSize;
-    
+    public int magazineSize;
+    public float reloadTime;
+
     public bool zoomable;
     public bool isNeedZoom;
     public float zoomRatio;
     public float zoomSpeed;
-    
 
     public int burst;
 
     public bool isAuto;
 
-    public WeaponData(string name, int damage, int headDamage, float rate, float Xrecoil, float Yrecoil, int magazineSize, bool zoomable, bool isNeedZoom, float zoomRatio, float zoomSpeed, int burst, bool isAuto)
+    public WeaponData(string name, int damage, int headDamage, float rate, float Xrecoil, float Yrecoil, int magazineSize, float reloadTime ,bool zoomable, bool isNeedZoom, float zoomRatio, float zoomSpeed, int burst, bool isAuto)
     {
         this.weaponName = name;
 
@@ -39,6 +39,7 @@ public class WeaponData
         this.Yrecoil = Yrecoil;
 
         this.magazineSize = magazineSize;
+        this.reloadTime = reloadTime;
 
         this.zoomable = zoomable;
         this.isNeedZoom = isNeedZoom;
