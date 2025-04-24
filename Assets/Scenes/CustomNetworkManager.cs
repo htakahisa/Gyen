@@ -83,7 +83,6 @@ public class CustomNetworkManager : NetworkManager
         foreach (var conn in pendingConnections)
         {
             ServerSpawnPlayer(conn);
-            yield return new WaitForSeconds(0.5f); // ƒXƒ|[ƒ“ŠÔŠu‚ğ‹ó‚¯‚é
         }
     }
 

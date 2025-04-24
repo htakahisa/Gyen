@@ -8,10 +8,12 @@ using static WeaponManager;
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(LineRenderer))]
 
     public class ShootManager : NetworkBehaviour
     {
 
+        public GameObject weaponPos;
 
         private GameObject _mainCamera;
         private Camera _CameraComponent;
@@ -34,6 +36,8 @@ namespace StarterAssets
 
         private bool hasLoaded = false;
 
+
+
         // Start is called before the first frame update
         public override void OnStartAuthority()
         {
@@ -46,6 +50,7 @@ namespace StarterAssets
                 _mainCamera = _CameraComponent.gameObject;
 
             }
+
         }
 
 
@@ -154,10 +159,11 @@ namespace StarterAssets
                         _CameraComponent.fieldOfView -= 1;
                         yield return new WaitForSeconds(currentWeapon.zoomSpeed / (80 - currentWeapon.zoomRatio));
                     }
+                    IsZooming = true;
                 }
             }
 
-            IsZooming = true;
+           
             
         }
 
@@ -178,10 +184,13 @@ namespace StarterAssets
 
         private void ShootWeapon()
         {
-            if (weaponManager.magazine >= 1)
+            if (weaponManager.magazine >= 1 || RoundManager.rm.Mode == "Practice")
             {
                 audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(gameObject.GetComponent<CharacterController>().center), 0.06f);
-                weaponManager.magazine--;
+                if (weaponManager.magazine >= 1)
+                {
+                    weaponManager.magazine--;
+                }
                 lastAttackTime = Time.time;
                 WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
                 if (currentWeapon != null)
@@ -189,7 +198,7 @@ namespace StarterAssets
                     Vector3 direction = _mainCamera.transform.forward;
                     if (!currentWeapon.isNeedZoom || IsZooming)
                     {
-                        GetComponent<ServerCheckShoot>().CmdGetShoot(gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage);
+                        GetComponent<ServerCheckShoot>().CmdGetShoot(gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage, weaponPos.transform.position);
                     }
                     StartCoroutine(RecoilCoroutine(0.1f, new Vector3(-currentWeapon.Yrecoil, currentWeapon.Xrecoil, 0f)));
                 }
@@ -229,8 +238,6 @@ namespace StarterAssets
             }
 
             if (!shoot) return false;
-
-            if (weaponManager.magazine <= 0) return false;
 
             if (weaponManager.isReloading) return false;
 
@@ -273,6 +280,8 @@ namespace StarterAssets
         {
             return currentRecoilPosition;
         }
+
+      
 
 
     }

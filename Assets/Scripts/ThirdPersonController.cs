@@ -136,7 +136,6 @@ namespace StarterAssets
             myBody.layer = 7;
             _CameraComponent.enabled = true;
             _UiCameraComponent.enabled = true;
-            _audioListener.enabled = true;
         }
 
         private void Start()
@@ -163,7 +162,18 @@ namespace StarterAssets
 
             JumpAndGravity();
             GroundedCheck();
+
             Move();
+            
+
+            if (RoundManager.rm.Mode == "Practice" && RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE)
+            {
+                _audioListener.enabled = true;
+            }
+            else
+            {
+                _audioListener.enabled = false;
+            }
 
         }
 
@@ -223,7 +233,8 @@ namespace StarterAssets
 
         private void Move()
         {
-            bool walk = Input.GetKey(KeyCode.LeftShift);
+
+                bool walk = Input.GetKey(KeyCode.LeftShift);
 
             // **Input.GetAxis ではなく、Input.GetKey で即時判定**
             float horiMove =
@@ -236,6 +247,8 @@ namespace StarterAssets
 
             bool isMove = (horiMove != 0 || verMove != 0);
 
+
+
             // **地上にいる場合のみ移動方向と速度を更新**
             if (Grounded)
             {
@@ -244,7 +257,8 @@ namespace StarterAssets
 
                 // **Lerpを使わず、即座に速度を適用**
                 _speed = targetSpeed;
-                _animationBlend = targetSpeed;
+                _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+                if (_animationBlend < 0.01f) _animationBlend = 0f;
 
                 // **移動方向計算（正規化 + 速度適用）**
                 Vector3 newMoveDirection = (transform.right * horiMove + transform.forward * verMove).normalized;
@@ -252,11 +266,16 @@ namespace StarterAssets
                 {
                     _lastMoveDirection = newMoveDirection;
                 }
+
+
             }
+
+
 
             // **移動ベクトルを計算（空中では最後の移動方向を維持）**
             Vector3 moveDirection = _lastMoveDirection * _speed;
             moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
+
 
             // **ダッシュ音の処理**
             if (_speed > 0)
@@ -273,6 +292,8 @@ namespace StarterAssets
                 _dashSound += Time.deltaTime;
             }
 
+
+            Debug.Log("p" + moveDirection);
             // **CharacterControllerで移動**
             _controller.Move(moveDirection * Time.deltaTime);
 
@@ -366,7 +387,68 @@ namespace StarterAssets
             }
         }
 
+        public void BotMove(float horiMove, bool isWalk)
+        {
 
+            bool isMove = (horiMove != 0);
+
+            // **地上にいる場合のみ移動方向と速度を更新**
+            if (Grounded)
+            {
+                // **目標速度を設定（入力がない場合は即座に0）**
+                float targetSpeed = isMove ? (isWalk ? MoveSpeed : SprintSpeed) : 0.0f;
+
+                // **Lerpを使わず、即座に速度を適用**
+                _speed = targetSpeed;
+                _animationBlend = targetSpeed;
+
+                // **移動方向計算（正規化 + 速度適用）**
+                Vector3 newMoveDirection = (transform.right * horiMove).normalized;
+                if (newMoveDirection != Vector3.zero)
+                {
+                    _lastMoveDirection = newMoveDirection;
+                }
+            }
+
+            // **移動ベクトルを計算（空中では最後の移動方向を維持）**
+            Vector3 moveDirection = _lastMoveDirection * _speed;
+            moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
+
+            
+
+            // **ダッシュ音の処理**
+            if (_speed > 0)
+            {
+                _dashSound -= Time.deltaTime;
+                if (_dashSound <= 0)
+                {
+                    OnFootstep();
+                    _dashSound = 0.4f;
+                }
+            }
+            else if (_dashSound <= 0.4f)
+            {
+                _dashSound += Time.deltaTime;
+            }
+
+
+            Debug.Log("b" + moveDirection);
+            // **CharacterControllerで移動**
+            _controller.Move(moveDirection * Time.deltaTime);
+
+            // **アニメーター更新**
+            if (_hasAnimator)
+            {
+                _animator.SetFloat(_animIDSpeed, _animationBlend);
+                _animator.SetFloat(_animIDMotionSpeed, _speed);
+            }
+        }
+
+        public void BotStop()
+        {
+            _animator.SetFloat(_animIDSpeed, 0);
+            _animator.SetFloat(_animIDMotionSpeed, 0);
+        }
 
 
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)

@@ -26,6 +26,8 @@ public class RoundManager : NetworkBehaviour
 
     public bool hasLoaded = false;
 
+    public BotMove currentBotMove = BotMove.STOP;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -46,6 +48,14 @@ public class RoundManager : NetworkBehaviour
 
 
     }
+
+    public enum BotMove 
+    {
+        STOP,
+        WALK,
+        RUN
+    }
+
 
     private void Update()
     {

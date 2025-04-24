@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class InstanceBot : MonoBehaviour
+public class BotSetting : MonoBehaviour
 {
 
     public GameObject Bot;
@@ -37,5 +37,22 @@ public class InstanceBot : MonoBehaviour
         bot.GetComponent<BotManager>().ResetPos();
         bot.GetComponent<HpMaster>().armer = RoundManager.rm.GetMyPlayer().GetComponent<HpMaster>().armer;
     }
+
+    public void BotStopping()
+    {
+        RoundManager.rm.currentBotMove = RoundManager.BotMove.STOP;
+    }
+
+    public void BotWalking()
+    {
+        RoundManager.rm.currentBotMove = RoundManager.BotMove.WALK;
+    }
+
+    public void BotRunning()
+    {
+        RoundManager.rm.currentBotMove = RoundManager.BotMove.RUN;
+    }
+
+
 
 }
