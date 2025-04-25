@@ -266,10 +266,10 @@ namespace StarterAssets
                 float t = elapsedTime / duration;
 
                 // スムーズなリコイル適用（イージングをかける）
-                _mainCamera.transform.rotation *= Quaternion.Euler(targetRecoil.x, 0, 0);
+                _mainCamera.transform.rotation *= Quaternion.Euler(targetRecoil.x / t, 0, 0);
                 transform.Rotate(Vector3.up * targetRecoil.y * (UnityEngine.Random.value < 0.5f ? -1f : 1f));
 
-                yield return null;
+                yield return new WaitForSeconds(0.01f);
             }
 
 
