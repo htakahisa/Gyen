@@ -2291,7 +2291,7 @@ MonoBehaviour:
   syncInterval: 0
   hitMask:
     serializedVersion: 2
-    m_Bits: 584
+    m_Bits: 1608
   maxDistance: 100
   lineDuration: 0.1
 --- !u!114 &164791515131999902
@@ -2572,7 +2572,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 104
+    m_Bits: 1128
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -3139,7 +3139,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.05
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 80
   orthographic: 0
@@ -3147,7 +3147,7 @@ Camera:
   m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 607
+    m_Bits: 1631
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

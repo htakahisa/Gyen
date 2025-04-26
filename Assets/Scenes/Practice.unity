@@ -832,7 +832,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   name: 6
-  cost: 2800
+  cost: 2500
 --- !u!114 &242773838
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4933,6 +4933,7 @@ GameObject:
   - component: {fileID: 966734462}
   - component: {fileID: 966734461}
   - component: {fileID: 966734460}
+  - component: {fileID: 966734465}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -5053,6 +5054,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &966734465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966734459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f32be0dd434a7824ca96566c4b2add93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 520
+  lime: {fileID: 3539715179979286606, guid: f6640a8a82c26614c8f80227a4f15d91, type: 3}
 --- !u!1 &1020591894
 GameObject:
   m_ObjectHideFlags: 0
@@ -5122,8 +5139,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4293853439
-  m_fontColor: {r: 1, g: 0, b: 0.93725497, a: 1}
+    rgba: 4285530367
+  m_fontColor: {r: 1, g: 0, b: 0.43921572, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -6819,7 +6836,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 2800
+  m_text: 2400
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 62cd9891115876248af7c8587b16c004, type: 2}
   m_sharedMaterial: {fileID: -8940488444597090311, guid: 62cd9891115876248af7c8587b16c004,
@@ -8714,7 +8731,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   name: 5
-  cost: 2800
+  cost: 2500
 --- !u!114 &1724300859
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10338,7 +10355,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 2800
+  m_text: 2400
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 62cd9891115876248af7c8587b16c004, type: 2}
   m_sharedMaterial: {fileID: -8940488444597090311, guid: 62cd9891115876248af7c8587b16c004,

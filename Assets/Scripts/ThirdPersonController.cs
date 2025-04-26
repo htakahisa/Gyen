@@ -164,7 +164,7 @@ namespace StarterAssets
             GroundedCheck();
 
             Move();
-            
+            Ability();
 
             if (RoundManager.rm.Mode == "Practice" && RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE)
             {
@@ -302,6 +302,14 @@ namespace StarterAssets
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
                 _animator.SetFloat(_animIDMotionSpeed, _speed);
+            }
+        }
+
+        private void Ability()
+        {
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                AbilityController.ac.Lime();
             }
         }
 
