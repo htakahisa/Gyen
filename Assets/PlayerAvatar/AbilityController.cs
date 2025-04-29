@@ -32,6 +32,7 @@ public class AbilityController : NetworkBehaviour
     {
         GameObject instance = Instantiate(lime, GetHitInForward(), Quaternion.identity);
         NetworkServer.Spawn(instance);
+        RoundManager.spawns.Add(instance);
     }
 
     public Vector3 GetHitInForward()
@@ -40,7 +41,7 @@ public class AbilityController : NetworkBehaviour
         Physics.Raycast(mainCamera.position, mainCamera.forward, out RaycastHit hit, 100, wallLayer);
 
         Vector3 offsetDirection = -mainCamera.forward;
-        float offsetDistance = 1f; // 少し手前の距離（必要に応じて調整）
+        float offsetDistance = 0.1f; // 少し手前の距離（必要に応じて調整）
 
         return hit.point + offsetDirection * offsetDistance;
 

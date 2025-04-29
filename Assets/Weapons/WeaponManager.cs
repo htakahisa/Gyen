@@ -16,6 +16,7 @@ public class WeaponManager : NetworkBehaviour
     // 武器のデータベース
     private Dictionary<WeaponType, WeaponData> weaponDatabase = new Dictionary<WeaponType, WeaponData>()
     {
+        { WeaponType.Hotaru, new WeaponData("Hotaru", 50, 150, 0f, 0f, 0f, 0, 0f, true, false, 55f, 0f, 1, false) },
         { WeaponType.Lover, new WeaponData("Lover", 30, 70, 0.13f, 0.02f, 0.015f, 7, 0.8f,false, false, 80f, 0f, 1, false) },
         { WeaponType.Leo, new WeaponData("Leo", 25, 60, 0.11f, 0.06f, 0.02f, 10, 1f,false, false, 80f, 0f, 1, true) },
         { WeaponType.Liet, new WeaponData("Liet", 50, 133, 0.3f, 0f, 0.05f, 5, 1.3f,false, false, 80f, 0f ,1, false) },
@@ -63,6 +64,7 @@ public class WeaponManager : NetworkBehaviour
     // 武器の種類を定義
     public enum WeaponType
     {
+        Hotaru,
         Lover,
         Leo,
         Liet,

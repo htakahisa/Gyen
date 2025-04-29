@@ -28,6 +28,8 @@ public class RoundManager : NetworkBehaviour
 
     public BotMove currentBotMove = BotMove.STOP;
 
+    public static List<GameObject> spawns = new List<GameObject>();
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -98,15 +100,18 @@ public class RoundManager : NetworkBehaviour
 
     public void ResetRound()
     {
-        RpcResetAllObjects();
+        ServerResetAllObjects();
         ResetPlayers();
     }
 
 
-    [ClientRpc]
-    public void RpcResetAllObjects()
+    public void ServerResetAllObjects()
     {
         // クライアント側でオブジェクトをリセット
+        foreach(var spawn in spawns)
+        {
+            NetworkServer.Destroy(spawn);
+        }
     }
 
 
