@@ -8,10 +8,11 @@ public class DestroyTimer : NetworkBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        Invoke("Destroy", time);
+        Invoke("RpcDestroy", time);
     }
 
-    public void Destroy()
+    [ClientRpc]
+    public void RpcDestroy()
     {
         NetworkServer.Destroy(gameObject);
     }

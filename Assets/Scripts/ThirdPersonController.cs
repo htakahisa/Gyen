@@ -156,7 +156,10 @@ namespace StarterAssets
 
         private void Update()
         {
-            if (!isLocalPlayer) return;
+            if (!isLocalPlayer)
+            {
+                _audioListener.enabled = false; return; 
+            }
 
             _hasAnimator = TryGetComponent(out _animator);
 
@@ -166,7 +169,7 @@ namespace StarterAssets
             Move();
             Ability();
 
-            if (RoundManager.rm.Mode == "Practice" && RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE)
+            if (RoundManager.rm.Mode == "Practice" || RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE)
             {
                 _audioListener.enabled = true;
             }
