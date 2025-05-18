@@ -31,14 +31,14 @@ namespace StarterAssets
 
         [Space(10)]
         [Tooltip("The height the player can jump")]
-        public float JumpHeight = 2.2f;
+        public float JumpHeight = 2f;
 
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
         public float Gravity = -15.0f;
 
         [Space(10)]
         [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
-        public float JumpTimeout = 0.50f;
+        public float JumpTimeout = 0f;
 
         [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
         public float FallTimeout = 0.15f;
@@ -75,6 +75,7 @@ namespace StarterAssets
         public GameObject myBody;
 
         public LayerMask Invisible;
+        public LayerMask OrbMask;
 
         // player
         private float _speed;
@@ -115,6 +116,8 @@ namespace StarterAssets
         private float _dashSound = 0.4f;
 
         private Vector3 _lastMoveDirection = Vector3.zero;
+
+        private float _sensitivity = 1f;
 
 
         public AudioManager audioManager;
@@ -158,9 +161,10 @@ namespace StarterAssets
         {
             if (!isLocalPlayer)
             {
-                _audioListener.enabled = false; return; 
+                return; 
             }
 
+            _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
             _hasAnimator = TryGetComponent(out _animator);
 
             JumpAndGravity();
@@ -168,6 +172,7 @@ namespace StarterAssets
 
             Move();
             Ability();
+            GetOrb();
 
             if (RoundManager.rm.Mode == "Practice" || RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE)
             {
@@ -218,7 +223,7 @@ namespace StarterAssets
 
             xRotation = 0;
             // 上下方向の回転（カメラの俯仰）
-            xRotation -= mouseY;
+            xRotation -= mouseY * _sensitivity;
             xRotation = Mathf.Clamp(xRotation, -90f, 90f); // 上下の回転角度を制限
 
 
@@ -228,7 +233,7 @@ namespace StarterAssets
                 _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
 
                 // プレイヤー身体に左右回転を適用
-                transform.Rotate(Vector3.up * mouseX);
+                transform.Rotate(Vector3.up * mouseX * _sensitivity);
                 
             }
 
@@ -237,7 +242,9 @@ namespace StarterAssets
         private void Move()
         {
 
-                bool walk = Input.GetKey(KeyCode.LeftShift);
+            bool walk = Input.GetKey(KeyCode.LeftShift);
+
+            bool sneak = Input.GetMouseButton(1);
 
             // **Input.GetAxis ではなく、Input.GetKey で即時判定**
             float horiMove =
@@ -255,8 +262,35 @@ namespace StarterAssets
             // **地上にいる場合のみ移動方向と速度を更新**
             if (Grounded)
             {
+                float targetSpeed = 0f;
+
                 // **目標速度を設定（入力がない場合は即座に0）**
-                float targetSpeed = isMove ? (walk ? MoveSpeed : SprintSpeed) : 0.0f;
+
+                if (isMove)
+                {
+                    
+
+                    if (walk)
+                    {
+                        targetSpeed = MoveSpeed;
+                    }
+                    else
+                    {
+                        targetSpeed = SprintSpeed;
+                    }
+
+                    if (sneak) 
+                    {
+                        targetSpeed *= 0.5f;
+                    }
+
+                                                  
+                }
+                else
+                {
+                    targetSpeed = 0f;
+                }
+                            
 
                 // **Lerpを使わず、即座に速度を適用**
                 _speed = targetSpeed;
@@ -296,7 +330,7 @@ namespace StarterAssets
             }
 
 
-            Debug.Log("p" + moveDirection);
+            //Debug.Log("p" + moveDirection);
             // **CharacterControllerで移動**
             _controller.Move(moveDirection * Time.deltaTime);
 
@@ -314,6 +348,35 @@ namespace StarterAssets
             {
                 AbilityController.ac.Lime();
             }
+        }
+
+        private void GetOrb()
+        {
+
+            if(Input.GetKey(KeyCode.F)){
+
+                try
+                {
+                    foreach (var orbs in GameObject.FindGameObjectsWithTag("Orb"))
+                    {
+                        Vector3 direction = orbs.transform.position - _mainCamera.transform.position;
+
+                        if (Physics.Raycast(_mainCamera.transform.position, direction, out RaycastHit hit, 100, OrbMask))
+                        {   
+                            if (hit.distance <= 1.5f)
+                            {
+                                    hit.collider.gameObject.GetComponent<GetEffect>().Active();
+                            }
+                        }
+                        
+                    }
+                }
+                catch
+                {
+
+                }
+            }
+
         }
 
         private void JumpAndGravity()
@@ -443,7 +506,7 @@ namespace StarterAssets
             }
 
 
-            Debug.Log("b" + moveDirection);
+            //Debug.Log("b" + moveDirection);
             // **CharacterControllerで移動**
             _controller.Move(moveDirection * Time.deltaTime);
 

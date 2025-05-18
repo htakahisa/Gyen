@@ -30,6 +30,12 @@ public class AbilityController : NetworkBehaviour
 
     public void Lime()
     {
+        ServerLime();
+    }
+
+    [ServerCallback]
+    public void ServerLime()
+    {
         GameObject instance = Instantiate(lime, GetHitInForward(), Quaternion.identity);
         NetworkServer.Spawn(instance);
         RoundManager.spawns.Add(instance);

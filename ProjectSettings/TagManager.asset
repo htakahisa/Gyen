@@ -9,6 +9,7 @@ TagManager:
   - PlayerMesh
   - Head
   - Body
+  - Orb
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - Filter
   - PhaseWall
   - Smoke
-  - 
+  - Orb
   - 
   - 
   - 

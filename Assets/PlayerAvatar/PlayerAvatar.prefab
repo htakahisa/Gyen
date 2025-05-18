@@ -2189,6 +2189,9 @@ MonoBehaviour:
   Invisible:
     serializedVersion: 2
     m_Bits: 128
+  OrbMask:
+    serializedVersion: 2
+    m_Bits: 2568
   audioManager: {fileID: 164791515131999902}
 --- !u!114 &384796226056249388
 MonoBehaviour:
@@ -2572,7 +2575,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1128
+    m_Bits: 3177
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -3147,7 +3150,7 @@ Camera:
   m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1631
+    m_Bits: 3679
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
