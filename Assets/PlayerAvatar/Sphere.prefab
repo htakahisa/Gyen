@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 9160531979565139124}
   - component: {fileID: 5602487577345971805}
   - component: {fileID: 1075627374201394627}
+  - component: {fileID: 6220774946829919000}
   m_Layer: 11
   m_Name: Sphere
   m_TagString: Orb
@@ -29,8 +30,8 @@ Transform:
   m_GameObject: {fileID: 2158545504791687764}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.77, y: 0.784, z: -8.83}
-  m_LocalScale: {x: 0.9216324, y: 0.9216324, z: 0.9216324}
+  m_LocalPosition: {x: 4.59, y: 0.784, z: -1.089}
+  m_LocalScale: {x: 0.76035726, y: 0.76035726, z: 0.76035726}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -121,12 +122,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7ca990f1e6279a4caf741b6cfed0450, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   effect:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1075627374201394627}
         m_TargetAssemblyTypeName: GetEffect, Assembly-CSharp
-        m_MethodName: DebugCall
+        m_MethodName: ChargeEnergy
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -136,3 +140,21 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  hadGot: 0
+--- !u!114 &6220774946829919000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2158545504791687764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 1703189518
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0

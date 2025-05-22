@@ -30,6 +30,8 @@ public class RoundManager : NetworkBehaviour
 
     public static List<GameObject> spawns = new List<GameObject>();
 
+    public List<GameObject> respawns = new List<GameObject>();
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -55,7 +57,8 @@ public class RoundManager : NetworkBehaviour
     {
         STOP,
         WALK,
-        RUN
+        RUN,
+        JUMP
     }
 
 
@@ -80,6 +83,7 @@ public class RoundManager : NetworkBehaviour
         GiveRound(winner);
 
         RpcSwitchBuyPhase();
+        RpcResultText(loser);
         Invoke("RpcSwitchBattlePhase", 15f);
 
     }
@@ -88,6 +92,22 @@ public class RoundManager : NetworkBehaviour
     public void RpcSwitchBuyPhase()
     {
         CurrentPhase = Phase.BUY;
+    }
+
+    [ClientRpc]
+    public void RpcResultText(GameObject loser)
+    {
+        string result = "";
+
+        if (loser == GetMyPlayer())
+        {
+            result = "lose";
+        }
+        else
+        {
+            result = "win";
+        }
+        StartCoroutine(TextManager.textManager.ResultCoroutine(result));
     }
 
     [ClientRpc]
@@ -104,7 +124,7 @@ public class RoundManager : NetworkBehaviour
         ResetPlayers();
     }
 
-
+    [Server]
     public void ServerResetAllObjects()
     {
         // クライアント側でオブジェクトをリセット
@@ -112,6 +132,13 @@ public class RoundManager : NetworkBehaviour
         {
             ClientDestroy(spawn);
         }
+
+        // クライアント側でオブジェクトをリセット
+        foreach (var respawns in respawns)
+        {
+            ServerSpawn(respawns);
+        }
+
     }
 
     [ClientRpc]
@@ -120,7 +147,13 @@ public class RoundManager : NetworkBehaviour
         Destroy(instance);
     }
 
-
+    [Server]
+    public void ServerSpawn(GameObject prefab)
+    {
+        GameObject instance = Instantiate(prefab);
+        NetworkServer.Spawn(instance);
+        spawns.Add(instance);
+    }
 
     public void ResetPlayers()
     {
@@ -216,6 +249,20 @@ public class RoundManager : NetworkBehaviour
 
         return botsList;
     }
+
+
+    [Command]
+    public void CmdCallDance()
+    {
+        GetMyPlayer().GetComponent<ThirdPersonController>().RpcDance();
+    }
+
+    [Command]
+    public void CmdCallEndDance()
+    {
+        GetMyPlayer().GetComponent<ThirdPersonController>().RpcEndDance();
+    }
+
 
     public enum Phase
     {

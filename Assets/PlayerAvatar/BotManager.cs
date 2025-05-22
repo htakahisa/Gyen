@@ -9,6 +9,9 @@ public class BotManager : MonoBehaviour
     public float currentMoveDirection;
     public float moveDuration;
 
+    public float jumpTime = 0f;
+    public float jumpDuration;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -36,6 +39,32 @@ public class BotManager : MonoBehaviour
             {
                 moveTime = 0;
             }
+
+            if(RoundManager.rm.currentBotMove == RoundManager.BotMove.JUMP)
+            {
+                if (tpc.Grounded)
+                {
+                    jumpTime += Time.deltaTime;
+
+                    if (jumpTime >= jumpDuration)
+                    {
+                        tpc.BotJumpAndGravity(true);
+                        jumpTime = 0;
+                        jumpDuration = Random.Range(1.0f, 5.0f);
+                    }
+                    else
+                    {
+                        tpc.BotJumpAndGravity(false);
+                    }
+                     
+                }
+                else
+                {
+                    tpc.BotJumpAndGravity(false);
+                }
+
+            }
+
         }
         else
         {

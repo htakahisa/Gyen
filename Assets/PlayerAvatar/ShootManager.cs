@@ -36,7 +36,9 @@ namespace StarterAssets
 
         private bool hasLoaded = false;
 
+        public bool canShoot = true;
 
+        public LayerMask wallMask;
 
         // Start is called before the first frame update
         public override void OnStartAuthority()
@@ -157,7 +159,7 @@ namespace StarterAssets
                     while (currentWeapon.zoomRatio < _CameraComponent.fieldOfView)
                     {
                         _CameraComponent.fieldOfView -= 1;
-                        yield return new WaitForSeconds(currentWeapon.zoomSpeed / (80 - currentWeapon.zoomRatio));
+                        yield return new WaitForSeconds(currentWeapon.zoomSpeed / (74.03f - currentWeapon.zoomRatio));
                     }
                     IsZooming = true;
                 }
@@ -175,7 +177,7 @@ namespace StarterAssets
                 if (currentWeapon.zoomable && zoomCoroutine != null)
                 {
                     StopCoroutine(zoomCoroutine);
-                    _CameraComponent.fieldOfView = 80;
+                    _CameraComponent.fieldOfView = 74.03f;
                     IsZooming = false;
                 }
             }
@@ -186,7 +188,41 @@ namespace StarterAssets
         {
             if (weaponManager.magazine >= 1 || RoundManager.rm.Mode == "Practice")
             {
-                audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(gameObject.GetComponent<CharacterController>().center), 0.06f);
+                if (Input.GetMouseButton(3))
+                {   
+
+                    Vector3 cheatdirection = new Vector3(0,0,0);
+                    Transform myhead;
+                    Transform enemyhead;
+
+                    if (RoundManager.rm.GetOtherPlayer() != null)
+                    {
+                        myhead = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
+                        enemyhead = RoundManager.rm.GetOtherPlayer().GetComponentInChildren<Camera>().transform;
+                        cheatdirection = enemyhead.position - myhead.position; 
+                        
+                    }  
+                    else
+                    {
+                        myhead = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
+                        enemyhead = RoundManager.rm.GetBots()[UnityEngine.Random.Range(0, RoundManager.rm.GetBots().Count)].GetComponentInChildren<Camera>().transform;
+
+                        cheatdirection = enemyhead.position - myhead.position;
+                        
+                    }
+
+                    if (!Physics.Raycast(myhead.position, enemyhead.position - myhead.position, Vector3.Distance(myhead.position, enemyhead.position), wallMask))
+                    {
+                        Vector3 bodydirection = new Vector3(cheatdirection.x, 0, cheatdirection.z);
+
+                        transform.rotation = Quaternion.LookRotation(bodydirection);
+
+                        _mainCamera.transform.rotation = Quaternion.LookRotation(cheatdirection);
+                    }
+                    
+                }
+
+                    audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(gameObject.GetComponent<CharacterController>().center), 0.06f);
                 if (weaponManager.magazine >= 1)
                 {
                     weaponManager.magazine--;
@@ -221,6 +257,7 @@ namespace StarterAssets
         public bool CanShoot(bool Auto)
         {
 
+            if (!canShoot) return false;
 
             WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
 

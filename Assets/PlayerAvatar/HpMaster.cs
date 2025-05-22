@@ -7,6 +7,8 @@ public class HpMaster : NetworkBehaviour
     public int hp = 100; // 各プレイヤーのHP
 
     public float armer = 1; // 各プレイヤーのHP
+    [SyncVar]
+    public bool isInvincible = false;
 
     [SyncVar]
     public bool isDead = false;
@@ -19,7 +21,7 @@ public class HpMaster : NetworkBehaviour
     [Server]
     public void TakeDamage(int damage)
     {
-        if (isDead)
+        if (isDead || isInvincible)
         {
             return;
         }
@@ -50,6 +52,13 @@ public class HpMaster : NetworkBehaviour
     {
         isDead = false;
         hp = 100;
+
+    }
+
+    [Command]
+    public void CmdInvincible(bool invincible)
+    {
+        isInvincible = invincible;
 
     }
 

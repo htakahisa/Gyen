@@ -316,7 +316,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1729391697800681205}
@@ -390,6 +390,10 @@ MonoBehaviour:
   IsZooming: 0
   isBursting: 0
   audioManager: {fileID: 8135213472563124772}
+  canShoot: 1
+  wallMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &1378437777043357893
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -429,7 +433,15 @@ MonoBehaviour:
   Invisible:
     serializedVersion: 2
     m_Bits: 128
+  OrbMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _speed: 0
   audioManager: {fileID: 8135213472563124772}
+  canMove: 1
+  canAbility: 1
+  canGetOrb: 1
+  Aiscream: {fileID: 0}
 --- !u!114 &-2900896035119755407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,6 +459,7 @@ MonoBehaviour:
   syncInterval: 0
   hp: 100
   armer: 1
+  isInvincible: 0
   isDead: 0
 --- !u!114 &590089684175471371
 MonoBehaviour:
@@ -571,6 +584,8 @@ MonoBehaviour:
   moveTime: 0
   currentMoveDirection: 0
   moveDuration: 0
+  jumpTime: 0
+  jumpDuration: 0
 --- !u!120 &307654404663700722
 LineRenderer:
   serializedVersion: 2

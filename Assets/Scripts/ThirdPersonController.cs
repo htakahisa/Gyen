@@ -77,7 +77,8 @@ namespace StarterAssets
         public LayerMask Invisible;
         public LayerMask OrbMask;
 
-        // player
+        [SyncVar]
+        [SerializeField]
         private float _speed;
         private float _animationBlend;
         private Quaternion _targetRotation;
@@ -94,6 +95,7 @@ namespace StarterAssets
         private int _animIDJump;
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
+        private int _animDance;
 
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 #endif
@@ -107,6 +109,9 @@ namespace StarterAssets
         private Camera _CameraComponent;
         private Camera _UiCameraComponent;
 
+        private ShootManager _shootManager;
+        private HpMaster _hpMaster;
+
         private bool _hasAnimator;
 
         private float xRotation = 0f; // 上下回転の累積値
@@ -119,10 +124,14 @@ namespace StarterAssets
 
         private float _sensitivity = 1f;
 
-
         public AudioManager audioManager;
 
+        public bool canMove = true;
+        public bool canAbility = true;
+        public bool canGetOrb = true;
+        public GameObject Aiscream;
 
+        GameObject BgmObject;
         public override void OnStartAuthority() 
         {
             if (_mainCamera == null)
@@ -131,9 +140,10 @@ namespace StarterAssets
                 _mainCamera = _CameraComponent.gameObject;
                 _UiCameraComponent = _mainCamera.transform.GetChild(0).GetComponent<Camera>();
                 _UiCamera = _UiCameraComponent.gameObject;
-                _audioListener = _mainCamera.GetComponent<AudioListener>();
                 Canvas canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>();
-                canvas.worldCamera = _CameraComponent;              
+                canvas.worldCamera = _CameraComponent;
+                _shootManager = GetComponent<ShootManager>();
+                _hpMaster = GetComponent<HpMaster>();
             }
 
             myBody.layer = 7;
@@ -155,34 +165,87 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+
+            
+
         }
 
         private void Update()
         {
+
+            GroundedCheck();
+
+            if (_audioListener == null)
+            {
+                _CameraComponent = GetComponentInChildren<Camera>();
+                _mainCamera = _CameraComponent.gameObject;
+                _audioListener = _mainCamera?.GetComponent<AudioListener>();
+            }
+            else
+            {
+
+                    if (RoundManager.rm.Mode == "Practice" || (RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE && isLocalPlayer))
+                    {
+                        _audioListener.enabled = true;
+                    }
+                    else
+                    {
+                        _audioListener.enabled = false;
+                    }
+
+            }
+
             if (!isLocalPlayer)
             {
-                return; 
+                return;
             }
 
             _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
             _hasAnimator = TryGetComponent(out _animator);
 
-            JumpAndGravity();
-            GroundedCheck();
-
-            Move();
-            Ability();
-            GetOrb();
-
-            if (RoundManager.rm.Mode == "Practice" || RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE)
+            if (canMove)
             {
-                _audioListener.enabled = true;
+                JumpAndGravity();
+
+                Move();
             }
-            else
+            if (canAbility)
             {
-                _audioListener.enabled = false;
+                Ability();
+            }
+            if (canGetOrb)
+            {
+                GetOrb();
             }
 
+            if(Input.GetKeyDown(KeyCode.P))
+            {
+                if (_animator.GetInteger(_animDance) == 0)
+                {
+                    CmdCallDance();
+                }
+                else
+                {
+                    CmdCallEndDance();
+                }
+            }
+
+        }
+
+        [Command]
+        public void  CmdCallDance()
+        {
+            NetworkServer.Destroy(BgmObject);
+            TargetDance();
+            BgmObject = Instantiate(Aiscream, transform.position, Quaternion.identity);
+            NetworkServer.Spawn(BgmObject);
+        }
+
+        [Command]
+        public void CmdCallEndDance()
+        {
+            NetworkServer.Destroy(BgmObject);
+            TargetEndDance();
         }
 
         private void LateUpdate()
@@ -198,6 +261,7 @@ namespace StarterAssets
             _animIDJump = Animator.StringToHash("Jump");
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+            _animDance = Animator.StringToHash("Dance");
         }
 
         private void GroundedCheck()
@@ -233,7 +297,7 @@ namespace StarterAssets
                 _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
 
                 // プレイヤー身体に左右回転を適用
-                transform.Rotate(Vector3.up * mouseX * _sensitivity);
+                transform.Rotate(Vector3.up * mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f));
                 
             }
 
@@ -307,7 +371,7 @@ namespace StarterAssets
 
             }
 
-
+            CmdReportSpeed(_speed);
 
             // **移動ベクトルを計算（空中では最後の移動方向を維持）**
             Vector3 moveDirection = _lastMoveDirection * _speed;
@@ -340,13 +404,16 @@ namespace StarterAssets
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
                 _animator.SetFloat(_animIDMotionSpeed, _speed);
             }
+
+
+
         }
 
         private void Ability()
         {
             if (Input.GetKeyDown(KeyCode.E))
             {
-                AbilityController.ac.Lime();
+                GetComponent<AbilityController>().Lime();
             }
         }
 
@@ -365,8 +432,8 @@ namespace StarterAssets
                         {   
                             if (hit.distance <= 1.5f)
                             {
-                                    hit.collider.gameObject.GetComponent<GetEffect>().Active();
-                            }
+                                hit.collider.gameObject.GetComponent<GetEffect>().Active();
+                            }   
                         }
                         
                     }
@@ -518,6 +585,110 @@ namespace StarterAssets
             }
         }
 
+        public void BotJumpAndGravity(bool jump)
+        {
+
+            if (Grounded)
+            {
+                transform.rotation = Quaternion.identity;
+
+                // 空中に0.7秒以上いた場合にOnLand()を呼び出す
+                if (_airTime >= 0.7f)
+                {
+                    OnLand();
+                }
+                _airTime = 0f; // 空中時間をリセット
+
+                // reset the fall timeout timer
+                _fallTimeoutDelta = FallTimeout;
+
+                // update animator if using character
+                if (_hasAnimator)
+                {
+                    _animator.SetBool(_animIDJump, false);
+                    _animator.SetBool(_animIDFreeFall, false);
+                }
+
+                // stop our velocity dropping infinitely when grounded
+                if (_verticalVelocity < 0.0f)
+                {
+                    _verticalVelocity = -2f;
+                }
+
+                // Jump
+                if (jump && _jumpTimeoutDelta <= 0.0f)
+                {
+                    // the square root of H * -2 * G = how much velocity needed to reach desired height
+                    _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+
+                    // update animator if using character
+                    if (_hasAnimator)
+                    {
+                        _animator.SetBool(_animIDJump, true);
+                    }
+                }
+
+                // jump timeout
+                if (_jumpTimeoutDelta >= 0.0f)
+                {
+                    _jumpTimeoutDelta -= Time.deltaTime;
+                }
+                jump = false;
+            }
+            else
+            {
+
+                float mouseX = 2;
+                float mouseY = 2;
+
+                xRotation = 0;
+                // 上下方向の回転（カメラの俯仰）
+                xRotation -= mouseY;
+                xRotation = Mathf.Clamp(xRotation, -90f, 90f); // 上下の回転角度を制限
+
+
+                if (mouseX != 0 || mouseY != 0)
+                {
+                    // カメラに上下回転を適用
+                    _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
+
+                    // プレイヤー身体に左右回転を適用
+                    transform.Rotate(Vector3.up * mouseX * (_CameraComponent.fieldOfView / 74.03f));
+
+                }
+
+                // 空中にいる時間を加算
+                _airTime += Time.deltaTime;
+
+                // reset the jump timeout timer
+                _jumpTimeoutDelta = JumpTimeout;
+
+                // fall timeout
+                if (_fallTimeoutDelta >= 0.0f)
+                {
+                    _fallTimeoutDelta -= Time.deltaTime;
+                }
+                else
+                {
+                    // update animator if using character
+                    if (_hasAnimator)
+                    {
+                        _animator.SetBool(_animIDFreeFall, true);
+                    }
+                }
+
+                // if we are not grounded, do not jump
+                jump = false;
+            }
+
+            // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
+            if (_verticalVelocity < _terminalVelocity)
+            {
+                _verticalVelocity += Gravity * Time.deltaTime;
+            }
+        }
+
+
         public void BotStop()
         {
             _animator.SetFloat(_animIDSpeed, 0);
@@ -574,10 +745,17 @@ namespace StarterAssets
             return _mainCamera;
         }
 
+        [Command]
+        void CmdReportSpeed(float clientSpeed)
+        {
+            _speed = clientSpeed;  // サーバー上で保持＆SyncVarにより全クライアントに反映される
+        }
+
         public float GetSpeed()
         {
-            return _speed;
+            return _speed;  // 呼び出したクライアント上で最後に受信した値（SyncVar）
         }
+
 
         [Server]
         public void ResetPos(Vector3 pos)
@@ -588,11 +766,90 @@ namespace StarterAssets
         }
 
         [ClientRpc]
+        public void RpcDance()
+        {
+            canMove = false;
+            canAbility = false;
+            canGetOrb = false;
+            _shootManager.canShoot = false;
+            _hpMaster.isInvincible = true;
+
+
+            _animator.SetInteger(_animDance, 1);
+
+        }
+
+        [ClientRpc]
+        public void RpcEndDance()
+        {
+            canMove = true;
+            canAbility = true;
+            canGetOrb = true;
+            _shootManager.canShoot = true;
+            _hpMaster.isInvincible = false;
+
+
+            _animator.SetInteger(_animDance, 0);
+
+        }
+
+        [TargetRpc]
+        public void TargetDance()
+        {
+            canMove = false;
+            canAbility = false;
+            canGetOrb = false;
+            _shootManager.canShoot = false;
+            _hpMaster.CmdInvincible(true);
+
+
+            _animator.SetInteger(_animDance, 1);
+
+        }
+
+        [TargetRpc]
+        public void TargetEndDance()
+        {
+            canMove = true;
+            canAbility = true;
+            canGetOrb = true;
+            _shootManager.canShoot = true;
+            _hpMaster.CmdInvincible(false);
+
+
+            _animator.SetInteger(_animDance, 0);
+
+        }
+
+
+        [ClientRpc]
         void RpcUpdateAllPositions(Vector3 newPos)
         {
             _controller.enabled = false;
             transform.position = newPos;
             _controller.enabled = true;
+        }
+
+        public void RequestDestroy(uint sceneObjNetId)
+        {
+            if (isLocalPlayer)
+            {
+                CmdRequestDestroy(sceneObjNetId);
+            }
+        }
+
+        // クライアントがサーバーに対して削除を要求するCommand
+        [Command]
+        public void CmdRequestDestroy(uint sceneObjNetId)
+        {
+            if (NetworkServer.spawned.TryGetValue(sceneObjNetId, out NetworkIdentity targetIdentity))
+            {
+                var destroy = targetIdentity.GetComponent<GetEffect>();
+                if (destroy != null)
+                {
+                    destroy.ServerDestroy();
+                }
+            }
         }
     }
 }

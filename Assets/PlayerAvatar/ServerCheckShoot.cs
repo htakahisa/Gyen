@@ -15,6 +15,10 @@ public class ServerCheckShoot : NetworkBehaviour
 
     private LineRenderer lineRenderer;
 
+    public static float headShot;
+
+    public static float bodyShot;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -46,7 +50,7 @@ public class ServerCheckShoot : NetworkBehaviour
         DrawBulletLine(weaponPos, direction, playerObject);
 
 
-        if (tpc.GetSpeed() == 0f && tpc.Grounded)
+        if (tpc.GetSpeed() == 0 && tpc.Grounded)
         {
             int hitCount = Physics.RaycastNonAlloc(ray, results, 100, hitMask);
             // 距離順にソート（もし順序が狂っている場合の保険）
@@ -64,7 +68,7 @@ public class ServerCheckShoot : NetworkBehaviour
                 GameObject hit = results[i].collider.gameObject;
 
 
-                // 地面チェック（先に減衰率を計算）
+                // フェーズウォールチェック（先に減衰率を計算）
                 if (hit.layer == 9)
                 {
                     currentDamageRate *= 0f;
@@ -73,7 +77,7 @@ public class ServerCheckShoot : NetworkBehaviour
                 }
 
 
-                // 地面チェック（先に減衰率を計算）
+                // スモークチェック（先に減衰率を計算）
                 if (hit.layer == 10)
                 {
                     currentDamageRate *= 0.9f;
@@ -101,6 +105,16 @@ public class ServerCheckShoot : NetworkBehaviour
                         if (!hitList.Contains(hpMaster.gameObject))
                         {
                             int finalDamage = (int)((hit.tag == "Head" ? originalHeadDamage : originalDamage) * currentDamageRate);
+
+                            if(hit.tag == "Head")
+                            {
+                                headShot++;
+                            }
+                            else
+                            {
+                                bodyShot++;
+                            }
+
                             hpMaster.TakeDamage(finalDamage);
                             hitList.Add(hpMaster.gameObject);
                             Debug.Log($"ヒット: {hit.tag}, ダメージ {finalDamage}");
@@ -111,6 +125,18 @@ public class ServerCheckShoot : NetworkBehaviour
             }
         }
     }
+
+    public float GetHeadShotRate()
+    {
+        if(headShot + bodyShot == 0)
+        {
+            return 0f;
+        }
+        int a = (int)(headShot / (headShot + bodyShot) * 10000);
+
+        return (float)a / 100;
+    }
+
 
     [ClientRpc]
     public void DrawBulletLine(Vector3 origin, Vector3 direction, GameObject playerObject)

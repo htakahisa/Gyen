@@ -8,46 +8,50 @@ public class AbilityController : NetworkBehaviour
 
     public GameObject lime;
 
-    private Transform mainCamera;
-
-    public static AbilityController ac;
+    public int energy = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        ac = this;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(RoundManager.rm.hasLoaded && mainCamera == null)
+        if(RoundManager.rm.Mode == "Practice")
         {
-            mainCamera = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
+            energy = 10000;
         }
     }
 
 
     public void Lime()
     {
-        ServerLime();
+        //必要数1
+        if (energy >= 1)
+        {
+            Transform mainCamera = GetComponentInChildren<Camera>().transform;
+            CmdLime(mainCamera.position, mainCamera.forward);
+            energy--;
+        }
     }
 
-    [ServerCallback]
-    public void ServerLime()
+    [Command]
+    public void CmdLime(Vector3 pos, Vector3 dir)
     {
-        GameObject instance = Instantiate(lime, GetHitInForward(), Quaternion.identity);
+        GameObject instance = Instantiate(lime, GetHitInForward(pos, dir), Quaternion.identity);
         NetworkServer.Spawn(instance);
         RoundManager.spawns.Add(instance);
     }
 
-    public Vector3 GetHitInForward()
+    public Vector3 GetHitInForward(Vector3 pos, Vector3 dir)
     {
-        
-        Physics.Raycast(mainCamera.position, mainCamera.forward, out RaycastHit hit, 100, wallLayer);
 
-        Vector3 offsetDirection = -mainCamera.forward;
-        float offsetDistance = 0.1f; // 少し手前の距離（必要に応じて調整）
+        Physics.Raycast(pos, dir, out RaycastHit hit, 100, wallLayer);
+
+        Vector3 offsetDirection = -dir;
+        float offsetDistance = 0.3f; // 少し手前の距離（必要に応じて調整）
 
         return hit.point + offsetDirection * offsetDistance;
 

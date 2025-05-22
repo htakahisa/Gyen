@@ -53,6 +53,10 @@ public class BotSetting : MonoBehaviour
         RoundManager.rm.currentBotMove = RoundManager.BotMove.RUN;
     }
 
+    public void BotJumping()
+    {
+        RoundManager.rm.currentBotMove = RoundManager.BotMove.JUMP;
+    }
 
 
 }

@@ -11,6 +11,7 @@ public class AudioManager : NetworkBehaviour
     public AudioClip land;
     public AudioClip shoot;
 
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -40,6 +41,7 @@ public class AudioManager : NetworkBehaviour
         {
             soundClip = shoot;
         }
+
         // サーバーで音を再生
         AudioSource.PlayClipAtPoint(soundClip, position, volume);
 
@@ -66,10 +68,13 @@ public class AudioManager : NetworkBehaviour
             soundClip = shoot;
         }
 
+
         // サーバー以外のクライアントで音を再生
         if (!isServer)
         {
             AudioSource.PlayClipAtPoint(soundClip, position, volume);
         }
     }
+
+
 }

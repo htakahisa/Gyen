@@ -15,7 +15,13 @@ public class CustomNetworkManager : NetworkManager
     public NetworkConnectionToClient attacker;
 
     private int playersInLobby = 0;
+
+    public string targetAddress = "192.168.11.21";
+    public ushort port = 7777;
+
     private readonly List<NetworkConnectionToClient> pendingConnections = new List<NetworkConnectionToClient>();
+
+    private int isCorrectforConnect;
 
     #region Initialization
     public override void Awake()
@@ -27,6 +33,63 @@ public class CustomNetworkManager : NetworkManager
     #endregion
 
     #region Server Callbacks
+
+
+    public void Connect()
+    {
+        StartCoroutine(ConnectCoroutine());
+    }
+
+    public IEnumerator ConnectCoroutine()
+    {
+        networkAddress = targetAddress;
+        StartClient();
+        yield return new WaitUntil(() => isCorrectforConnect != 0);
+        if (isCorrectforConnect == 2)
+        {
+            isCorrectforConnect = 0;
+
+            if (!IsInRoom())
+            {
+                NetworkClient.Disconnect();
+                networkAddress = "localhost";
+                StartClient();
+            }
+            yield return new WaitUntil(() => isCorrectforConnect != 0);
+            if (isCorrectforConnect == 2)
+            {
+                isCorrectforConnect = 0;
+                if (!IsInRoom())
+                {
+                    NetworkClient.Disconnect();
+                    networkAddress = "localhost";
+                    StartHost();
+                }
+            }
+        }
+    }
+
+    public override void OnClientConnect()
+    {
+        isCorrectforConnect = 1;
+    }
+
+
+    public override void OnClientDisconnect()
+    {
+        isCorrectforConnect = 2;
+    }
+
+
+
+
+    bool IsInRoom()
+    {
+        // クライアントが接続されていて、ネットワークがアクティブであるかを確認
+        return NetworkClient.isConnected && NetworkManager.singleton.isNetworkActive;
+    }
+
+
     public override void OnServerConnect(NetworkConnectionToClient conn)
     {
         base.OnServerConnect(conn);
@@ -49,6 +112,7 @@ public class CustomNetworkManager : NetworkManager
         playersInLobby--;
         pendingConnections.Remove(conn);
         Debug.Log($"Player disconnected (ID: {conn.connectionId}), Total: {playersInLobby}");
+
     }
     #endregion
 
