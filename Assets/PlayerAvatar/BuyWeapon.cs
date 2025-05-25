@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using static WeaponManager;
 
 public class BuyWeapon : MonoBehaviour
@@ -8,16 +9,17 @@ public class BuyWeapon : MonoBehaviour
     public WeaponType name;
     public int cost;
 
+
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void Buy()

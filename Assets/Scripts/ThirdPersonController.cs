@@ -48,7 +48,7 @@ namespace StarterAssets
         public bool Grounded = true;
 
         [Tooltip("Useful for rough ground")]
-        public float GroundedOffset = -0.14f;
+        public float GroundedOffset = -0.24f;
 
         [Tooltip("The radius of the grounded check. Should match the radius of the CharacterController")]
         public float GroundedRadius = 0.28f;
@@ -311,13 +311,9 @@ namespace StarterAssets
             bool sneak = Input.GetMouseButton(1);
 
             // **Input.GetAxis ではなく、Input.GetKey で即時判定**
-            float horiMove =
-                (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) ? -1.0f :
-                (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) ? 1.0f : 0.0f;
+            float horiMove = Input.GetAxisRaw("Horizontal");
 
-            float verMove =
-                (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) ? 1.0f :
-                (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) ? -1.0f : 0.0f;
+            float verMove = Input.GetAxisRaw("Vertical");
 
             bool isMove = (horiMove != 0 || verMove != 0);
 
@@ -472,7 +468,7 @@ namespace StarterAssets
                 // stop our velocity dropping infinitely when grounded
                 if (_verticalVelocity < 0.0f)
                 {
-                    _verticalVelocity = -2f;
+                    _verticalVelocity = Gravity;
                 }
 
                 // Jump
@@ -661,7 +657,7 @@ namespace StarterAssets
                 _airTime += Time.deltaTime;
 
                 // reset the jump timeout timer
-                _jumpTimeoutDelta = JumpTimeout;
+                //_jumpTimeoutDelta = JumpTimeout;
 
                 // fall timeout
                 if (_fallTimeoutDelta >= 0.0f)

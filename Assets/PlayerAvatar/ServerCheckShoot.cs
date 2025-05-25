@@ -19,6 +19,9 @@ public class ServerCheckShoot : NetworkBehaviour
 
     public static float bodyShot;
 
+    public GameObject Blood;
+    public GameObject Fragment;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -49,9 +52,9 @@ public class ServerCheckShoot : NetworkBehaviour
 
         DrawBulletLine(weaponPos, direction, playerObject);
 
-
         if (tpc.GetSpeed() == 0 && tpc.Grounded)
         {
+            
             int hitCount = Physics.RaycastNonAlloc(ray, results, 100, hitMask);
             // 距離順にソート（もし順序が狂っている場合の保険）
             Array.Sort(results, 0, hitCount, new RaycastHitDistanceComparer());
@@ -66,11 +69,13 @@ public class ServerCheckShoot : NetworkBehaviour
             {
                 Debug.Log($"HitOrder: [{i}] {results[i].collider.name} (Dist: {results[i].distance}m)");
                 GameObject hit = results[i].collider.gameObject;
-
+                RaycastHit hitpoint = results[i];
 
                 // フェーズウォールチェック（先に減衰率を計算）
                 if (hit.layer == 9)
                 {
+                    GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
+                    NetworkServer.Spawn(fragment);
                     currentDamageRate *= 0f;
                     Debug.Log($"地面通過: 減衰率 {currentDamageRate}");
                     continue; // 地面自体にはダメージを与えない
@@ -89,6 +94,8 @@ public class ServerCheckShoot : NetworkBehaviour
                 // 地面チェック（先に減衰率を計算）
                 if (hit.layer == 3)
                 {
+                    GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
+                    NetworkServer.Spawn(fragment);
                     currentDamageRate *= 0.5f;
                     Debug.Log($"地面通過: 減衰率 {currentDamageRate}");
                     continue; // 地面自体にはダメージを与えない
@@ -102,6 +109,8 @@ public class ServerCheckShoot : NetworkBehaviour
                     HpMaster hpMaster = hit.GetComponentInParent<HpMaster>();
                     if (hpMaster != null && playerObject.GetComponent<NetworkIdentity>().netId != hit.GetComponentInParent<NetworkIdentity>().netId)
                     {
+                        GameObject blood = Instantiate(Blood, hitpoint.point, Quaternion.identity);
+                        NetworkServer.Spawn(blood);
                         if (!hitList.Contains(hpMaster.gameObject))
                         {
                             int finalDamage = (int)((hit.tag == "Head" ? originalHeadDamage : originalDamage) * currentDamageRate);

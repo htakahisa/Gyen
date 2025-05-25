@@ -2095,7 +2095,7 @@ CharacterController:
   m_StepOffset: 0.5
   m_SkinWidth: 0.02
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 0.93, z: 0}
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!114 &5652861891855330889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2177,10 +2177,10 @@ MonoBehaviour:
   FootstepAudioVolume: 0.3
   JumpHeight: 1.2
   Gravity: -15
-  JumpTimeout: 0.3
+  JumpTimeout: 0
   FallTimeout: 0.15
   Grounded: 1
-  GroundedOffset: -0.14
+  GroundedOffset: -0.24
   GroundedRadius: 0.28
   GroundLayers:
     serializedVersion: 2
@@ -2309,6 +2309,9 @@ MonoBehaviour:
     m_Bits: 1608
   maxDistance: 100
   lineDuration: 0.1
+  Blood: {fileID: 4178278509775477463, guid: 3d0463f291d0351418a22c3bcd66ccdd, type: 3}
+  Fragment: {fileID: 6236630861130584601, guid: a87e483792b9d194b8616c7e2be9bdca,
+    type: 3}
 --- !u!114 &164791515131999902
 MonoBehaviour:
   m_ObjectHideFlags: 0

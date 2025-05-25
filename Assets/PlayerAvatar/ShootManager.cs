@@ -40,6 +40,8 @@ namespace StarterAssets
 
         public LayerMask wallMask;
 
+        Coroutine recoilBounce;
+
         // Start is called before the first frame update
         public override void OnStartAuthority()
         {
@@ -188,6 +190,11 @@ namespace StarterAssets
         {
             if (weaponManager.magazine >= 1 || RoundManager.rm.Mode == "Practice")
             {
+                if (recoilBounce != null)
+                {
+                    StopCoroutine(recoilBounce);
+                }
+
                 if (Input.GetMouseButton(3))
                 {   
 
@@ -236,7 +243,11 @@ namespace StarterAssets
                     {
                         GetComponent<ServerCheckShoot>().CmdGetShoot(gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage, weaponPos.transform.position);
                     }
-                    StartCoroutine(RecoilCoroutine(0.1f, new Vector3(-currentWeapon.Yrecoil, currentWeapon.Xrecoil, 0f)));
+
+                    StartCoroutine(RecoilCoroutine(0.1f, new Vector3(-currentWeapon.Xrecoil, currentWeapon.Yrecoil, 0f)));
+
+                    recoilBounce = StartCoroutine(Recoilbounce(0.1f, new Vector3(0, currentWeapon.Yrecoil, 0f)));
+                    
                 }
             }
         }
@@ -291,25 +302,28 @@ namespace StarterAssets
         // リコイル処理のコルーチン
         public IEnumerator RecoilCoroutine(float duration, Vector3 targetRecoil)
         {
-            float elapsedTime = 0f;
             if (IsZooming)
             {
                 targetRecoil *= 0.5f;
             }
 
-            while (elapsedTime < duration)
+            float xRandomRot = UnityEngine.Random.Range(-targetRecoil.x, targetRecoil.x);
+
+            for (int count = 0; count < 10; count++)
             {
-                elapsedTime += Time.deltaTime;
-                float t = elapsedTime / duration;
-
-                // スムーズなリコイル適用（イージングをかける）
-                _mainCamera.transform.rotation *= Quaternion.Euler(targetRecoil.x / t, 0, 0);
-                transform.Rotate(Vector3.up * targetRecoil.y * (UnityEngine.Random.value < 0.5f ? -1f : 1f));
-
-                yield return new WaitForSeconds(0.01f);
+                _mainCamera.transform.localRotation *= Quaternion.Euler(-targetRecoil.y / (10 - count), 0, 0);
+                transform.localRotation *= Quaternion.Euler(0, xRandomRot / (10 - count), 0);
+                yield return new WaitForSeconds(duration / 9);
             }
+        }
 
+        private IEnumerator Recoilbounce(float duration, Vector3 targetRecoil)
+        {
 
+            yield return new WaitForSeconds((0.3f - duration) * 1.5f);
+
+            StartCoroutine(RecoilCoroutine(duration, new Vector3(0, -targetRecoil.y, 0)));
+            
         }
 
         // 現在のリコイル値を取得
