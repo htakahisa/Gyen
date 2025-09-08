@@ -10,6 +10,7 @@ public class AudioManager : NetworkBehaviour
     public AudioClip footStep;
     public AudioClip land;
     public AudioClip shoot;
+    public LayerMask soundBlockLayer;
 
 
     // Start is called before the first frame update
@@ -42,9 +43,6 @@ public class AudioManager : NetworkBehaviour
             soundClip = shoot;
         }
 
-        // サーバーで音を再生
-        AudioSource.PlayClipAtPoint(soundClip, position, volume);
-
         // クライアントにも再生させる
         RpcPlaySoundAtPoint(name, position, volume);
     }
@@ -52,6 +50,19 @@ public class AudioManager : NetworkBehaviour
     [ClientRpc]
     private void RpcPlaySoundAtPoint(string name, Vector3 position, float volume)
     {
+        Debug.Log("SoundIsPlayed");
+
+        Vector3 dir = position - RoundManager.rm.GetMyPlayer().transform.position;
+
+        if (Physics.Raycast(RoundManager.rm.GetMyPlayer().transform.position, dir, out RaycastHit hit, dir.magnitude, soundBlockLayer))
+        {
+
+             // 壁に遮られている
+             Debug.Log("SoundWasBlocked!");
+             return;
+                        
+           
+        }
 
         AudioClip soundClip = null;
 
@@ -69,11 +80,9 @@ public class AudioManager : NetworkBehaviour
         }
 
 
-        // サーバー以外のクライアントで音を再生
-        if (!isServer)
-        {
-            AudioSource.PlayClipAtPoint(soundClip, position, volume);
-        }
+
+        AudioSource.PlayClipAtPoint(soundClip, position, volume);
+        
     }
 
 

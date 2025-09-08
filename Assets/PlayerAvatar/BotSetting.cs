@@ -58,5 +58,9 @@ public class BotSetting : MonoBehaviour
         RoundManager.rm.currentBotMove = RoundManager.BotMove.JUMP;
     }
 
+    public void BotCrouching()
+    {
+        RoundManager.rm.currentBotMove = RoundManager.BotMove.CROUCH;
+    }
 
 }

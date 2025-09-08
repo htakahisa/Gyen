@@ -25,6 +25,11 @@ public class PlayerManager : NetworkBehaviour
         {
             needPlayersCount = 1;
         }
+
+
+        Players.Remove(null);
+        
+        
        
         if(Players.Count >= needPlayersCount)
         {

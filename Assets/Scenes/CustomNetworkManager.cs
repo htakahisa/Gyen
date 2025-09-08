@@ -179,8 +179,8 @@ public class CustomNetworkManager : NetworkManager
         // スポーン位置決定
         bool isAttacker = (conn == attacker);
         Vector3 spawnPos = isAttacker ?
-            new Vector3(-11.14f, 5.32f, 1f) :
-            new Vector3(9f, 2.71f, 0f);
+            RoundManager.rm.attackSpawnPos :
+            RoundManager.rm.defenceSpawnPos;
 
         // プレイヤー生成
         GameObject player = Instantiate(

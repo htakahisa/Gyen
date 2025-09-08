@@ -15,10 +15,10 @@ namespace StarterAssets
     {
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
-        public float MoveSpeed = 2.0f;
+        public float MoveSpeed = 3.0f;
 
         [Tooltip("Sprint speed of the character in m/s")]
-        public float SprintSpeed = 5.335f;
+        public float SprintSpeed = 6f;
 
         [Tooltip("How fast the character turns to face movement direction")]
         [Range(0.0f, 0.3f)]
@@ -31,10 +31,10 @@ namespace StarterAssets
 
         [Space(10)]
         [Tooltip("The height the player can jump")]
-        public float JumpHeight = 2f;
+        public float JumpHeight = 1.8f;
 
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
-        public float Gravity = -15.0f;
+        public float Gravity = -18.0f;
 
         [Space(10)]
         [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
@@ -48,10 +48,10 @@ namespace StarterAssets
         public bool Grounded = true;
 
         [Tooltip("Useful for rough ground")]
-        public float GroundedOffset = -0.24f;
+        public float GroundedOffset = -0.25f;
 
         [Tooltip("The radius of the grounded check. Should match the radius of the CharacterController")]
-        public float GroundedRadius = 0.28f;
+        public float GroundedRadius = 0.29f;
 
         [Tooltip("What layers the character uses as ground")]
         public LayerMask GroundLayers;
@@ -96,6 +96,9 @@ namespace StarterAssets
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
         private int _animDance;
+        private int _animCrouching;
+
+        public Transform middleBrow;
 
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 #endif
@@ -175,6 +178,11 @@ namespace StarterAssets
 
             GroundedCheck();
 
+            if (_mainCamera != null)
+            {
+                _mainCamera.transform.position = middleBrow.position;
+            }
+
             if (_audioListener == null)
             {
                 _CameraComponent = GetComponentInChildren<Camera>();
@@ -184,7 +192,7 @@ namespace StarterAssets
             else
             {
 
-                    if (RoundManager.rm.Mode == "Practice" || (RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE && isLocalPlayer))
+                    if (RoundManager.rm.Mode == "Practice" || (RoundManager.rm.Mode == "1VS1" && isLocalPlayer))
                     {
                         _audioListener.enabled = true;
                     }
@@ -262,6 +270,7 @@ namespace StarterAssets
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
             _animDance = Animator.StringToHash("Dance");
+            _animCrouching = Animator.StringToHash("Crouching");
         }
 
         private void GroundedCheck()
@@ -306,7 +315,8 @@ namespace StarterAssets
         private void Move()
         {
 
-            bool walk = Input.GetKey(KeyCode.LeftShift);
+            bool walk = Input.GetKey(KeyCode.LeftControl);
+            bool crouch = Input.GetKey(KeyCode.LeftShift);
 
             bool sneak = Input.GetMouseButton(1);
 
@@ -317,55 +327,64 @@ namespace StarterAssets
 
             bool isMove = (horiMove != 0 || verMove != 0);
 
+            
 
-
-            // **地上にいる場合のみ移動方向と速度を更新**
-            if (Grounded)
+            if (!crouch)
             {
-                float targetSpeed = 0f;
 
-                // **目標速度を設定（入力がない場合は即座に0）**
-
-                if (isMove)
+                // **地上にいる場合のみ移動方向と速度を更新**
+                if (Grounded)
                 {
-                    
+                    float targetSpeed = 0f;
 
-                    if (walk)
+                    // **目標速度を設定（入力がない場合は即座に0）**
+
+                    if (isMove)
                     {
-                        targetSpeed = MoveSpeed;
+
+
+                        if (walk)
+                        {
+                            targetSpeed = MoveSpeed;
+                        }
+                        else
+                        {
+                            targetSpeed = SprintSpeed;
+                        }
+
+                        if (sneak)
+                        {
+                            targetSpeed *= 0.5f;
+                        }
+
+
                     }
                     else
                     {
-                        targetSpeed = SprintSpeed;
+                        targetSpeed = 0f;
                     }
 
-                    if (sneak) 
+
+                    // **Lerpを使わず、即座に速度を適用**
+                    _speed = targetSpeed;
+                    _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+                    if (_animationBlend < 0.01f) _animationBlend = 0f;
+
+                    // **移動方向計算（正規化 + 速度適用）**
+                    Vector3 newMoveDirection = (transform.right * horiMove + transform.forward * verMove).normalized;
+                    if (newMoveDirection != Vector3.zero)
                     {
-                        targetSpeed *= 0.5f;
+                        _lastMoveDirection = newMoveDirection;
                     }
 
-                                                  
+
                 }
-                else
-                {
-                    targetSpeed = 0f;
-                }
-                            
-
-                // **Lerpを使わず、即座に速度を適用**
-                _speed = targetSpeed;
-                _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
-                if (_animationBlend < 0.01f) _animationBlend = 0f;
-
-                // **移動方向計算（正規化 + 速度適用）**
-                Vector3 newMoveDirection = (transform.right * horiMove + transform.forward * verMove).normalized;
-                if (newMoveDirection != Vector3.zero)
-                {
-                    _lastMoveDirection = newMoveDirection;
-                }
-
-
             }
+            else
+            {
+                _speed = 0;
+            }
+
 
             CmdReportSpeed(_speed);
 
@@ -399,6 +418,7 @@ namespace StarterAssets
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
                 _animator.SetFloat(_animIDMotionSpeed, _speed);
+                _animator.SetBool(_animCrouching, crouch);
             }
 
 
@@ -448,8 +468,8 @@ namespace StarterAssets
 
             if (Grounded)
             {
-                // 空中に0.7秒以上いた場合にOnLand()を呼び出す
-                if (_airTime >= 0.7f)
+                // 空中に0.5秒以上いた場合にOnLand()を呼び出す
+                if (_airTime >= 0.5f)
                 {
                     OnLand();
                 }
@@ -524,31 +544,41 @@ namespace StarterAssets
             }
         }
 
-        public void BotMove(float horiMove, bool isWalk)
+        public void BotMove(float horiMove, bool isWalk, bool isCrouch)
         {
 
             bool isMove = (horiMove != 0);
 
-            // **地上にいる場合のみ移動方向と速度を更新**
-            if (Grounded)
+            _animator.SetBool(_animCrouching, isCrouch);
+
+            if (!isCrouch)
             {
-                // **目標速度を設定（入力がない場合は即座に0）**
-                float targetSpeed = isMove ? (isWalk ? MoveSpeed : SprintSpeed) : 0.0f;
 
-                // **Lerpを使わず、即座に速度を適用**
-                _speed = targetSpeed;
-                _animationBlend = targetSpeed;
-
-                // **移動方向計算（正規化 + 速度適用）**
-                Vector3 newMoveDirection = (transform.right * horiMove).normalized;
-                if (newMoveDirection != Vector3.zero)
+                // **地上にいる場合のみ移動方向と速度を更新**
+                if (Grounded)
                 {
-                    _lastMoveDirection = newMoveDirection;
+                    // **目標速度を設定（入力がない場合は即座に0）**
+                    float targetSpeed = isMove ? (isWalk ? MoveSpeed : SprintSpeed) : 0.0f;
+
+                    // **Lerpを使わず、即座に速度を適用**
+                    _speed = targetSpeed;
+                    _animationBlend = targetSpeed;
+
+                    // **移動方向計算（正規化 + 速度適用）**
+                    Vector3 newMoveDirection = (transform.right * horiMove).normalized;
+                    if (newMoveDirection != Vector3.zero)
+                    {
+                        _lastMoveDirection = newMoveDirection;
+                    }
                 }
             }
+            else
+            {
+                _speed = 0;
+            }
 
-            // **移動ベクトルを計算（空中では最後の移動方向を維持）**
-            Vector3 moveDirection = _lastMoveDirection * _speed;
+                // **移動ベクトルを計算（空中では最後の移動方向を維持）**
+                Vector3 moveDirection = _lastMoveDirection * _speed;
             moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
 
             
@@ -645,11 +675,21 @@ namespace StarterAssets
 
                 if (mouseX != 0 || mouseY != 0)
                 {
-                    // カメラに上下回転を適用
-                    _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
+                    if (_mainCamera != null)
+                    {
+                        // カメラに上下回転を適用
+                        _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
 
-                    // プレイヤー身体に左右回転を適用
-                    transform.Rotate(Vector3.up * mouseX * (_CameraComponent.fieldOfView / 74.03f));
+                    }
+                    if (_CameraComponent != null)
+                    {
+                        // プレイヤー身体に左右回転を適用
+                        transform.Rotate(Vector3.up * mouseX * (_CameraComponent.fieldOfView / 74.03f));
+                    }
+                    else
+                    {
+                        Debug.Log("The mainCamera attached this object is not detected!");
+                    }
 
                 }
 

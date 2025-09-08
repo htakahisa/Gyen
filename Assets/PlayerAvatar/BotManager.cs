@@ -12,6 +12,9 @@ public class BotManager : MonoBehaviour
     public float jumpTime = 0f;
     public float jumpDuration;
 
+    public float crouchTime = 0f;
+    public float crouchDuration;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -31,7 +34,7 @@ public class BotManager : MonoBehaviour
             }
 
             // 移動実行
-            tpc.BotMove(currentMoveDirection, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK);
+            tpc.BotMove(currentMoveDirection, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchTime < crouchDuration);
             moveTime += Time.deltaTime;
 
             // 移動時間が終了したらリセット
@@ -61,6 +64,23 @@ public class BotManager : MonoBehaviour
                 else
                 {
                     tpc.BotJumpAndGravity(false);
+                }
+
+            }
+
+            if (RoundManager.rm.currentBotMove == RoundManager.BotMove.CROUCH)
+            {
+                if (tpc.Grounded)
+                {
+                    crouchTime += Time.deltaTime;
+
+                    if (crouchTime >= crouchDuration + Random.Range(0.1f, 5.0f))
+                    {
+                        crouchTime = 0;
+                        crouchDuration = Random.Range(0.1f, 1.0f);
+                    }
+
+
                 }
 
             }

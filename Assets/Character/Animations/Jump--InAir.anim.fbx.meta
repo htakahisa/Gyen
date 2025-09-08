@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 063aa479676c4084ebf187660ca0a7b8
 ModelImporter:
-  serializedVersion: 21300
+  serializedVersion: 22200
   internalIDToNameTable:
   - first:
       74: -2702400367771620057
@@ -19,15 +19,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
-      copied configuration does not match position in animation file:\n\t'Left_UpperLeg'
-      : position error = 9993.781250 mm\n\t'Left_LowerLeg' : position error = 40500.527344
-      mm\n\t'Left_Foot' : position error = 40568.628906 mm\n\t'Left_Toes' : position
-      error = 13562.437500 mm\n\t'Right_UpperLeg' : position error = 9993.789063
-      mm\n\t'Right_LowerLeg' : position error = 40500.500000 mm\n\t'Right_Foot' :
-      position error = 40568.652344 mm\n\t'Right_Toes' : position error = 13562.811523
-      mm\n"
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -64,7 +55,7 @@ ModelImporter:
       keepOriginalPositionXZ: 1
       heightFromFeet: 0
       mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      bodyMask: 01000000000000000000000001000000010000000000000000000000000000000000000001000000010000000000000000000000
       curves: []
       events: []
       transformMask: []
@@ -79,6 +70,7 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -924,6 +916,7 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 2
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 0
   remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 

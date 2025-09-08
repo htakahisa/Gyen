@@ -154,6 +154,7 @@ Transform:
   - {fileID: 2536467381927060700}
   - {fileID: 492692172541343401}
   - {fileID: 5183220101415193874}
+  - {fileID: 2851857849060008337}
   m_Father: {fileID: 715680794303864764}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &6179576672558298760
@@ -2060,7 +2061,7 @@ Animator:
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
   m_Controller: {fileID: 9100000, guid: 40db3173a05ae3242b1c182a09b0a183, type: 2}
-  m_CullingMode: 1
+  m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
@@ -2090,7 +2091,7 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 3
   m_Height: 1.8
-  m_Radius: 0.29
+  m_Radius: 0.2
   m_SlopeLimit: 45
   m_StepOffset: 0.5
   m_SkinWidth: 0.02
@@ -2176,12 +2177,12 @@ MonoBehaviour:
   SpeedChangeRate: 10
   FootstepAudioVolume: 0.3
   JumpHeight: 1.2
-  Gravity: -15
+  Gravity: -20
   JumpTimeout: 0
   FallTimeout: 0.15
   Grounded: 1
-  GroundedOffset: -0.24
-  GroundedRadius: 0.28
+  GroundedOffset: -0.13
+  GroundedRadius: 0.24
   GroundLayers:
     serializedVersion: 2
     m_Bits: 520
@@ -2198,6 +2199,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2568
   _speed: 0
+  middleBrow: {fileID: 2851857849060008337}
   audioManager: {fileID: 164791515131999902}
   canMove: 1
   canAbility: 1
@@ -2330,6 +2332,9 @@ MonoBehaviour:
   footStep: {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
   land: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
   shoot: {fileID: 8300000, guid: d3b601780ff4a2b438134d888c39454e, type: 3}
+  soundBlockLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &3804814820139415104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3463,6 +3468,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 656641684693313432}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8486070816265853529
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2851857849060008337}
+  m_Layer: 6
+  m_Name: middle brow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2851857849060008337
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8486070816265853529}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.7071068, y: 4.3297806e-17, z: 0.7071068, w: -4.3297806e-17}
+  m_LocalPosition: {x: 0, y: 0.046, z: -0.028}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1593911863102122981}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8565583426210740876
 GameObject:

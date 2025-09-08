@@ -58,7 +58,8 @@ public class RoundManager : NetworkBehaviour
         STOP,
         WALK,
         RUN,
-        JUMP
+        JUMP,
+        CROUCH
     }
 
 
