@@ -38,12 +38,12 @@ public class TextManager : MonoBehaviour
                 myRoundText.text = RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().rounds.ToString();
                 enemyRountText.text = RoundManager.rm.GetOtherPlayer().GetComponent<CreditManager>().rounds.ToString();
             }
-            magazineText.text =  RoundManager.rm.GetMyPlayer().GetComponent<WeaponManager>().magazine.ToString();
-            magazineSizeText.text = "/" + RoundManager.rm.GetMyPlayer().GetComponent<WeaponManager>().GetCurrentWeaponData().magazineSize;
+            magazineText.text =  RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().magazine.ToString();
+            magazineSizeText.text = "/" + RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().GetCurrentWeaponData().magazineSize;
 
             if(RoundManager.rm.Mode == "Practice")
             {
-                headShotRate.text = "HS% : " + RoundManager.rm.GetMyPlayer().GetComponent<ServerCheckShoot>().GetHeadShotRate();
+                headShotRate.text = "HS% : " + RoundManager.rm.GetMyPlayer().GetComponentInChildren<ServerCheckShoot>().GetHeadShotRate();
             }
 
         }

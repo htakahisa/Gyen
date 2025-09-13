@@ -8,6 +8,9 @@ public class PlayerManager : NetworkBehaviour
 
     public static bool hasLoaded = false;
 
+    public static bool canMove = true;
+    public static bool canAbility = true;
+
     public void Update()
     {
         if (!Players.Contains(this))
@@ -26,15 +29,14 @@ public class PlayerManager : NetworkBehaviour
             needPlayersCount = 1;
         }
 
+        Players.RemoveAll(item => item == null);
 
-        Players.Remove(null);
-        
-        
-       
-        if(Players.Count >= needPlayersCount)
+        if (Players.Count >= needPlayersCount && !hasLoaded)
         {
             hasLoaded = true;
         }
+
+
 
     }
 
@@ -67,4 +69,6 @@ public class PlayerManager : NetworkBehaviour
 
         return Players.Find(p => p.gameObject != localPlayer)?.gameObject;
     }
+
+
 }

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace StarterAssets
 {
-    [RequireComponent(typeof(CharacterController))]
+
 
     public class ThirdPersonController : NetworkBehaviour
     {
@@ -103,7 +103,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 #endif
         private Animator _animator;
-        private CharacterController _controller;
+        public CharacterController controller;
         private GameObject _mainCamera;
         private GameObject _UiCamera;
 
@@ -129,12 +129,12 @@ namespace StarterAssets
 
         public AudioManager audioManager;
 
-        public bool canMove = true;
-        public bool canAbility = true;
         public bool canGetOrb = true;
         public GameObject Aiscream;
 
         GameObject BgmObject;
+        public GameObject parentOfPlayer;
+
         public override void OnStartAuthority() 
         {
             if (_mainCamera == null)
@@ -146,7 +146,7 @@ namespace StarterAssets
                 Canvas canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>();
                 canvas.worldCamera = _CameraComponent;
                 _shootManager = GetComponent<ShootManager>();
-                _hpMaster = GetComponent<HpMaster>();
+                _hpMaster = GetComponentInParent<HpMaster>();
             }
 
             myBody.layer = 7;
@@ -157,7 +157,6 @@ namespace StarterAssets
         private void Start()
         {
             _hasAnimator = TryGetComponent(out _animator);
-            _controller = GetComponent<CharacterController>();
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 #else
 			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
@@ -211,16 +210,13 @@ namespace StarterAssets
             _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
             _hasAnimator = TryGetComponent(out _animator);
 
-            if (canMove)
+            if (PlayerManager.canMove)
             {
                 JumpAndGravity();
 
                 Move();
             }
-            if (canAbility)
-            {
-                Ability();
-            }
+
             if (canGetOrb)
             {
                 GetOrb();
@@ -306,7 +302,7 @@ namespace StarterAssets
                 _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
 
                 // プレイヤー身体に左右回転を適用
-                transform.Rotate(Vector3.up * mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f));
+                parentOfPlayer.transform.Rotate(Vector3.up * mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f));
                 
             }
 
@@ -411,7 +407,7 @@ namespace StarterAssets
 
             //Debug.Log("p" + moveDirection);
             // **CharacterControllerで移動**
-            _controller.Move(moveDirection * Time.deltaTime);
+            controller.Move(moveDirection * Time.deltaTime);
 
             // **アニメーター更新**
             if (_hasAnimator)
@@ -425,13 +421,8 @@ namespace StarterAssets
 
         }
 
-        private void Ability()
-        {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                GetComponent<AbilityController>().Lime();
-            }
-        }
+
+
 
         private void GetOrb()
         {
@@ -601,7 +592,7 @@ namespace StarterAssets
 
             //Debug.Log("b" + moveDirection);
             // **CharacterControllerで移動**
-            _controller.Move(moveDirection * Time.deltaTime);
+            controller.Move(moveDirection * Time.deltaTime);
 
             // **アニメーター更新**
             if (_hasAnimator)
@@ -684,7 +675,7 @@ namespace StarterAssets
                     if (_CameraComponent != null)
                     {
                         // プレイヤー身体に左右回転を適用
-                        transform.Rotate(Vector3.up * mouseX * (_CameraComponent.fieldOfView / 74.03f));
+                        parentOfPlayer.transform.Rotate(Vector3.up * mouseX * (_CameraComponent.fieldOfView / 74.03f));
                     }
                     else
                     {
@@ -763,7 +754,7 @@ namespace StarterAssets
             if (Grounded)
             {
 
-                audioManager.CmdPlaySoundAtPoint("footStep", transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                audioManager.CmdPlaySoundAtPoint("footStep", transform.TransformPoint(controller.center), FootstepAudioVolume);
                     
                 
             }
@@ -772,7 +763,7 @@ namespace StarterAssets
         private void OnLand()
         {
 
-            audioManager.CmdPlaySoundAtPoint("land", transform.TransformPoint(_controller.center), FootstepAudioVolume);
+            audioManager.CmdPlaySoundAtPoint("land", transform.TransformPoint(controller.center), FootstepAudioVolume);
             
         }
 
@@ -804,8 +795,8 @@ namespace StarterAssets
         [ClientRpc]
         public void RpcDance()
         {
-            canMove = false;
-            canAbility = false;
+            PlayerManager.canMove = false;
+            PlayerManager.canAbility = false;
             canGetOrb = false;
             _shootManager.canShoot = false;
             _hpMaster.isInvincible = true;
@@ -818,8 +809,8 @@ namespace StarterAssets
         [ClientRpc]
         public void RpcEndDance()
         {
-            canMove = true;
-            canAbility = true;
+            PlayerManager.canMove = true;
+            PlayerManager.canAbility = true;
             canGetOrb = true;
             _shootManager.canShoot = true;
             _hpMaster.isInvincible = false;
@@ -832,8 +823,8 @@ namespace StarterAssets
         [TargetRpc]
         public void TargetDance()
         {
-            canMove = false;
-            canAbility = false;
+            PlayerManager.canMove = false;
+            PlayerManager.canAbility = false;
             canGetOrb = false;
             _shootManager.canShoot = false;
             _hpMaster.CmdInvincible(true);
@@ -846,8 +837,8 @@ namespace StarterAssets
         [TargetRpc]
         public void TargetEndDance()
         {
-            canMove = true;
-            canAbility = true;
+            PlayerManager.canMove = true;
+            PlayerManager.canAbility = true;
             canGetOrb = true;
             _shootManager.canShoot = true;
             _hpMaster.CmdInvincible(false);
@@ -859,12 +850,21 @@ namespace StarterAssets
 
 
         [ClientRpc]
-        void RpcUpdateAllPositions(Vector3 newPos)
+        public void RpcUpdateAllPositions(Vector3 newPos)
         {
-            _controller.enabled = false;
-            transform.position = newPos;
-            _controller.enabled = true;
+            controller.enabled = false;
+            parentOfPlayer.transform.position = newPos;
+            controller.enabled = true;
         }
+
+        [Client]
+        public void ClientUpdateAllPositions(Vector3 newPos)
+        {
+            controller.enabled = false;
+            parentOfPlayer.transform.position = newPos;
+            controller.enabled = true;
+        }
+
 
         public void RequestDestroy(uint sceneObjNetId)
         {

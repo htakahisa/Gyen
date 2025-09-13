@@ -9654,7 +9654,7 @@ MonoBehaviour:
   attacker: {fileID: 0}
   defender: {fileID: 0}
   attackSpawnPos: {x: 0, y: 0, z: 0}
-  defenceSpawnPos: {x: 0, y: 0, z: 0}
+  defenceSpawnPos: {x: 8.5, y: 2.708355, z: 7.511556}
   Round: 1
   CurrentPhase: 0
   Mode: 1VS1
@@ -9694,8 +9694,16 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 520
+  objectList: []
+  nowControlled: {fileID: 0}
+  nowGeometry: {fileID: 0}
+  nowCamera: {fileID: 0}
   lime: {fileID: 3539715179979286606, guid: f6640a8a82c26614c8f80227a4f15d91, type: 3}
   energy: 0
+  currentForm: 0
+  ground:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &983318238
 GameObject:
   m_ObjectHideFlags: 0

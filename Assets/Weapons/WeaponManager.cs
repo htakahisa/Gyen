@@ -18,10 +18,10 @@ public class WeaponManager : NetworkBehaviour
     private Dictionary<WeaponType, WeaponData> weaponDatabase = new Dictionary<WeaponType, WeaponData>()
     {
         { WeaponType.Hotaru, new WeaponData("Hotaru", 50, 150, 0f, 0f, 0f, 0, 0f, true, false, 55f, 0f, 1, false) },
-        { WeaponType.Lover, new WeaponData("Lover", 30, 70, 0.13f, 0.04f, 0.2f, 7, 0.8f,false, false, 80f, 0f, 1, false) },
-        { WeaponType.Leo, new WeaponData("Leo", 25, 60, 0.11f, 0.2f, 0.5f, 12, 1f,false, false, 80f, 0f, 1, true) },
-        { WeaponType.Liet, new WeaponData("Liet", 50, 133, 0.18f, 0f, 0.55f, 9, 1.3f,false, false, 80f, 0f ,1, false) },
-        { WeaponType.AntiREX, new WeaponData("Anti-REX", 65, 180, 0.8f, 0f, 0.75f, 3, 1.3f, false, false, 80f, 0f , 1, false) },
+        { WeaponType.Lover, new WeaponData("Lover", 30, 70, 0.17f, 0.04f, 0.2f, 7, 0.8f,false, false, 80f, 0f, 1, false) },
+        { WeaponType.Leo, new WeaponData("Leo", 35, 60, 0.11f, 0.2f, 0.5f, 12, 1f,false, false, 80f, 0f, 1, true) },
+        { WeaponType.Liet, new WeaponData("Liet", 50, 133, 0.16f, 0f, 0.55f, 9, 1.3f,false, false, 80f, 0f ,1, false) },
+        { WeaponType.AntiREX, new WeaponData("Anti-REX", 65, 180, 0.8f, 0f, 0.75f, 4, 1.3f, false, false, 80f, 0f , 1, false) },
         { WeaponType.Kafka, new WeaponData("Kafka", 25, 80, 0.07f, 0.3f, 0.4f, 20, 1.5f,true, false, 65f, 0.02f, 5, true) },
         { WeaponType.FALLEN, new WeaponData("FALLEN", 65, 190, 0.4f, 0f, 0.4f, 12, 1.5f,true, false, 60f, 0.03f , 1, false) },
         { WeaponType.KasMi, new WeaponData("KasMi", 35, 140, 0.08f, 0.05f, 0.17f, 30, 1.7f,true, false, 50f, 0.03f, 2, true) },

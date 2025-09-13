@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class RoundManager : NetworkBehaviour
 {
+    [SerializeField]
     private GameObject myPlayer;
     private GameObject otherPlayer;
 
@@ -177,18 +178,18 @@ public class RoundManager : NetworkBehaviour
         players.Add(myPlayer);
         players.Add(otherPlayer);
 
-        myPlayer.GetComponent<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
+        myPlayer.GetComponentInChildren<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
         if (Mode == "Practice")
         {
-            myPlayer.GetComponent<CreditManager>().AddCredit(99999 - 800);
+            myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999 - 800);
         }
     }
 
     [Server]
     public void SetPosition()
     {
-        attacker.GetComponent<ThirdPersonController>().ResetPos(attackSpawnPos);
-        defender.GetComponent<ThirdPersonController>().ResetPos(defenceSpawnPos);
+        attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(attackSpawnPos);
+        defender.GetComponentInChildren<ThirdPersonController>().ResetPos(defenceSpawnPos);
     }
 
 
@@ -222,10 +223,10 @@ public class RoundManager : NetworkBehaviour
     [ClientRpc]
     public void RpcResetWeapons()
     {
-        myPlayer.GetComponent<ShootManager>().ResetZoom();
-        myPlayer.GetComponent<ShootManager>().StopAllCoroutines();
-        myPlayer.GetComponent<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
-        myPlayer.GetComponent<ShootManager>().isBursting = false;
+        myPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
+        myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
+        myPlayer.GetComponentInChildren<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
+        myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
     }
 
 
@@ -255,13 +256,13 @@ public class RoundManager : NetworkBehaviour
     [Command]
     public void CmdCallDance()
     {
-        GetMyPlayer().GetComponent<ThirdPersonController>().RpcDance();
+        GetMyPlayer().GetComponentInChildren<ThirdPersonController>().RpcDance();
     }
 
     [Command]
     public void CmdCallEndDance()
     {
-        GetMyPlayer().GetComponent<ThirdPersonController>().RpcEndDance();
+        GetMyPlayer().GetComponentInChildren<ThirdPersonController>().RpcEndDance();
     }
 
 

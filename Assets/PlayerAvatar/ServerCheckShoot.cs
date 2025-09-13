@@ -44,7 +44,7 @@ public class ServerCheckShoot : NetworkBehaviour
     {
         Debug.Log("shoot");
 
-        ThirdPersonController tpc = playerObject.GetComponent<ThirdPersonController>();
+        ThirdPersonController tpc = playerObject.GetComponentInChildren<ThirdPersonController>();
 
         RaycastHit[] results = new RaycastHit[10]; // ŒŸo‰Â”\‚ÈÅ‘å”
 

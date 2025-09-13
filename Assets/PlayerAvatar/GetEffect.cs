@@ -40,7 +40,7 @@ public class GetEffect : NetworkBehaviour
 
         // 自分のプレイヤーオブジェクトを取得してCommandを呼ぶ
         var localPlayer = NetworkClient.connection.identity;
-        localPlayer.GetComponent<ThirdPersonController>()?.RequestDestroy(netId);
+        localPlayer.GetComponentInChildren<ThirdPersonController>()?.RequestDestroy(netId);
     }
 
     [Server]
@@ -57,7 +57,7 @@ public class GetEffect : NetworkBehaviour
 
     public void DebugCall()
     {
-        Debug.Log("It called");
+        Debug.Log("It's called");
     }
     public void ChargeEnergy()
     {

@@ -27,7 +27,7 @@ public class BuyWeapon : MonoBehaviour
         if (RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, true))       
         {
             RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CmdBuyWeapon(cost);
-            RoundManager.rm.GetMyPlayer().GetComponent<WeaponManager>().BuyWeapon(name);
+            RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().BuyWeapon(name);
         }
     }
 

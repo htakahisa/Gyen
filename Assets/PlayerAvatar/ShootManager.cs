@@ -7,7 +7,6 @@ using static WeaponManager;
 
 namespace StarterAssets
 {
-    [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(LineRenderer))]
 
     public class ShootManager : NetworkBehaviour
@@ -60,7 +59,7 @@ namespace StarterAssets
 
         public void StartGetTpc()
         {
-            tpc = RoundManager.rm.GetMyPlayer().GetComponent<ThirdPersonController>();
+            tpc = RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>();
         }
 
 
@@ -229,7 +228,7 @@ namespace StarterAssets
                     
                 }
 
-                    audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(gameObject.GetComponent<CharacterController>().center), 0.06f);
+                    audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.06f);
                 if (weaponManager.magazine >= 1)
                 {
                     weaponManager.magazine--;
@@ -241,7 +240,7 @@ namespace StarterAssets
                     Vector3 direction = _mainCamera.transform.forward;
                     if (!currentWeapon.isNeedZoom || IsZooming)
                     {
-                        GetComponent<ServerCheckShoot>().CmdGetShoot(gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage, weaponPos.transform.position);
+                        GetComponent<ServerCheckShoot>().CmdGetShoot(transform.parent.parent.gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage, weaponPos.transform.position);
                     }
 
                     StartCoroutine(RecoilCoroutine(0.1f, new Vector3(-currentWeapon.Xrecoil, currentWeapon.Yrecoil, 0f)));
