@@ -9554,7 +9554,6 @@ GameObject:
   - component: {fileID: 966734462}
   - component: {fileID: 966734461}
   - component: {fileID: 966734460}
-  - component: {fileID: 966734465}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -9651,6 +9650,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  myPlayer: {fileID: 0}
   attacker: {fileID: 0}
   defender: {fileID: 0}
   attackSpawnPos: {x: 0, y: 0, z: 0}
@@ -9676,34 +9676,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &966734465
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 966734459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f32be0dd434a7824ca96566c4b2add93, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 520
-  objectList: []
-  nowControlled: {fileID: 0}
-  nowGeometry: {fileID: 0}
-  nowCamera: {fileID: 0}
-  lime: {fileID: 3539715179979286606, guid: f6640a8a82c26614c8f80227a4f15d91, type: 3}
-  energy: 0
-  currentForm: 0
-  ground:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!1 &983318238
 GameObject:
   m_ObjectHideFlags: 0
@@ -11785,7 +11757,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8640944a54b80c4db19fef271d7fbb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  armer: 0.67
+  armer: 0.5
   cost: 1000
 --- !u!114 &1312856853
 MonoBehaviour:

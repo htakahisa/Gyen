@@ -35,9 +35,9 @@ public class DestructibleObject : NetworkBehaviour
             isDead = true;
             hp = 0;
             Debug.Log($"{netId} ‚ÌƒvƒŒƒCƒ„[‚ª“|‚³‚ê‚½");
-            if (RoundManager.rm.Mode == "1VS1")
+            if (RoundManager.rm.Mode == "Practice")
             {
-                RoundManager.rm.RoundEnd(gameObject);
+                NetworkServer.Destroy(gameObject);
             }
         }
     }

@@ -6,21 +6,24 @@ public class YellowController : NetworkBehaviour
 {
     [Header("Player")]
     [Tooltip("Move speed of the character in m/s")]
-    public float MoveSpeed = 3.0f;
+    public float MoveSpeed = 4.0f;
     public float TurnSpeed = 0.3f;
 
     public CharacterController characterController;
+    public AudioManager audioManager;
 
-
-    public float smoothSpeed = 5f;     // 変化の滑らかさ（大きいほど速く追従）
+    public float smoothSpeed = 4f;     // 変化の滑らかさ（大きいほど速く追従）
 
     private float targetValue = 0f;    // 目標値
     private float currentValue = 0f;   // 現在値（滑らかに変化する）
     private float _sensitivity = 1f;
 
     public GameObject mainCamera;
+    public AbilityController abilityController;
 
-
+    public float audioVolume;
+    public float audioInterval;
+    public float audioTimer;
 
 
     public override void OnStartAuthority()
@@ -40,6 +43,7 @@ public class YellowController : NetworkBehaviour
     private void LateUpdate()
     {
         if (!isLocalPlayer) return;
+        if (abilityController.currentForm != AbilityController.PlayerForm.Bird) return;
         CharacterMove();
         CharacterRotation();
 
@@ -78,6 +82,14 @@ public class YellowController : NetworkBehaviour
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.LeftShift))
         {
             characterController.Move(-transform.up * MoveSpeed * Time.deltaTime);
+        }
+
+        audioTimer += Time.deltaTime;
+
+        if (audioTimer >= audioInterval)
+        {
+            audioManager.CmdPlaySoundAtPoint("yellow", transform.TransformPoint(characterController.center), audioVolume);
+            audioTimer = 0;
         }
 
     }

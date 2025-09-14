@@ -32,18 +32,21 @@ public class TextManager : MonoBehaviour
     {
         if (RoundManager.rm.GetMyPlayer() != null)
         {
-            creditText.text = "Credit : " + RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().credit;
+            creditText.text = "Credit : " + RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>()?.credit;
             if (RoundManager.rm.Mode == "1VS1")
             {
-                myRoundText.text = RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().rounds.ToString();
-                enemyRountText.text = RoundManager.rm.GetOtherPlayer().GetComponent<CreditManager>().rounds.ToString();
+                myRoundText.text = RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>()?.rounds.ToString();
+                enemyRountText.text = RoundManager.rm.GetOtherPlayer().GetComponent<CreditManager>()?.rounds.ToString();
             }
-            magazineText.text =  RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().magazine.ToString();
-            magazineSizeText.text = "/" + RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().GetCurrentWeaponData().magazineSize;
-
-            if(RoundManager.rm.Mode == "Practice")
+            if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>() != null)
             {
-                headShotRate.text = "HS% : " + RoundManager.rm.GetMyPlayer().GetComponentInChildren<ServerCheckShoot>().GetHeadShotRate();
+                magazineText.text = RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>()?.magazine.ToString();
+                magazineSizeText.text = "/" + RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>()?.GetCurrentWeaponData().magazineSize;
+
+                if (RoundManager.rm.Mode == "Practice")
+                {
+                    headShotRate.text = "HS% : " + RoundManager.rm.GetMyPlayer().GetComponentInChildren<ServerCheckShoot>()?.GetHeadShotRate();
+                }
             }
 
         }

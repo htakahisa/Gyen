@@ -469,11 +469,11 @@ MonoBehaviour:
     m_Bits: 0
   _speed: 0
   middleBrow: {fileID: 3929690982290694602}
+  controller: {fileID: 1378437777043357892}
   audioManager: {fileID: 8135213472563124772}
-  canMove: 1
-  canAbility: 1
   canGetOrb: 1
   Aiscream: {fileID: 0}
+  parentOfPlayer: {fileID: 1378437777043357902}
 --- !u!114 &-2900896035119755407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -533,6 +533,7 @@ MonoBehaviour:
   footStep: {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
   land: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
   shoot: {fileID: 8300000, guid: d3b601780ff4a2b438134d888c39454e, type: 3}
+  yellow: {fileID: 0}
   soundBlockLayer:
     serializedVersion: 2
     m_Bits: 0

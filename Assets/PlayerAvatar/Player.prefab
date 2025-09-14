@@ -370,6 +370,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc23ee0f1f468194ead78e5f84d1b179, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   geometry: {fileID: 799851667630623740}
   camera: {fileID: 3587143367143688788}
 --- !u!114 &1353135463020073453
@@ -616,8 +619,8 @@ MonoBehaviour:
   JumpTimeout: 0
   FallTimeout: 0.15
   Grounded: 1
-  GroundedOffset: -0.13
-  GroundedRadius: 0.24
+  GroundedOffset: -0.11
+  GroundedRadius: 0.2
   GroundLayers:
     serializedVersion: 2
     m_Bits: 520
@@ -745,6 +748,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2879780127971192791}
   - component: {fileID: 3400445855470485196}
+  - component: {fileID: 248169359381331807}
   m_Layer: 0
   m_Name: YellowObject
   m_TagString: Untagged
@@ -780,8 +784,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc23ee0f1f468194ead78e5f84d1b179, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   geometry: {fileID: 7031267788165057374}
   camera: {fileID: 5846571374343232750}
+--- !u!114 &248169359381331807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1069514757087215023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8854eb8e65b6e1a40bbe1187e73233c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  time: 7
+  abilityController: {fileID: 3159636760548436729}
+  birdCamera: {fileID: 8164833727617922735}
 --- !u!1 &1158049255860812194
 GameObject:
   m_ObjectHideFlags: 0
@@ -1637,7 +1662,10 @@ GameObject:
   - component: {fileID: 3051506110441234160}
   - component: {fileID: 8825841003792857049}
   - component: {fileID: 5938196771916806253}
+  - component: {fileID: 8447630504621839706}
+  - component: {fileID: 6792009286812342892}
   - component: {fileID: 3159636760548436729}
+  - component: {fileID: -5865967421182638424}
   - component: {fileID: 5264078432467384439}
   - component: {fileID: 7767665597172722380}
   - component: {fileID: 7131634090093216591}
@@ -1718,6 +1746,39 @@ MonoBehaviour:
   positionSensitivity: 0.01
   rotationSensitivity: 0.01
   scaleSensitivity: 0.01
+--- !u!114 &8447630504621839706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 836da50fa1b3dee45854291038771488, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  skill1Energy: 2
+  skill2Energy: 1
+  abilityController: {fileID: 3159636760548436729}
+  limepre: {fileID: 3539715179979286606, guid: 284412664aa79544688680eee0955610, type: 3}
+  currentCharacter: {fileID: 8447630504621839706}
+--- !u!114 &6792009286812342892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcccd034ce639a04f9addbdc16fdce5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentCharacter: {fileID: 8447630504621839706}
 --- !u!114 &3159636760548436729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1742,12 +1803,30 @@ MonoBehaviour:
   nowControlled: {fileID: 0}
   nowGeometry: {fileID: 0}
   nowCamera: {fileID: 0}
-  lime: {fileID: 3539715179979286606, guid: f6640a8a82c26614c8f80227a4f15d91, type: 3}
+  shootManager: {fileID: 8334744245603090709}
+  skillManager: {fileID: 6792009286812342892}
   energy: 0
   currentForm: 0
   ground:
     serializedVersion: 2
     m_Bits: 8
+--- !u!114 &-5865967421182638424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 522793def7839644aa26f56c6981aa4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  skill1Energy: 0
+  skill2Energy: 0
 --- !u!114 &5264078432467384439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1819,6 +1898,7 @@ MonoBehaviour:
   footStep: {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
   land: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
   shoot: {fileID: 8300000, guid: d3b601780ff4a2b438134d888c39454e, type: 3}
+  yellow: {fileID: 8300000, guid: 24ebbea79964fd14d8c60ad56cd6a6ea, type: 3}
   soundBlockLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -1840,13 +1920,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2.3
+  m_Height: 2.1
   m_Radius: 0.2
   m_SlopeLimit: 45
   m_StepOffset: 0.5
   m_SkinWidth: 0.02
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 1.15, z: 0}
+  m_Center: {x: 0, y: 1.1, z: 0}
 --- !u!1 &3561717742706190703
 GameObject:
   m_ObjectHideFlags: 0
@@ -2821,7 +2901,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5846571374343232750}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
@@ -2847,7 +2927,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 1000
-  field of view: 74.03
+  field of view: 100
   orthographic: 0
   orthographic size: 5
   m_Depth: 1
@@ -3339,7 +3419,7 @@ GameObject:
   - component: {fileID: 1619691889089860974}
   - component: {fileID: 8390951464836155913}
   - component: {fileID: 6860544754505300519}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Yellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3455,8 +3535,13 @@ MonoBehaviour:
   MoveSpeed: 3
   TurnSpeed: 0.3
   characterController: {fileID: 1112727817626628774}
+  audioManager: {fileID: 5256954999152019067}
   smoothSpeed: 5
   mainCamera: {fileID: 5846571374343232750}
+  abilityController: {fileID: 3159636760548436729}
+  audioVolume: 1
+  audioInterval: 1
+  audioTimer: 0
 --- !u!1 &7236088950303693030
 GameObject:
   m_ObjectHideFlags: 0

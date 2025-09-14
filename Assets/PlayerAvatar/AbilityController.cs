@@ -14,12 +14,12 @@ public class AbilityController : NetworkBehaviour
     public GameObject nowGeometry;
     public GameObject nowCamera;
     private CharacterController _controller;
-  
+    public ShootManager shootManager;
+    public SkillManager skillManager;
 
-    public GameObject lime;
-
-    public int energy = 0;
     
+
+
     [SyncVar]
     public PlayerForm currentForm = PlayerForm.Human;
 
@@ -37,64 +37,32 @@ public class AbilityController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(RoundManager.rm.Mode == "Practice")
-        {
-            energy = 10000;
-        }
 
         if (PlayerManager.canAbility)
         {
             Ability();
         }
 
+
     }
 
     public void Ability()
     {
+
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Yellow();
-
+            skillManager.UseSkill1();
         }
+
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Lime();
+            skillManager.UseSkill2();
         }
     }
 
 
-    public void Lime()
-    {
-        //•K—v”1
-        //if (energy >= 1)
-        {
-            Transform mainCamera = GetComponentInChildren<Camera>().transform;
-            CmdLime(mainCamera.position, mainCamera.forward);
-            energy--;
-        }
-    }
 
 
-    [Command]
-    public void CmdLime(Vector3 pos, Vector3 dir)
-    {
-        GameObject instance = Instantiate(lime, GetHitInForward(pos, dir), Quaternion.identity);
-        NetworkServer.Spawn(instance);
-        RoundManager.spawns.Add(instance);
-    }
-
-    public void Yellow()
-    {
-        if (currentForm == PlayerForm.Human)
-        {
-            SwitchForm(PlayerForm.Bird);
-        }
-        else if(currentForm == PlayerForm.Bird)
-        {
-            SwitchForm(PlayerForm.Human);
-        }
-        energy--;
-    }
 
 
     public Vector3 GetHitInForward(Vector3 pos, Vector3 dir)
@@ -129,6 +97,7 @@ public class AbilityController : NetworkBehaviour
     public void RpcSwitchForm(int newFormInt)
     {
 
+        shootManager.ResetZoom();
         PlayerForm newForm = (PlayerForm)newFormInt;
 
         currentForm = newForm;
@@ -141,8 +110,8 @@ public class AbilityController : NetworkBehaviour
             if (isLocalPlayer)
             {
                 _controller.radius = 0.2f;
-                _controller.height = 2.3f;
-                _controller.center = new Vector3(0, 1.15f, 0);
+                _controller.height = 2.1f;
+                _controller.center = new Vector3(0, 1.1f, 0);
 
            
                 while (Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), -transform.up, out RaycastHit hit, 2f, ground))
@@ -165,6 +134,8 @@ public class AbilityController : NetworkBehaviour
                 _controller.height = 0.2f;
                 _controller.center = new Vector3(0, 1.9f, -0.14f);
             }
+            YellowManager yellowManager = nowControlled.GetComponentInChildren<YellowManager>();
+            yellowManager.StartChange();
         }
         nowGeometry = nowControlled.GetComponent<FormManager>().geometry;
         nowCamera = nowControlled.GetComponent<FormManager>().camera;
@@ -196,6 +167,22 @@ public class AbilityController : NetworkBehaviour
     {
         Human,
         Bird
+    }
+
+    public void BeHuman()
+    {
+        if (currentForm == PlayerForm.Bird)
+        {
+            SwitchForm(PlayerForm.Human);
+        }
+    }
+
+    public void BeBird()
+    {
+        if (currentForm == PlayerForm.Human)
+        {
+            SwitchForm(PlayerForm.Bird);
+        }
     }
 
 }

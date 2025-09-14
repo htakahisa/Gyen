@@ -1437,7 +1437,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8640944a54b80c4db19fef271d7fbb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  armer: 0.67
+  armer: 0.5
   cost: 1000
 --- !u!114 &80927134
 MonoBehaviour:
@@ -17189,6 +17189,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  myPlayer: {fileID: 0}
   attacker: {fileID: 0}
   defender: {fileID: 0}
   attackSpawnPos: {x: 36, y: 9.194197, z: -10}
@@ -17198,9 +17199,7 @@ MonoBehaviour:
   Mode: 1VS1
   hasLoaded: 0
   currentBotMove: 0
-  respawns:
-  - {fileID: 2158545504791687764, guid: 07cc10ed9af511242b899cb93d9ff0ca, type: 3}
-  - {fileID: 1846335836137476455, guid: b1d0f4283abfdc04393e38531fe87bb1, type: 3}
+  respawns: []
 --- !u!114 &1765612025
 MonoBehaviour:
   m_ObjectHideFlags: 0

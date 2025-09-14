@@ -30,7 +30,7 @@ public class Hpbar : NetworkBehaviour
                 // äDêF (Gray)
                 barColor.color = new Color(0.5f, 0.5f, 0.5f);
             }
-            if (RoundManager.rm.GetMyPlayer().GetComponent<HpMaster>().armer == 0.67f)
+            if (RoundManager.rm.GetMyPlayer().GetComponent<HpMaster>().armer == 0.5f)
             {
                 // â©êF (Yellow)
                 barColor.color = new Color(1.0f, 1.0f, 0.0f);

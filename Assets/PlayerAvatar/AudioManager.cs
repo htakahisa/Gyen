@@ -10,6 +10,8 @@ public class AudioManager : NetworkBehaviour
     public AudioClip footStep;
     public AudioClip land;
     public AudioClip shoot;
+    public AudioClip yellow;
+
     public LayerMask soundBlockLayer;
 
 
@@ -41,6 +43,10 @@ public class AudioManager : NetworkBehaviour
         if (name == "shoot")
         {
             soundClip = shoot;
+        }
+        if (name == "yellow")
+        {
+            soundClip = yellow;
         }
 
         // クライアントにも再生させる
@@ -77,6 +83,10 @@ public class AudioManager : NetworkBehaviour
         if (name == "shoot")
         {
             soundClip = shoot;
+        }
+        if (name == "yellow")
+        {
+            soundClip = yellow;
         }
 
 

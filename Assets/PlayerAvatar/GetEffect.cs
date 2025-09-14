@@ -61,7 +61,7 @@ public class GetEffect : NetworkBehaviour
     }
     public void ChargeEnergy()
     {
-        RoundManager.rm.GetMyPlayer().GetComponent<AbilityController>().energy ++;
+        RoundManager.rm.GetMyPlayer().GetComponent<CharacterSkills>().ultimateEnergy ++;
     }
 
 
