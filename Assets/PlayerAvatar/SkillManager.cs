@@ -23,4 +23,14 @@ public class SkillManager : MonoBehaviour
             currentCharacter.Skill2.Invoke();
         }
     }
+
+    // ƒXƒLƒ‹3‚ğÀs
+    public void UseSkill3()
+    {
+
+        if (currentCharacter != null && currentCharacter.Skill3 != null)
+        {
+            currentCharacter.Skill3.Invoke();
+        }
+    }
 }

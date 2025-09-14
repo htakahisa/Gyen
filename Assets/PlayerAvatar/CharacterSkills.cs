@@ -8,9 +8,11 @@ public class CharacterSkills : NetworkBehaviour
     // スキル1, スキル2のデリゲート（メソッド参照）
     public Action Skill1;
     public Action Skill2;
+    public Action Skill3;
 
     public int skill1Energy;
     public int skill2Energy;
+    public int skill3Energy;
 
     public int ultimateEnergy;
 
@@ -22,15 +24,15 @@ public class CharacterSkills : NetworkBehaviour
     }
 
     // デフォルトスキル
-    void DefaultSkill1()
-    {
-        Debug.Log("Default Skill1 executed");
-    }
+    //void DefaultSkill1()
+    //{
+    //    Debug.Log("Default Skill1 executed");
+    //}
 
-    void DefaultSkill2()
-    {
-        Debug.Log("Default Skill2 executed");
-    }
+    //void DefaultSkill2()
+    //{
+    //    Debug.Log("Default Skill2 executed");
+    //}
 }
 
 

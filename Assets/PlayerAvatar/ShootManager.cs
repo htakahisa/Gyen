@@ -17,7 +17,7 @@ namespace StarterAssets
         private GameObject _mainCamera;
         private Camera _CameraComponent;
 
-        private WeaponManager weaponManager;
+        public WeaponManager weaponManager;
 
         private float lastAttackTime; // ÅŒã‚ÉUŒ‚‚µ‚½
 
@@ -42,11 +42,16 @@ namespace StarterAssets
         Coroutine recoilBounce;
 
         // Start is called before the first frame update
+
+        private void Awake()
+        {
+            weaponManager.SwitchWeapon(WeaponType.Liet);
+        }
+
         public override void OnStartAuthority()
         {
          
-            weaponManager = GetComponent<WeaponManager>();
-            weaponManager.SwitchWeapon(WeaponType.Liet);
+           
             if (_mainCamera == null)
             {
                 _CameraComponent = GetComponentInChildren<Camera>();
@@ -78,11 +83,6 @@ namespace StarterAssets
             if (!isLocalPlayer) return;
 
 
-            // •ŠíØ‚è‘Ö‚¦‚Ì—á
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                weaponManager.SwitchWeapon(WeaponType.Hazard);
-            }
 
             // •ŠíƒŠƒ[ƒh
             if (Input.GetKeyDown(KeyCode.R))

@@ -1,4 +1,5 @@
 using Mirror;
+using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,10 @@ using UnityEngine.UI;
 
 public class WeaponManager : NetworkBehaviour
 {
+    public ShootManager shootManager;
+
+
+
     // Œ»İ‚ÌŠ•Ší
     [SyncVar]
     private WeaponType currentWeapon;
@@ -88,7 +93,7 @@ public class WeaponManager : NetworkBehaviour
 
     public void Reload()
     {
-        if (isReloading || magazine == GetCurrentWeaponData().magazineSize)
+        if ((isReloading || magazine == GetCurrentWeaponData().magazineSize) && shootManager.canShoot)
         {
             return;
         }

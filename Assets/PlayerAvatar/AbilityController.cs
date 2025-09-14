@@ -58,6 +58,11 @@ public class AbilityController : NetworkBehaviour
         {
             skillManager.UseSkill2();
         }
+
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            skillManager.UseSkill3();
+        }
     }
 
 

@@ -660,6 +660,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   weaponPos: {fileID: 3352325458824434371}
+  weaponManager: {fileID: 1470853562863111889}
   IsZooming: 0
   isBursting: 0
   audioManager: {fileID: 5256954999152019067}
@@ -682,6 +683,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  shootManager: {fileID: 8334744245603090709}
   magazine: 0
   isReloading: 0
 --- !u!114 &4248758210931635522
@@ -1763,9 +1765,17 @@ MonoBehaviour:
   syncInterval: 0
   skill1Energy: 2
   skill2Energy: 1
+  skill3Energy: 10
+  ultimateEnergy: 0
   abilityController: {fileID: 3159636760548436729}
   limepre: {fileID: 3539715179979286606, guid: 284412664aa79544688680eee0955610, type: 3}
   currentCharacter: {fileID: 8447630504621839706}
+  shootManager: {fileID: 8334744245603090709}
+  hpMaster: {fileID: 5264078432467384439}
+  isSinging: 0
+  singIntervalTimer: 0
+  singInterval: 1
+  memo: Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing
 --- !u!114 &6792009286812342892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1805,7 +1815,6 @@ MonoBehaviour:
   nowCamera: {fileID: 0}
   shootManager: {fileID: 8334744245603090709}
   skillManager: {fileID: 6792009286812342892}
-  energy: 0
   currentForm: 0
   ground:
     serializedVersion: 2
@@ -1827,6 +1836,8 @@ MonoBehaviour:
   syncInterval: 0
   skill1Energy: 0
   skill2Energy: 0
+  skill3Energy: 0
+  ultimateEnergy: 0
 --- !u!114 &5264078432467384439
 MonoBehaviour:
   m_ObjectHideFlags: 0
