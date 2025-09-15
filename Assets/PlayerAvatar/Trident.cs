@@ -98,11 +98,8 @@ public class Trident : CharacterSkills
 
     public void Singing()
     {
-        if (hpMaster.hp >= 100)
-        {
-            return;
-        }
-        if (!isSinging) {
+      
+        if (!isSinging && hpMaster.hp < 100) {
 
             shootManager.canShoot = false;
             isSinging = true;

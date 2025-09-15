@@ -32,7 +32,7 @@ public class WeaponManager : NetworkBehaviour
         { WeaponType.KasMi, new WeaponData("KasMi", 45, 190, 0.08f, 0.05f, 0.17f, 30, 1.7f,true, false, 50f, 0.03f, 2, true) },
         { WeaponType.ReiNe, new WeaponData("ReiNe", 60, 200, 0.12f, 0.1f, 0.55f, 20, 1.5f,true, false, 60f, 0.05f, 1, true) },
         { WeaponType.Hazard, new WeaponData("Hazard", 200, 400, 1f, 0f, 0f, 2, 3f,true, true, 30f, 0.1f, 1, false) },
-        { WeaponType.RapetPuppet, new WeaponData("RapetPuppet", 30, 70, 0.07f, 0.3f, 0.4f, 100, 2f,true, false, 40f, 0.1f, 1, true) },
+        { WeaponType.RapetPuppet, new WeaponData("RapetPuppet", 30, 50, 0.07f, 0.3f, 0.4f, 70, 2f,true, false, 40f, 0.1f, 1, true) },
         { WeaponType.Violets, new WeaponData("Violets", 45, 100, 0.06f, 0.4f, 0.55f, 152, 4f,true, false, 45f, 0.2f, 1, true) },
     };
 

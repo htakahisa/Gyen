@@ -4351,7 +4351,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 2000
+  m_text: 1800
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 62cd9891115876248af7c8587b16c004, type: 2}
   m_sharedMaterial: {fileID: -8940488444597090311, guid: 62cd9891115876248af7c8587b16c004,
@@ -5223,7 +5223,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   name: 6
-  cost: 2000
+  cost: 1800
 --- !u!114 &601015533
 MonoBehaviour:
   m_ObjectHideFlags: 0
