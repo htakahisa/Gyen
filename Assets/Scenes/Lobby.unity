@@ -1037,7 +1037,7 @@ MonoBehaviour:
   timeInterpolationGui: 0
   requiredPlayers: 2
   battleSceneName: Assets/Scenes/Battle.unity
-  targetAddress: 192.168.11.21
+  targetAddress: 192.168.11.15
   port: 7777
 --- !u!4 &783319032
 Transform:

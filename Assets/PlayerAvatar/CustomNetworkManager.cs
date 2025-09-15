@@ -16,7 +16,7 @@ public class CustomNetworkManager : NetworkManager
 
     private int playersInLobby = 0;
 
-    public string targetAddress = "192.168.11.21";
+    public string targetAddress = "192.168.11.15";
     public ushort port = 7777;
 
     private readonly List<NetworkConnectionToClient> pendingConnections = new List<NetworkConnectionToClient>();
