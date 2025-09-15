@@ -1,0 +1,72 @@
+/* app/globals.css */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #1f1f2f;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+h1.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #ffcc00;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.card {
+  background: linear-gradient(145deg, #2a2a3d, #1c1c28);
+  border: 1px solid #444;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 3px 3px 12px rgba(0,0,0,0.7);
+}
+
+.card .title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 0.5rem;
+}
+
+.card .desc {
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 0.6rem;
+  padding: 0.5rem 1rem;
+  background-color: #ff9900;
+  color: #1f1f2f;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.button:hover {
+  background-color: #e68a00;
+}
+/* 開発用の紫リンクを非表示 */
+#__next a[href*="next"] {
+  display: none !important;
+}
+a {
+  text-decoration: none;
+}

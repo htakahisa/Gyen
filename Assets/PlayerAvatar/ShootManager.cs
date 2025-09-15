@@ -258,6 +258,10 @@ namespace StarterAssets
 
         void OnDrawGizmos()
         {
+            if (_mainCamera == null)
+            {
+                return;
+            }
             Vector3 direction = _mainCamera.transform.forward;
             // カメラの位置から指定方向にレイを描画
             Gizmos.color = Color.red;

@@ -1774,7 +1774,7 @@ MonoBehaviour:
   hpMaster: {fileID: 5264078432467384439}
   isSinging: 0
   singIntervalTimer: 0
-  singInterval: 1
+  singInterval: 0.5
   memo: Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing
 --- !u!114 &6792009286812342892
 MonoBehaviour:

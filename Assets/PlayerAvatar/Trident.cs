@@ -12,7 +12,7 @@ public class Trident : CharacterSkills
 
     public bool isSinging;
     public float singIntervalTimer;
-    public int singInterval;
+    public float singInterval;
 
     [TextArea]
     public string memo = "Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing";
