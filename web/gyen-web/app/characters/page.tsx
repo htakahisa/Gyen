@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { characters } from "../../data/characters";
-import { CardButton, NormalButton } from "../components/UI";
+import { CardButton } from "../components/UI";
 
 export default function CharacterRank() {
   return (
