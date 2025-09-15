@@ -1766,6 +1766,9 @@ MonoBehaviour:
   skill1Energy: 2
   skill2Energy: 1
   skill3Energy: 10
+  default1Energy: 2
+  default2Energy: 1
+  default3Energy: 10
   ultimateEnergy: 0
   abilityController: {fileID: 3159636760548436729}
   limepre: {fileID: 3539715179979286606, guid: 284412664aa79544688680eee0955610, type: 3}
@@ -1837,6 +1840,9 @@ MonoBehaviour:
   skill1Energy: 0
   skill2Energy: 0
   skill3Energy: 0
+  default1Energy: 0
+  default2Energy: 0
+  default3Energy: 0
   ultimateEnergy: 0
 --- !u!114 &5264078432467384439
 MonoBehaviour:

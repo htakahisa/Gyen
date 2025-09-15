@@ -227,6 +227,8 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
         myPlayer.GetComponentInChildren<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
         myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
+
+        myPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
     }
 
 

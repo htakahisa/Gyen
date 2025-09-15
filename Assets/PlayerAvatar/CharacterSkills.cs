@@ -14,13 +14,17 @@ public class CharacterSkills : NetworkBehaviour
     public int skill2Energy;
     public int skill3Energy;
 
+    public int default1Energy;
+    public int default2Energy;
+    public int default3Energy;
+
     public int ultimateEnergy;
 
-    private void Start()
+    public void ResetSkill()
     {
-        //// スキルをデフォルトでセット（例）
-        //Skill1 = DefaultSkill1;
-        //Skill2 = DefaultSkill2;
+        skill1Energy = default1Energy;
+        skill2Energy = default2Energy;
+        skill3Energy = default3Energy;
     }
 
     // デフォルトスキル
