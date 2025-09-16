@@ -23,6 +23,9 @@ public class YellowManager : NetworkBehaviour
     [ClientRpc]
     public void RpcRemove()
     {
-        abilityController.SwitchForm(AbilityController.PlayerForm.Human);
+        if (abilityController.currentForm == AbilityController.PlayerForm.Bird)
+        {
+            abilityController.SwitchForm(AbilityController.PlayerForm.Human);
+        }
     }
 }

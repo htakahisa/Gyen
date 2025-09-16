@@ -1,30 +1,40 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { items } from "../../../data/items";
+import { characters } from "../../../data/characters";
 
 interface Props {
   params: { name: string };
 }
 
-export default function ItemDetail({ params }: Props) {
+export default function DetailPage({ params }: Props) {
   const router = useRouter();
   const { name } = params;
-  const item = items.find((i) => i.name === name);
 
-  if (!item) {
-    return <p>このアイテムの情報がありません。</p>;
+  // アイテムを探す
+  const item = items.find((i) => i.name === name);
+  // キャラを探す
+  const character = characters.find((c) => c.name === name);
+
+  // どちらもなければエラーメッセージ
+  if (!item && !character) {
+    return <p>このデータの情報がありません。</p>;
   }
+
+  // 共通化のため、対象データをまとめる
+  const target = item || character;
+  const typeLabel = item ? "アイテム" : "キャラクター";
 
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif", color: "white" }}>
       <h2 style={{ fontSize: "1.5rem" }}>
-        {item.name}（ランク: {item.rank}）
+        {target?.name}（ランク: {target?.rank} / {typeLabel}）
       </h2>
-      <p>{item.description}</p>
+      <p>{target?.description}</p>
 
       <h3>調整履歴</h3>
       <ul>
-        {item.history.map((h, idx) => (
+        {target?.history.map((h, idx) => (
           <li
             key={idx}
             style={{

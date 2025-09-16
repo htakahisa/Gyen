@@ -615,7 +615,7 @@ MonoBehaviour:
   SpeedChangeRate: 10
   FootstepAudioVolume: 0.3
   JumpHeight: 1.2
-  Gravity: -20
+  Gravity: -15
   JumpTimeout: 0
   FallTimeout: 0.15
   Grounded: 1
@@ -644,6 +644,7 @@ MonoBehaviour:
   Aiscream: {fileID: 3549720354301209160, guid: d5e0e2b6b05dc444dac6a9fd7a7f3c73,
     type: 3}
   parentOfPlayer: {fileID: 3543936278411775571}
+  transformNetwork: {fileID: -4732923928998472460}
 --- !u!114 &8334744245603090709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -668,6 +669,8 @@ MonoBehaviour:
   wallMask:
     serializedVersion: 2
     m_Bits: 1544
+  transformNetwork: {fileID: -4732923928998472460}
+  parentOfPlayer: {fileID: 3543936278411775571}
 --- !u!114 &1470853562863111889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1662,12 +1665,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3051506110441234160}
+  - component: {fileID: -4732923928998472460}
   - component: {fileID: 8825841003792857049}
-  - component: {fileID: 5938196771916806253}
   - component: {fileID: 8447630504621839706}
   - component: {fileID: 6792009286812342892}
   - component: {fileID: 3159636760548436729}
-  - component: {fileID: -5865967421182638424}
   - component: {fileID: 5264078432467384439}
   - component: {fileID: 7767665597172722380}
   - component: {fileID: 7131634090093216591}
@@ -1697,6 +1699,23 @@ Transform:
   - {fileID: 2879780127971192791}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-4732923928998472460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94073a5fbae94624b8afeb8f2fbd1cf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  yaw: 0
+  controller: {fileID: 1112727817626628774}
 --- !u!114 &8825841003792857049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1714,40 +1733,6 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
---- !u!114 &5938196771916806253
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3543936278411775571}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a553cb17010b2403e8523b558bffbc14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 1
-  syncMode: 0
-  syncInterval: 0
-  target: {fileID: 8727971832061936366}
-  syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
-  onlySyncOnChange: 0
-  compressRotation: 1
-  interpolatePosition: 1
-  interpolateRotation: 1
-  interpolateScale: 0
-  coordinateSpace: 1
-  timelineOffset: 1
-  showGizmos: 0
-  showOverlay: 0
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
-  bufferResetMultiplier: 3
-  useFixedUpdate: 0
-  positionSensitivity: 0.01
-  rotationSensitivity: 0.01
-  scaleSensitivity: 0.01
 --- !u!114 &8447630504621839706
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1822,28 +1807,6 @@ MonoBehaviour:
   ground:
     serializedVersion: 2
     m_Bits: 8
---- !u!114 &-5865967421182638424
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3543936278411775571}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 522793def7839644aa26f56c6981aa4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  skill1Energy: 0
-  skill2Energy: 0
-  skill3Energy: 0
-  default1Energy: 0
-  default2Energy: 0
-  default3Energy: 0
-  ultimateEnergy: 0
 --- !u!114 &5264078432467384439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3550,15 +3513,18 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   MoveSpeed: 3
+  UpSpeed: 1
   TurnSpeed: 0.3
   characterController: {fileID: 1112727817626628774}
   audioManager: {fileID: 5256954999152019067}
   smoothSpeed: 5
   mainCamera: {fileID: 5846571374343232750}
   abilityController: {fileID: 3159636760548436729}
+  transformNetwork: {fileID: -4732923928998472460}
   audioVolume: 1
   audioInterval: 1
   audioTimer: 0
+  parentOfPlayer: {fileID: 3543936278411775571}
 --- !u!1 &7236088950303693030
 GameObject:
   m_ObjectHideFlags: 0

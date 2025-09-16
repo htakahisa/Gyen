@@ -135,6 +135,10 @@ namespace StarterAssets
         GameObject BgmObject;
         public GameObject parentOfPlayer;
 
+        public CharacterTransfromNetwork transformNetwork;
+
+        
+
         public override void OnStartAuthority() 
         {
             if (_mainCamera == null)
@@ -234,7 +238,12 @@ namespace StarterAssets
                 }
             }
 
+            
+
         }
+
+
+
 
         [Command]
         public void  CmdCallDance()
@@ -301,8 +310,10 @@ namespace StarterAssets
                 // カメラに上下回転を適用
                 _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
 
-                // プレイヤー身体に左右回転を適用
-                parentOfPlayer.transform.Rotate(Vector3.up * mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f));
+                // --- 身体の左右回転 (Yaw) ---
+                transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
+                parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
                 
             }
 
@@ -408,6 +419,7 @@ namespace StarterAssets
             //Debug.Log("p" + moveDirection);
             // **CharacterControllerで移動**
             controller.Move(moveDirection * Time.deltaTime);
+            transformNetwork.CmdPos(transform.position);
 
             // **アニメーター更新**
             if (_hasAnimator)
@@ -421,7 +433,7 @@ namespace StarterAssets
 
         }
 
-
+        
 
 
         private void GetOrb()
@@ -676,6 +688,7 @@ namespace StarterAssets
                     {
                         // プレイヤー身体に左右回転を適用
                         parentOfPlayer.transform.Rotate(Vector3.up * mouseX * (_CameraComponent.fieldOfView / 74.03f));
+                        transformNetwork.CmdRotate(transform.rotation);
                     }
                     else
                     {

@@ -82,7 +82,7 @@ public class Trident : CharacterSkills
     {
         if (abilityController.currentForm == AbilityController.PlayerForm.Human)
         {
-            if (currentCharacter.skill1Energy <= 0)
+            if (currentCharacter.skill2Energy <= 0)
             {
                 return;
             }

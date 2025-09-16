@@ -41,6 +41,9 @@ namespace StarterAssets
 
         Coroutine recoilBounce;
 
+        public CharacterTransfromNetwork transformNetwork;
+        public GameObject parentOfPlayer;
+
         // Start is called before the first frame update
 
         private void Awake()
@@ -221,7 +224,8 @@ namespace StarterAssets
                     {
                         Vector3 bodydirection = new Vector3(cheatdirection.x, 0, cheatdirection.z);
 
-                        transform.rotation = Quaternion.LookRotation(bodydirection);
+                        parentOfPlayer.transform.rotation = Quaternion.LookRotation(bodydirection);
+                        transformNetwork.CmdRotate(transform.rotation);
 
                         _mainCamera.transform.rotation = Quaternion.LookRotation(cheatdirection);
                     }
@@ -315,7 +319,8 @@ namespace StarterAssets
             for (int count = 0; count < 10; count++)
             {
                 _mainCamera.transform.localRotation *= Quaternion.Euler(-targetRecoil.y / (10 - count), 0, 0);
-                transform.localRotation *= Quaternion.Euler(0, xRandomRot / (10 - count), 0);
+                parentOfPlayer.transform.localRotation *= Quaternion.Euler(0, xRandomRot / (10 - count), 0);
+                transformNetwork.CmdPos(transform.position);
                 yield return new WaitForSeconds(duration / 9);
             }
         }

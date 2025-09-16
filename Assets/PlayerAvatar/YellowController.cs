@@ -7,6 +7,7 @@ public class YellowController : NetworkBehaviour
     [Header("Player")]
     [Tooltip("Move speed of the character in m/s")]
     public float MoveSpeed = 4.0f;
+    public float UpSpeed = 4.0f;
     public float TurnSpeed = 0.3f;
 
     public CharacterController characterController;
@@ -20,10 +21,13 @@ public class YellowController : NetworkBehaviour
 
     public GameObject mainCamera;
     public AbilityController abilityController;
+    public CharacterTransfromNetwork transformNetwork;
 
     public float audioVolume;
     public float audioInterval;
     public float audioTimer;
+
+    public GameObject parentOfPlayer;
 
 
     public override void OnStartAuthority()
@@ -67,21 +71,26 @@ public class YellowController : NetworkBehaviour
         // 現在値を滑らかに目標値に近づける
         currentValue = Mathf.Lerp(currentValue, targetValue, Time.deltaTime * smoothSpeed);
 
-        // プレイヤー身体に左右回転を適用
-        RoundManager.rm.GetMyPlayer().transform.Rotate(Vector3.up * currentValue);
+        transformNetwork.yaw += currentValue;
+        parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+        transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
         mainCamera.transform.localRotation *= Quaternion.Euler(-mouseY, 0f, 0f);
     }
 
     public void CharacterMove()
     {
         characterController.Move(transform.forward * MoveSpeed * Time.deltaTime);
+        transformNetwork.CmdPos(parentOfPlayer.transform.position);
+
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space))
         {
-            characterController.Move(transform.up * MoveSpeed * Time.deltaTime);
+            characterController.Move(transform.up * UpSpeed * Time.deltaTime);
+            transformNetwork.CmdPos(parentOfPlayer.transform.position);
         }
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.LeftShift))
         {
-            characterController.Move(-transform.up * MoveSpeed * Time.deltaTime);
+            characterController.Move(-transform.up * UpSpeed * Time.deltaTime);
+            transformNetwork.CmdPos(parentOfPlayer.transform.position);
         }
 
         audioTimer += Time.deltaTime;
