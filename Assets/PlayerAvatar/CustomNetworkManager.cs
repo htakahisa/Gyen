@@ -8,7 +8,7 @@ public class CustomNetworkManager : NetworkManager
 {
     [Header("Custom Settings")]
     public int requiredPlayers = 2;
-    [Scene] public string battleSceneName = "Battle"; // [Scene]属性でビルド設定を強制確認
+    [Scene] public string loadSceneName = "Loading"; // [Scene]属性でビルド設定を強制確認
 
     [Header("Player References")]
     public NetworkConnectionToClient defender;
@@ -21,7 +21,7 @@ public class CustomNetworkManager : NetworkManager
 
     private readonly List<NetworkConnectionToClient> pendingConnections = new List<NetworkConnectionToClient>();
 
-    private int isCorrectforConnect;
+    public GameObject[] playerPrefabs;
 
     #region Initialization
     public override void Awake()
@@ -73,16 +73,6 @@ public class CustomNetworkManager : NetworkManager
     }
 
 
-    public override void OnClientConnect()
-    {
-        isCorrectforConnect = 1;
-    }
-
-
-    public override void OnClientDisconnect()
-    {
-        isCorrectforConnect = 2;
-    }
 
 
 
@@ -102,12 +92,16 @@ public class CustomNetworkManager : NetworkManager
         pendingConnections.Add(conn);
         Debug.Log($"Player connected (ID: {conn.connectionId}), Total: {playersInLobby}");
 
+        
+
         if (playersInLobby >= requiredPlayers)
         {
             AssignRoles();
-            StartCoroutine(StartBattleSequence("Battle"));
+            ServerChangeScene("Loading");
         }
     }
+
+
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
@@ -137,48 +131,46 @@ public class CustomNetworkManager : NetworkManager
         Debug.Log($"Roles assigned - Attacker: {attacker.connectionId}, Defender: {defender.connectionId}");
     }
 
-    private IEnumerator StartBattleSequence(string name)
+
+
+    public override void OnServerSceneChanged(string sceneName)
     {
-        Debug.Log("Starting battle sequence...");
-
-        // 1. シーン遷移
-        ServerChangeScene(name);
-        yield return WaitForSceneLoad(name);
-
-        yield return new WaitForSeconds(1f); // スポーン間隔を空ける
-
-        // 2. 全プレイヤーをスポーン
-        foreach (var conn in pendingConnections)
+        if (sceneName == "Battle")
         {
-            ServerSpawnPlayer(conn);
-        }
-    }
-
-    private IEnumerator WaitForSceneLoad(string sceneName)
-    {
-        float timeout = Time.time + 10f;
-        while (SceneManager.GetActiveScene().name != sceneName)
-        {
-            if (Time.time > timeout)
-            {
-                Debug.LogError("Scene load timeout!");
-                yield break;
+            
+            // 2. 全プレイヤーをスポーン
+            foreach (var conn in pendingConnections)
+            {               
+                StartCoroutine(ServerSpawnPlayer(conn));
             }
-            yield return null;
         }
-        Debug.Log($"Scene loaded: {sceneName}");
+        if (sceneName == "Practice")
+        {
+            Vector3 spawnPos = RoundManager.rm.defenceSpawnPos;
+
+            // プレイヤー生成
+            GameObject player = Instantiate(
+                playerPrefabs[1],
+                spawnPos,
+                Quaternion.identity
+            );
+            NetworkServer.AddPlayerForConnection(NetworkServer.localConnection, player);
+            
+        }
+     
     }
+
+
     #endregion
 
     #region Player Spawning
     [Server]
-    private void ServerSpawnPlayer(NetworkConnectionToClient conn)
+    public IEnumerator ServerSpawnPlayer(NetworkConnectionToClient conn)
     {
-        if (playerPrefab == null)
-        {
-            Debug.LogError("Player prefab is not assigned!");
-            return;
-        }
+        yield return new WaitUntil(() => conn.isReady);
+
+        var characterManager = conn.identity.GetComponent<CharacterManager>();
+        int index = characterManager.selectedCharacter;
 
         // スポーン位置決定
         bool isAttacker = (conn == attacker);
@@ -188,7 +180,7 @@ public class CustomNetworkManager : NetworkManager
 
         // プレイヤー生成
         GameObject player = Instantiate(
-            playerPrefab,
+            playerPrefabs[index],
             spawnPos,
             Quaternion.identity
         );
@@ -209,13 +201,20 @@ public class CustomNetworkManager : NetworkManager
         }
 
         // ネットワーク登録
-        NetworkServer.AddPlayerForConnection(conn, player);
+        NetworkServer.ReplacePlayerForConnection(conn, player, true);
         Debug.Log($"Spawned player for connection {conn.connectionId} at {spawnPos}");
     }
-    #endregion
+    public override void OnClientConnect()
+    {
+        base.OnClientConnect();
 
-    #region Public Methods
-    public void StartHostGame()
+        // クライアントが準備できたことをサーバーに伝える
+        NetworkClient.Ready();
+    }
+        #endregion
+
+        #region Public Methods
+        public void StartHostGame()
     {
         if (NetworkServer.active || NetworkClient.isConnected)
         {
@@ -232,8 +231,16 @@ public class CustomNetworkManager : NetworkManager
         StartHost();
         if (playersInLobby > 0)
         {
-            StartCoroutine(StartBattleSequence("Practice"));
+            ServerChangeScene("Practice");
         }
     }
-    #endregion
+    public override void OnClientSceneChanged()
+    {
+        base.OnClientSceneChanged();
+
+        // 新しいシーンで準備完了をサーバーに通知
+        NetworkClient.Ready();
+    }
+
+        #endregion
 }

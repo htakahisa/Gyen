@@ -27,16 +27,7 @@ public class CharacterSkills : NetworkBehaviour
         skill3Energy = default3Energy;
     }
 
-    // デフォルトスキル
-    //void DefaultSkill1()
-    //{
-    //    Debug.Log("Default Skill1 executed");
-    //}
 
-    //void DefaultSkill2()
-    //{
-    //    Debug.Log("Default Skill2 executed");
-    //}
 }
 
 

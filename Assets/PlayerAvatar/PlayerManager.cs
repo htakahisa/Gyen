@@ -6,10 +6,12 @@ public class PlayerManager : NetworkBehaviour
 {
     public static readonly List<PlayerManager> Players = new List<PlayerManager>();
 
-    public static bool hasLoaded = false;
+    public bool hasLoaded = false;
 
-    public static bool canMove = true;
-    public static bool canAbility = true;
+    [SyncVar]
+    public bool canMove = true;
+    [SyncVar]
+    public bool canAbility = true;
 
     public void Update()
     {
@@ -54,13 +56,13 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    public static GameObject GetLocalPlayer()
+    public GameObject GetLocalPlayer()
     {
         PlayerManager player = Players.Find(p => p.isLocalPlayer);
         return player != null ? player.gameObject : null;
     }
 
-    public static GameObject GetOtherPlayer()
+    public GameObject GetOtherPlayer()
     {
 
         GameObject localPlayer = GetLocalPlayer();

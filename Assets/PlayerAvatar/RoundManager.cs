@@ -33,6 +33,8 @@ public class RoundManager : NetworkBehaviour
 
     public List<GameObject> respawns = new List<GameObject>();
 
+    public PlayerManager playerManager;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -66,10 +68,17 @@ public class RoundManager : NetworkBehaviour
 
     private void Update()
     {
-        if (!hasLoaded && PlayerManager.hasLoaded)
+        if (!hasLoaded)
         {
-            StartGetPlayers();
-            hasLoaded = true;
+            if (NetworkClient.localPlayer.gameObject != null && NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>() != null)
+            {
+                if (NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>().hasLoaded)
+                {
+                    playerManager = NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>();
+                    StartGetPlayers();
+                    hasLoaded = true;
+                }
+            }
         }
     }
 
@@ -123,7 +132,7 @@ public class RoundManager : NetworkBehaviour
     public void ResetRound()
     {
         ServerResetAllObjects();
-        ResetPlayers();
+        StartCoroutine(ResetPlayers());
     }
 
     [Server]
@@ -157,8 +166,22 @@ public class RoundManager : NetworkBehaviour
         spawns.Add(instance);
     }
 
-    public void ResetPlayers()
+    public IEnumerator ResetPlayers()
     {
+        playerManager.canMove = false;
+        myPlayer.GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
+        myPlayer.GetComponentInChildren<ShootManager>().canShoot = false;
+
+        if (otherPlayer != null)
+        {
+            otherPlayer.GetComponent<PlayerManager>().canMove = false;
+            otherPlayer.GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
+            otherPlayer.GetComponentInChildren<ShootManager>().canShoot = false;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+    
 
         SetPosition();
         SetHp();
@@ -169,10 +192,10 @@ public class RoundManager : NetworkBehaviour
     private void StartGetPlayers()
     {
         // 自分のプレイヤーを取得
-        myPlayer = PlayerManager.GetLocalPlayer();
+        myPlayer = playerManager.GetLocalPlayer();
 
         // 相手のプレイヤーを取得
-        otherPlayer = PlayerManager.GetOtherPlayer();
+        otherPlayer = playerManager.GetOtherPlayer();
 
 
         players.Add(myPlayer);
@@ -188,8 +211,14 @@ public class RoundManager : NetworkBehaviour
     [Server]
     public void SetPosition()
     {
-        attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(attackSpawnPos);
-        defender.GetComponentInChildren<ThirdPersonController>().ResetPos(defenceSpawnPos);
+        if (attacker != null)
+        {
+            attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(attackSpawnPos);
+        }
+        if (defender != null)
+        {
+            defender.GetComponentInChildren<ThirdPersonController>().ResetPos(defenceSpawnPos);
+        }
     }
 
 

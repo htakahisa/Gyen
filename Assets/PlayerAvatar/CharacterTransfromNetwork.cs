@@ -12,6 +12,8 @@ public class CharacterTransfromNetwork : NetworkBehaviour
     private float t;
 
     public CharacterController controller;
+    [SyncVar]
+    public bool isSynchronize = true;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -38,11 +40,27 @@ public class CharacterTransfromNetwork : NetworkBehaviour
         t = 0f;
     }
 
+    [TargetRpc]
+    public void TargetRequestPos(NetworkConnection conn, Vector3 position)
+    {
+        Debug.Log("a");
+        CmdPos(position);
+    }
+
     [Command]
     public void CmdPos(Vector3 position)
     {
         controller.enabled = false;
-        transform.transform.position = position;
+        transform.position = position;
+        controller.enabled = true;
+
+        RpcPositionNetwork(position);
+    }
+    [Server]
+    public void ServerPos(Vector3 position)
+    {
+        controller.enabled = false;
+        transform.position = position;
         controller.enabled = true;
 
         RpcPositionNetwork(position);
@@ -73,27 +91,25 @@ public class CharacterTransfromNetwork : NetworkBehaviour
     [ClientRpc]
     public void RpcPositionNetwork(Vector3 position)
     {
+        if (!isSynchronize) return;
+
         if (!isLocalPlayer)
         {
-
             SetTarget(position);
-
-            // 他プレイヤーはサーバーの位置に補正
-            controller.enabled = false;
-            transform.transform.position = position;
-            controller.enabled = true;
+            // 他プレイヤーは補間で自然に追従
+            transform.position = Vector3.Lerp(transform.position, position, 0.5f);
         }
         else
         {
-
-            // 自分自身はサーバーとの差分を補正
+            // 自分はサーバーとの差分が大きい場合のみ補正
             float dist = Vector3.Distance(transform.position, position);
-            if (dist > 0.1f) // 大きくズレていたら修正
+            if (dist > 1f) // 適切な閾値
             {
-                transform.position = Vector3.Lerp(transform.position, position, 0.5f);
+                transform.position = position;
             }
         }
     }
+
 
     [ClientRpc]
     public void RpcRotationNetwork(Quaternion rotation)

@@ -1,6 +1,7 @@
+using Mirror;
 using UnityEngine;
 
-public class BotSetting : MonoBehaviour
+public class BotSetting : NetworkBehaviour
 {
 
     public GameObject Bot;
@@ -20,6 +21,7 @@ public class BotSetting : MonoBehaviour
     public void AddBot()
     {
         GameObject bot = Instantiate(Bot);
+        NetworkServer.Spawn(bot);
         //ƒIƒ“ƒ‰ƒCƒ““¯Šú‚·‚é‚È‚çSpawn‚·‚×‚«
         SetBot(bot);
     }

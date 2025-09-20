@@ -21,6 +21,7 @@ export const characters: Character[] = [
     description: "カナダから風に吹かれてトライデントは、自然と共存したスタイルで広大な自然を駆け回る。",
     history: [
       { version: "1.0.2", change: "Yellow中の上昇、下降速度を3から1に減少" , type: "debuff" as const },
+      { version: "1.0.3", change: "Singingで回復中に専用のエフェクトの発生を追加" , type: "debuff" as const },
     ],
   },
 

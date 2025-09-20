@@ -1,5 +1,6 @@
 using UnityEngine;
 using Mirror;
+using UnityEngine.Events;
 
 public class HpMaster : NetworkBehaviour
 {
@@ -12,6 +13,8 @@ public class HpMaster : NetworkBehaviour
 
     [SyncVar]
     public bool isDead = false;
+
+    public EventOnDeath onDeath;
 
     private void OnHpChanged(int oldValue, int newValue)
     {
@@ -34,16 +37,8 @@ public class HpMaster : NetworkBehaviour
         {
             isDead = true;
             hp = 0;
-            Debug.Log($"{netId} のプレイヤーが倒された");
-            if (RoundManager.rm.Mode == "1VS1")
-            {
-                RoundManager.rm.RoundEnd(gameObject);
-            }
-            if (RoundManager.rm.Mode == "Practice")
-            {
-                ResetHp();
-                GetComponent<BotManager>().ResetPos();
-            }
+            Debug.Log($"{netId} のオブジェクトが壊された");
+            OnDeath();
         }
     }
 
@@ -61,6 +56,36 @@ public class HpMaster : NetworkBehaviour
         isInvincible = invincible;
 
     }
+
+    public void OnDeath()
+    {
+        if (onDeath == EventOnDeath.LoseRound)
+        {
+            RoundManager.rm.RoundEnd(gameObject);
+        }
+        if (onDeath == EventOnDeath.RespawnTarget)
+        {
+            ResetHp();
+            GetComponent<BotManager>().ResetPos();
+        }
+        if (onDeath == EventOnDeath.Destroy)
+        {
+            NetworkServer.Destroy(gameObject);
+        }
+        if (onDeath == EventOnDeath.FormToHuman)
+        {
+            GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
+        }
+    }
+
+    public enum EventOnDeath
+    {
+        LoseRound,
+        RespawnTarget,
+        Destroy,
+        FormToHuman
+    }
+
 
 
 }

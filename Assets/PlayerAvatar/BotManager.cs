@@ -1,7 +1,8 @@
+using Mirror;
 using StarterAssets;
 using UnityEngine;
 
-public class BotManager : MonoBehaviour
+public class BotManager : NetworkBehaviour
 {
     public ThirdPersonController tpc;
     public CharacterController cc;
@@ -94,8 +95,7 @@ public class BotManager : MonoBehaviour
 
     public void ResetPos()
     {
-        cc.enabled = false;
         transform.position = new Vector3(Random.Range(-8.53f, 2.77f), 0.01000023f, Random.Range(1.20f, 3.27f));
-        cc.enabled = true;
+        GetComponent<CharacterTransfromNetwork>().ServerPos(transform.position);
     }
 }

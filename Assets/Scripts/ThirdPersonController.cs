@@ -117,7 +117,7 @@ namespace StarterAssets
 
         private bool _hasAnimator;
 
-        private float xRotation = 0f; // 上下回転の累積値
+        public float xRotation = 0f; // 上下回転の累積値
 
         private float _airTime;
 
@@ -214,7 +214,7 @@ namespace StarterAssets
             _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
             _hasAnimator = TryGetComponent(out _animator);
 
-            if (PlayerManager.canMove)
+            if (GetComponentInParent<PlayerManager>().canMove)
             {
                 JumpAndGravity();
 
@@ -295,27 +295,37 @@ namespace StarterAssets
 
         private void CameraRotation()
         {
-            // マウス入力を取得
             float mouseX = Input.GetAxis("Mouse X");
             float mouseY = Input.GetAxis("Mouse Y");
 
-            xRotation = 0;
-            // 上下方向の回転（カメラの俯仰）
+            // 上下方向の回転を蓄積してClamp
             xRotation -= mouseY * _sensitivity;
-            xRotation = Mathf.Clamp(xRotation, -90f, 90f); // 上下の回転角度を制限
-
+            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
             if (mouseX != 0 || mouseY != 0)
             {
                 // カメラに上下回転を適用
-                _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
+                _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
                 // --- 身体の左右回転 (Yaw) ---
                 transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
                 parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
                 transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
-                
             }
+
+        }
+
+        public void CameraRecoil(float recoil)
+        {
+
+            // 上下方向の回転を蓄積してClamp
+            xRotation -= recoil;
+            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+            // カメラに上下回転を適用
+            _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+            
 
         }
 
@@ -605,6 +615,7 @@ namespace StarterAssets
             //Debug.Log("b" + moveDirection);
             // **CharacterControllerで移動**
             controller.Move(moveDirection * Time.deltaTime);
+            transformNetwork.ServerPos(parentOfPlayer.transform.position);
 
             // **アニメーター更新**
             if (_hasAnimator)
@@ -687,8 +698,9 @@ namespace StarterAssets
                     if (_CameraComponent != null)
                     {
                         // プレイヤー身体に左右回転を適用
-                        parentOfPlayer.transform.Rotate(Vector3.up * mouseX * (_CameraComponent.fieldOfView / 74.03f));
-                        transformNetwork.CmdRotate(transform.rotation);
+                        transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
+                        parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+                        transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
                     }
                     else
                     {
@@ -801,15 +813,15 @@ namespace StarterAssets
         public void ResetPos(Vector3 pos)
         {
             
-            RpcUpdateAllPositions(pos);
+            ServerUpdateAllPositions(pos);
             
         }
 
         [ClientRpc]
         public void RpcDance()
         {
-            PlayerManager.canMove = false;
-            PlayerManager.canAbility = false;
+            GetComponentInParent<PlayerManager>().canMove = false;
+            GetComponentInParent<PlayerManager>().canAbility = false;
             canGetOrb = false;
             _shootManager.canShoot = false;
             _hpMaster.isInvincible = true;
@@ -822,8 +834,8 @@ namespace StarterAssets
         [ClientRpc]
         public void RpcEndDance()
         {
-            PlayerManager.canMove = true;
-            PlayerManager.canAbility = true;
+            GetComponentInParent<PlayerManager>().canMove = true;
+            GetComponentInParent<PlayerManager>().canAbility = true;
             canGetOrb = true;
             _shootManager.canShoot = true;
             _hpMaster.isInvincible = false;
@@ -836,8 +848,8 @@ namespace StarterAssets
         [TargetRpc]
         public void TargetDance()
         {
-            PlayerManager.canMove = false;
-            PlayerManager.canAbility = false;
+            GetComponentInParent<PlayerManager>().canMove = false;
+            GetComponentInParent<PlayerManager>().canAbility = false;
             canGetOrb = false;
             _shootManager.canShoot = false;
             _hpMaster.CmdInvincible(true);
@@ -850,8 +862,8 @@ namespace StarterAssets
         [TargetRpc]
         public void TargetEndDance()
         {
-            PlayerManager.canMove = true;
-            PlayerManager.canAbility = true;
+            GetComponentInParent<PlayerManager>().canMove = true;
+            GetComponentInParent<PlayerManager>().canAbility = true;
             canGetOrb = true;
             _shootManager.canShoot = true;
             _hpMaster.CmdInvincible(false);
@@ -862,20 +874,26 @@ namespace StarterAssets
         }
 
 
-        [ClientRpc]
-        public void RpcUpdateAllPositions(Vector3 newPos)
+        [Server]
+        public void ServerUpdateAllPositions(Vector3 newPos)
         {
+            NetworkIdentity identity = parentOfPlayer.GetComponent<NetworkIdentity>();
+            NetworkConnection conn = identity.connectionToClient;
+
             controller.enabled = false;
             parentOfPlayer.transform.position = newPos;
             controller.enabled = true;
+            GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
+            parentOfPlayer.GetComponent<CharacterTransfromNetwork>().TargetRequestPos(conn, newPos);
+            StartCoroutine(StartToMove());
+
         }
 
-        [Client]
-        public void ClientUpdateAllPositions(Vector3 newPos)
+        public IEnumerator StartToMove()
         {
-            controller.enabled = false;
-            parentOfPlayer.transform.position = newPos;
-            controller.enabled = true;
+            yield return new WaitForSeconds(0.5f);
+            GetComponentInParent<PlayerManager>().canMove = true;
+            GetComponentInParent<ShootManager>().canShoot = true;
         }
 
 

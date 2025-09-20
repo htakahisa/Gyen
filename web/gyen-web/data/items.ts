@@ -100,6 +100,7 @@ export const weapons: Item[] = [
     description: "高速ライトマシンガン。連射速度が速く、壁抜きをするときの選択肢として入る武器であるが、それ以外の使い方ではあまりメリットがない。",
     history: [
       { version: "1.0.2", change: "連射レートを1/0.07sから1/0.05sに向上" , type: "buff" as const },
+      { version: "1.0.2", change: "マガジンサイズを100から70に減少" , type: "debuff" as const },
     ],
   },
     {

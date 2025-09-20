@@ -40,7 +40,7 @@ public class BuyPanel : MonoBehaviour
     {
         if (RoundManager.rm != null)
         {
-            if (RoundManager.rm.hasLoaded && PlayerManager.hasLoaded && !hasLoaded)
+            if (RoundManager.rm.hasLoaded && RoundManager.rm.GetMyPlayer().GetComponent<PlayerManager>().hasLoaded && !hasLoaded)
             {
                 StartGetPlayer();
                 hasLoaded = true;

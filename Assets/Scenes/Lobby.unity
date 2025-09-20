@@ -1006,9 +1006,9 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 3543936278411775571, guid: 60313309513db6342a6e5ebb00dae860,
+  playerPrefab: {fileID: 1033095711663537407, guid: 656b36ee086ab8c4288123fce05f1607,
     type: 3}
-  autoCreatePlayer: 0
+  autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 3549720354301209160, guid: d5e0e2b6b05dc444dac6a9fd7a7f3c73, type: 3}
@@ -1019,6 +1019,13 @@ MonoBehaviour:
   - {fileID: 1846335836137476455, guid: b1d0f4283abfdc04393e38531fe87bb1, type: 3}
   - {fileID: 3808034258725763465, guid: a51078fabb77f7c4da73621f7776322a, type: 3}
   - {fileID: 3539715179979286606, guid: 284412664aa79544688680eee0955610, type: 3}
+  - {fileID: 9017484664307500583, guid: 1245b8d2997d5b34fb1637be70a7eb05, type: 3}
+  - {fileID: 3543936278411775571, guid: 2432d290de03a804a93340e02e3657ab, type: 3}
+  - {fileID: 3543936278411775571, guid: 60313309513db6342a6e5ebb00dae860, type: 3}
+  - {fileID: 5610010966355794069, guid: 803ecf87f61d9fb4f84ba6319ba95c9c, type: 3}
+  - {fileID: 3539715179979286606, guid: bd31141f5512fd54cb6f630b21bbcc0d, type: 3}
+  - {fileID: 3539715179979286606, guid: f1da8575e7eddbd4999750a4669202b3, type: 3}
+  - {fileID: 6823302871133167919, guid: 3138a83bedbd6ad4481ba0b061da2eb6, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -1035,9 +1042,12 @@ MonoBehaviour:
   evaluationInterval: 3
   timeInterpolationGui: 0
   requiredPlayers: 2
-  battleSceneName: Assets/Scenes/Battle.unity
+  loadSceneName: Assets/Scenes/Loading.unity
   targetAddress: 192.168.11.15
   port: 7777
+  playerPrefabs:
+  - {fileID: 3543936278411775571, guid: 60313309513db6342a6e5ebb00dae860, type: 3}
+  - {fileID: 3543936278411775571, guid: 2432d290de03a804a93340e02e3657ab, type: 3}
 --- !u!4 &783319032
 Transform:
   m_ObjectHideFlags: 0

@@ -36,6 +36,7 @@ namespace StarterAssets
         private bool hasLoaded = false;
 
         public bool canShoot = true;
+        public bool shootInputAhead;
 
         public LayerMask wallMask;
 
@@ -76,7 +77,7 @@ namespace StarterAssets
         {
             if (RoundManager.rm != null)
             {
-                if (RoundManager.rm.hasLoaded && PlayerManager.hasLoaded && !hasLoaded)
+                if (RoundManager.rm.hasLoaded && GetComponentInParent<PlayerManager>().hasLoaded && !hasLoaded)
                 {
                     StartGetTpc();
                     hasLoaded = true;
@@ -217,17 +218,27 @@ namespace StarterAssets
                         enemyhead = RoundManager.rm.GetBots()[UnityEngine.Random.Range(0, RoundManager.rm.GetBots().Count)].GetComponentInChildren<Camera>().transform;
 
                         cheatdirection = enemyhead.position - myhead.position;
-                        
+
                     }
 
                     if (!Physics.Raycast(myhead.position, enemyhead.position - myhead.position, Vector3.Distance(myhead.position, enemyhead.position), wallMask))
                     {
-                        Vector3 bodydirection = new Vector3(cheatdirection.x, 0, cheatdirection.z);
+                        // “G‚Ì“ª‚ÌˆÊ’uƒxƒNƒgƒ‹
+                        Vector3 targetDir = enemyhead.position - myhead.position;
 
-                        parentOfPlayer.transform.rotation = Quaternion.LookRotation(bodydirection);
-                        transformNetwork.CmdRotate(transform.rotation);
+                        // --- ‘Ìi…•½‰ñ“]‚Ì‚İj ---
+                        Vector3 bodyDir = new Vector3(targetDir.x, 0, targetDir.z); // …•½•ûŒü‚¾‚¯
+                        Quaternion bodyRot = Quaternion.LookRotation(bodyDir);      // …•½‰ñ“]‚ğŒvZ
+                        transformNetwork.yaw = bodyRot.eulerAngles.y;
+                        parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
+                       
 
-                        _mainCamera.transform.rotation = Quaternion.LookRotation(cheatdirection);
+                        // --- ƒJƒƒ‰ic‚àŠÜ‚ß‚½‰ñ“]j ---
+                        Quaternion fullRot = Quaternion.LookRotation(targetDir);    // c‚àŠÜ‚ß‚Ä‰ñ“]‚ğŒvZ
+                        _mainCamera.transform.rotation = Quaternion.Euler(fullRot.eulerAngles.x, bodyRot.eulerAngles.y, 0);
+
+                        transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+
                     }
                     
                 }
@@ -277,6 +288,16 @@ namespace StarterAssets
 
             if (!canShoot) return false;
 
+            if (shootInputAhead)
+            {
+                if (!Input.GetMouseButton(0))
+                {
+                    shootInputAhead = false;
+                }
+
+                return false;
+            }
+
             WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
 
             if (currentWeapon == null) return false;
@@ -318,9 +339,10 @@ namespace StarterAssets
 
             for (int count = 0; count < 10; count++)
             {
-                _mainCamera.transform.localRotation *= Quaternion.Euler(-targetRecoil.y / (10 - count), 0, 0);
-                parentOfPlayer.transform.localRotation *= Quaternion.Euler(0, xRandomRot / (10 - count), 0);
-                transformNetwork.CmdPos(transform.position);
+                transformNetwork.yaw += xRandomRot / (10 - count);
+                GetComponent<ThirdPersonController>().CameraRecoil(targetRecoil.y / (10 - count));
+                parentOfPlayer.transform.rotation = Quaternion.Euler(0, transformNetwork.yaw, 0);
+                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
                 yield return new WaitForSeconds(duration / 9);
             }
         }

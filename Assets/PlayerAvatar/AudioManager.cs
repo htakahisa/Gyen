@@ -11,6 +11,7 @@ public class AudioManager : NetworkBehaviour
     public AudioClip land;
     public AudioClip shoot;
     public AudioClip yellow;
+    public AudioClip laser;
 
     public LayerMask soundBlockLayer;
 
@@ -47,6 +48,10 @@ public class AudioManager : NetworkBehaviour
         if (name == "yellow")
         {
             soundClip = yellow;
+        }
+        if (name == "laser")
+        {
+            soundClip = laser;
         }
 
         // クライアントにも再生させる
@@ -88,7 +93,10 @@ public class AudioManager : NetworkBehaviour
         {
             soundClip = yellow;
         }
-
+        if (name == "laser")
+        {
+            soundClip = laser;
+        }
 
 
         AudioSource.PlayClipAtPoint(soundClip, position, volume);
