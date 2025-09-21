@@ -103,7 +103,7 @@ public class CharacterTransfromNetwork : NetworkBehaviour
         {
             // 自分はサーバーとの差分が大きい場合のみ補正
             float dist = Vector3.Distance(transform.position, position);
-            if (dist > 1f) // 適切な閾値
+            if (dist > 0.3f) // 適切な閾値
             {
                 transform.position = position;
             }

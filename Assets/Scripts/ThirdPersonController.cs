@@ -314,6 +314,15 @@ namespace StarterAssets
             }
 
         }
+        public void CameraParticularRotaion(float pitch)
+        {
+            // ピッチをClamp
+            xRotation = Mathf.Clamp(-pitch, -90f, 90f);
+
+            // 体のYawと合成
+            _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0, 0f);
+        }
+
 
         public void CameraRecoil(float recoil)
         {

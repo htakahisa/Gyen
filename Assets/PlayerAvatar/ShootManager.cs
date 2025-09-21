@@ -201,7 +201,6 @@ namespace StarterAssets
                 if (Input.GetMouseButton(3))
                 {   
 
-                    Vector3 cheatdirection = new Vector3(0,0,0);
                     Transform myhead;
                     Transform enemyhead;
 
@@ -209,7 +208,6 @@ namespace StarterAssets
                     {
                         myhead = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
                         enemyhead = RoundManager.rm.GetOtherPlayer().GetComponentInChildren<Camera>().transform;
-                        cheatdirection = enemyhead.position - myhead.position; 
                         
                     }  
                     else
@@ -217,33 +215,43 @@ namespace StarterAssets
                         myhead = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
                         enemyhead = RoundManager.rm.GetBots()[UnityEngine.Random.Range(0, RoundManager.rm.GetBots().Count)].GetComponentInChildren<Camera>().transform;
 
-                        cheatdirection = enemyhead.position - myhead.position;
-
                     }
 
-                    if (!Physics.Raycast(myhead.position, enemyhead.position - myhead.position, Vector3.Distance(myhead.position, enemyhead.position), wallMask))
-                    {
-                        // 敵の頭の位置ベクトル
-                        Vector3 targetDir = enemyhead.position - myhead.position;
 
-                        // --- 体（水平回転のみ） ---
-                        Vector3 bodyDir = new Vector3(targetDir.x, 0, targetDir.z); // 水平方向だけ
-                        Quaternion bodyRot = Quaternion.LookRotation(bodyDir);      // 水平回転を計算
+                    // カメラ位置からターゲット方向ベクトル
+                    Vector3 camPos = Camera.main.transform.position;
+                    Vector3 camToTarget = enemyhead.position - camPos;
+
+                    if (camToTarget.sqrMagnitude > 0.0001f)
+                    {
+                        // 水平方向の距離
+                        float flatDist = new Vector2(camToTarget.x, camToTarget.z).magnitude;
+
+                        // ピッチ角度 = atan2(高さ, 水平方向距離)
+                        float desiredPitch = Mathf.Atan2(camToTarget.y, flatDist) * Mathf.Rad2Deg;
+
+                        // ここで直接「絶対角度」として渡す
+                        GetComponent<ThirdPersonController>().CameraParticularRotaion(desiredPitch);
+                    }
+
+
+                    Vector3 targetDir = enemyhead.position - myhead.position;
+                    Vector3 bodyDir = new Vector3(targetDir.x, 0, targetDir.z);
+
+                    if (bodyDir.sqrMagnitude > 0.0001f)
+                    {
+                        Quaternion bodyRot = Quaternion.LookRotation(bodyDir, Vector3.up);
                         transformNetwork.yaw = bodyRot.eulerAngles.y;
                         parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
-                       
-
-                        // --- カメラ（縦も含めた回転） ---
-                        Quaternion fullRot = Quaternion.LookRotation(targetDir);    // 縦も含めて回転を計算
-                        _mainCamera.transform.rotation = Quaternion.Euler(fullRot.eulerAngles.x, bodyRot.eulerAngles.y, 0);
-
-                        transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
-
                     }
-                    
+
+                    // --- サーバー同期 ---
+                    transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+
+
                 }
 
-                    audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.06f);
+                audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.06f);
                 if (weaponManager.magazine >= 1)
                 {
                     weaponManager.magazine--;

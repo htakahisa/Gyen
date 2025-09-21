@@ -1667,9 +1667,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3051506110441234160}
+  - component: {fileID: 8447630504621839706}
   - component: {fileID: -4732923928998472460}
   - component: {fileID: 8825841003792857049}
-  - component: {fileID: 8447630504621839706}
   - component: {fileID: 6792009286812342892}
   - component: {fileID: 3159636760548436729}
   - component: {fileID: 5264078432467384439}
@@ -1701,6 +1701,40 @@ Transform:
   - {fileID: 2879780127971192791}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8447630504621839706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 836da50fa1b3dee45854291038771488, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  skill1Energy: 2
+  skill2Energy: 1
+  skill3Energy: 10
+  default1Energy: 2
+  default2Energy: 1
+  default3Energy: 10
+  ultimateEnergy: 0
+  abilityController: {fileID: 3159636760548436729}
+  limepre: {fileID: 3539715179979286606, guid: 284412664aa79544688680eee0955610, type: 3}
+  currentCharacter: {fileID: 8447630504621839706}
+  shootManager: {fileID: 8334744245603090709}
+  hpMaster: {fileID: 5264078432467384439}
+  healEffect: {fileID: 9017484664307500583, guid: 1245b8d2997d5b34fb1637be70a7eb05,
+    type: 3}
+  healEffectInstance: {fileID: 0}
+  isSinging: 0
+  singIntervalTimer: 0
+  singInterval: 0.5
+  memo: Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing
 --- !u!114 &-4732923928998472460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1736,40 +1770,6 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
---- !u!114 &8447630504621839706
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3543936278411775571}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 836da50fa1b3dee45854291038771488, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  skill1Energy: 2
-  skill2Energy: 1
-  skill3Energy: 10
-  default1Energy: 2
-  default2Energy: 1
-  default3Energy: 10
-  ultimateEnergy: 0
-  abilityController: {fileID: 3159636760548436729}
-  limepre: {fileID: 3539715179979286606, guid: 284412664aa79544688680eee0955610, type: 3}
-  currentCharacter: {fileID: 8447630504621839706}
-  shootManager: {fileID: 8334744245603090709}
-  hpMaster: {fileID: 5264078432467384439}
-  healEffect: {fileID: 9017484664307500583, guid: 1245b8d2997d5b34fb1637be70a7eb05,
-    type: 3}
-  healEffectInstance: {fileID: 0}
-  isSinging: 0
-  singIntervalTimer: 0
-  singInterval: 0.5
-  memo: Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing
 --- !u!114 &6792009286812342892
 MonoBehaviour:
   m_ObjectHideFlags: 0
