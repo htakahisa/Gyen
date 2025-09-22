@@ -20,6 +20,14 @@ public class HpMaster : NetworkBehaviour
     {
         Debug.Log($"{netId} ‚ÌHP‚ª {oldValue} ¨ {newValue} ‚É•ÏX");
     }
+    private void Update()
+    {
+        if (transform.position.y <= -30)
+        {
+            TakeDamage(10);
+        }
+    }
+    
 
     [Server]
     public void TakeDamage(int damage)
