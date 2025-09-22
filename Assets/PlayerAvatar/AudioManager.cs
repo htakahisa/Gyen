@@ -12,14 +12,20 @@ public class AudioManager : NetworkBehaviour
     public AudioClip shoot;
     public AudioClip yellow;
     public AudioClip laser;
+    public AudioClip hitBlood;
 
     public LayerMask soundBlockLayer;
 
 
     // Start is called before the first frame update
-    void Awake()
+    public enum Sounds
     {
-
+        FOOTSTEP,
+        LAND,
+        SHOOT,
+        YELLOW,
+        LASER,
+        HITBLOOD,
     }
 
     // Update is called once per frame
@@ -29,37 +35,14 @@ public class AudioManager : NetworkBehaviour
     }
 
     [Command]
-    public void CmdPlaySoundAtPoint(string name, Vector3 position, float volume)
+    public void CmdPlaySoundAtPoint(Sounds name, Vector3 position, float volume)
     {
-        AudioClip soundClip = null;
 
-        if (name == "footStep")
-        {
-            soundClip = footStep;
-        }
-        if (name == "land")
-        {
-            soundClip = land;
-        }
-        if (name == "shoot")
-        {
-            soundClip = shoot;
-        }
-        if (name == "yellow")
-        {
-            soundClip = yellow;
-        }
-        if (name == "laser")
-        {
-            soundClip = laser;
-        }
-
-        // クライアントにも再生させる
         RpcPlaySoundAtPoint(name, position, volume);
     }
 
     [ClientRpc]
-    private void RpcPlaySoundAtPoint(string name, Vector3 position, float volume)
+    private void RpcPlaySoundAtPoint(Sounds name, Vector3 position, float volume)
     {
         Debug.Log("SoundIsPlayed");
 
@@ -77,25 +60,31 @@ public class AudioManager : NetworkBehaviour
 
         AudioClip soundClip = null;
 
-        if (name == "footStep")
+        switch (name)
         {
-            soundClip = footStep;
-        }
-        if (name == "land")
-        {
-            soundClip = land;
-        }
-        if (name == "shoot")
-        {
-            soundClip = shoot;
-        }
-        if (name == "yellow")
-        {
-            soundClip = yellow;
-        }
-        if (name == "laser")
-        {
-            soundClip = laser;
+            case Sounds.FOOTSTEP:
+                soundClip = footStep;
+                break;
+
+            case Sounds.LAND:
+                soundClip = land;
+                break;
+
+            case Sounds.SHOOT:
+                soundClip = shoot;
+                break;
+
+            case Sounds.YELLOW:
+                soundClip = yellow;
+                break;
+
+            case Sounds.LASER:
+                soundClip = laser;
+                break;
+
+            case Sounds.HITBLOOD:
+                soundClip = hitBlood;
+                break;
         }
 
 

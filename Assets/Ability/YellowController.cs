@@ -32,6 +32,8 @@ public class YellowController : NetworkBehaviour
 
     public GameObject parentOfPlayer;
 
+    public AudioListener audioListener;
+
 
     public override void OnStartAuthority()
     {
@@ -49,10 +51,22 @@ public class YellowController : NetworkBehaviour
 
     private void LateUpdate()
     {
-        if (!isLocalPlayer) return;
-        if (abilityController.currentForm != AbilityController.PlayerForm.Bird) return;
-        CharacterMove();
-        CharacterRotation();
+        if (isLocalPlayer)
+        {
+            if (abilityController.currentForm != AbilityController.PlayerForm.Bird) return;
+            CharacterMove();
+            CharacterRotation();
+        }
+
+        if (RoundManager.rm.Mode == "Practice" || (RoundManager.rm.Mode == "1VS1" && isLocalPlayer))
+        {
+            audioListener.enabled = true;
+        }
+        else
+        {
+            audioListener.enabled = false;
+        }
+
 
     }
 
@@ -109,7 +123,7 @@ public class YellowController : NetworkBehaviour
 
         if (audioTimer >= audioInterval)
         {
-            audioManager.CmdPlaySoundAtPoint("yellow", transform.TransformPoint(characterController.center), audioVolume);
+            audioManager.CmdPlaySoundAtPoint(AudioManager.Sounds.YELLOW, transform.TransformPoint(characterController.center), audioVolume);
             audioTimer = 0;
         }
 

@@ -614,7 +614,7 @@ MonoBehaviour:
   RotationSmoothTime: 0.12
   SpeedChangeRate: 10
   FootstepAudioVolume: 0.3
-  JumpHeight: 1.2
+  JumpHeight: 1
   Gravity: -15
   JumpTimeout: 0
   FallTimeout: 0.15
@@ -1890,6 +1890,7 @@ MonoBehaviour:
   shoot: {fileID: 8300000, guid: d3b601780ff4a2b438134d888c39454e, type: 3}
   yellow: {fileID: 8300000, guid: 24ebbea79964fd14d8c60ad56cd6a6ea, type: 3}
   laser: {fileID: 8300000, guid: 97bd6926c8e6a234daf1bee10616d31b, type: 3}
+  hitBlood: {fileID: 8300000, guid: 4508c3c219b554b48a5a21ab31ab3452, type: 3}
   soundBlockLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -1978,7 +1979,7 @@ Transform:
   m_GameObject: {fileID: 3587143367143688788}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.664, z: 0.044}
+  m_LocalPosition: {x: 0, y: 1.664, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3536,6 +3537,7 @@ MonoBehaviour:
   audioInterval: 1
   audioTimer: 0
   parentOfPlayer: {fileID: 3543936278411775571}
+  audioListener: {fileID: 4081695471351277210}
 --- !u!1 &7236088950303693030
 GameObject:
   m_ObjectHideFlags: 0

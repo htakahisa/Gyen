@@ -29,7 +29,11 @@ public class HpMaster : NetworkBehaviour
             return;
         }
 
-        int correctedDamage = (int)(damage * armer);
+        int correctedDamage = damage;
+
+        if (damage >= 0) {
+            correctedDamage = (int)(damage * armer); 
+        }
 
         if (hp <= 0) return;
         hp -= correctedDamage;
@@ -59,31 +63,52 @@ public class HpMaster : NetworkBehaviour
 
     public void OnDeath()
     {
-        if (onDeath == EventOnDeath.LoseRound)
+        if (onDeath == EventOnDeath.LOSEROUND)
         {
             RoundManager.rm.RoundEnd(gameObject);
         }
-        if (onDeath == EventOnDeath.RespawnTarget)
+        if (onDeath == EventOnDeath.RESPAWNTARGET)
         {
             ResetHp();
             GetComponent<BotManager>().ResetPos();
         }
-        if (onDeath == EventOnDeath.Destroy)
+        if (onDeath == EventOnDeath.DESTROY)
         {
             NetworkServer.Destroy(gameObject);
         }
-        if (onDeath == EventOnDeath.FormToHuman)
+        if (onDeath == EventOnDeath.FORMTOHUMAN)
         {
             GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
+        }
+        if (onDeath == EventOnDeath.LIGHTLOAD)
+        {
+
+            NetworkIdentity owner = GetComponent<SpawnOwner>().WhoseThis();
+
+            int healHp = 0;
+            if (owner.GetComponent<HpMaster>().hp + GetComponent<DarknessSize>().darknessSize >= 100)
+            {
+                healHp = 100 - owner.GetComponent<HpMaster>().hp;
+            }
+            else
+            {
+                healHp  = GetComponent<DarknessSize>().darknessSize;
+            }
+
+           
+
+            owner.GetComponent<HpMaster>().TakeDamage(-healHp);
+            owner.GetComponentInChildren<ServerCheckShoot>().DestroyOrb(gameObject);
         }
     }
 
     public enum EventOnDeath
     {
-        LoseRound,
-        RespawnTarget,
-        Destroy,
-        FormToHuman
+        LOSEROUND,
+        RESPAWNTARGET,
+        DESTROY,
+        FORMTOHUMAN,
+        LIGHTLOAD,
     }
 
 

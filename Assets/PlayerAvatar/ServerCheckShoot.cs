@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class ServerCheckShoot : NetworkBehaviour
 {
@@ -21,6 +22,14 @@ public class ServerCheckShoot : NetworkBehaviour
 
     public GameObject Blood;
     public GameObject Fragment;
+    [SyncVar]
+    public bool isDarkness;
+
+    public GameObject darkOrb;
+    public float darkRadius = 2f;        // 上部からの半径（周囲の広がり）
+    public LayerMask ground;   // 壁や障害物のLayerを指定
+
+    public SyncList<GameObject> darkOrbPrefabs = new SyncList<GameObject>();
 
     // Start is called before the first frame update
     void Awake()
@@ -34,7 +43,7 @@ public class ServerCheckShoot : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
 
@@ -109,10 +118,12 @@ public class ServerCheckShoot : NetworkBehaviour
                     HpMaster hpMaster = hit.GetComponentInParent<HpMaster>();
                     if (hpMaster != null && playerObject.GetComponent<NetworkIdentity>().netId != hit.GetComponentInParent<NetworkIdentity>().netId)
                     {
+                        
                         GameObject blood = Instantiate(Blood, hitpoint.point, Quaternion.identity);
                         NetworkServer.Spawn(blood);
                         if (!hitList.Contains(hpMaster.gameObject))
                         {
+                            playerObject.GetComponent<AudioManager>().CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f);
                             int finalDamage = (int)((hit.tag == "Head" ? originalHeadDamage : originalDamage) * currentDamageRate);
 
                             if(hit.tag == "Head")
@@ -127,12 +138,96 @@ public class ServerCheckShoot : NetworkBehaviour
                             hpMaster.TakeDamage(finalDamage);
                             hitList.Add(hpMaster.gameObject);
                             Debug.Log($"ヒット: {hit.tag}, ダメージ {finalDamage}");
+
+                            if (isDarkness)
+                            {
+                                Darkness(hpMaster.transform, finalDamage, playerObject);                              
+                            }
+
                         }
                     }
                 }
           
             }
         }
+    }
+
+    public void Darkness(Transform target, int damage, GameObject playerObject)
+    {
+        // 対象のBounds（サイズ情報）を取得
+        Renderer rend = target.GetComponentInChildren<SkinnedMeshRenderer>();
+        if (rend == null) return;
+
+        Bounds bounds = rend.bounds;
+
+        float scale = 0.5f + (damage / 200);
+
+        for (int i = 0; i < 1000; i++) // 最大1000回試行
+        {
+            // XZ平面でランダムな位置
+            Vector2 randomCircle = Random.insideUnitCircle * darkRadius;
+
+            Vector3 spawnPos = new Vector3(
+                bounds.center.x + randomCircle.x,
+                bounds.center.y + 3,
+                bounds.center.z + randomCircle.y
+            );
+
+            // その位置に障害物がないか確認
+            bool blocked = Physics.CheckSphere(spawnPos, scale / 2, ground);
+            if (!blocked)
+            {
+                GameObject darkOrbPrefab = Instantiate(darkOrb, spawnPos, Quaternion.identity);                
+                darkOrbPrefab.transform.localScale = new Vector3(scale, scale, scale);
+                // 誰が生成依頼したかを記録
+                var ownerTag = darkOrbPrefab.AddComponent<SpawnOwner>();
+                // 依頼者のnetIdを記録
+                ownerTag.ownerNetId = playerObject.GetComponent<NetworkIdentity>().netId; 
+                NetworkServer.Spawn(darkOrbPrefab);
+                darkOrbPrefab.GetComponent<DarknessSize>().SetSize(damage);
+                darkOrbPrefabs.Add(darkOrbPrefab);
+                RoundManager.rm.respawns.Add(darkOrbPrefab);
+                return; // 成功したら終了
+            }
+        }
+
+        
+    }
+
+    public GameObject GetDarkOrb()
+    {
+        if (darkOrbPrefabs.Count != 0)
+        {
+            GameObject smallest = darkOrbPrefabs[0];
+            float smallestScale = darkOrbPrefabs[0].transform.localScale.magnitude;
+
+            foreach (var orb in darkOrbPrefabs)
+            {
+                float orbScale = orb.transform.localScale.magnitude;
+                if (orbScale < smallestScale)
+                {
+                    smallest = orb;
+                    smallestScale = orbScale;
+                }
+            }
+
+            return smallest;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void DestroyOrb(GameObject orb)
+    {
+        if (darkOrbPrefabs.Contains(orb))
+        {
+            darkOrbPrefabs.Remove(orb);
+        }
+        RoundManager.rm.respawns.Remove(orb);
+        NetworkServer.Destroy(orb);
+
     }
 
     public float GetHeadShotRate()

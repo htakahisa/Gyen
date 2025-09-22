@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: TerraTrans
-  m_Shader: {fileID: 4800000, guid: 64a7f775db902504c8173c69c0abc5e4, type: 3}
+  m_Name: Darkness
+  m_Shader: {fileID: 4800000, guid: 313fcf3aebc04cf4ab4f8c5f2850be7f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -32,7 +32,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: _ShadowStepSmooth
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -119,14 +119,14 @@ Material:
     - _GlossyReflections: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
-    - _OutlineWidth: 0.1
+    - _OutlineWidth: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RimStep: 1
-    - _RimStepSmooth: 0.24
-    - _ShadowStep: 0.973
-    - _ShadowStepSmooth: 1
+    - _RimStep: 0.77
+    - _RimStepSmooth: 0
+    - _ShadowStep: 0
+    - _ShadowStepSmooth: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -141,14 +141,14 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 1, g: 0.6039216, b: 0, a: 0.19607843}
-    - _Color: {r: 0.7075472, g: 0.36100805, b: 0, a: 0.11764706}
+    - _BaseColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Color: {r: 0, g: 0, b: 0, a: 0.6392157}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HighColor: {r: 1, g: 1, b: 1, a: 1}
-    - _OutlineColor: {r: 1, g: 0.32156864, b: 0, a: 0.19607843}
-    - _RimColor: {r: 0.48235294, g: 0.2627451, b: 0, a: 0.19607843}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 0.5882353}
+    - _RimColor: {r: 1, g: 0, b: 0, a: 0.19607843}
     - _ShadowColor: {r: 0.8, g: 0.8, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SpecularColor: {r: 1, g: 1, b: 1, a: 0.39215687}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

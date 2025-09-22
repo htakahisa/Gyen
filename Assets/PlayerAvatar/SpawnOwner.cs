@@ -10,4 +10,12 @@ public class SpawnOwner : NetworkBehaviour
         return NetworkClient.connection.identity.netId == ownerNetId;
     }
 
+    public NetworkIdentity WhoseThis()
+    {
+        if (NetworkServer.spawned.TryGetValue(ownerNetId, out NetworkIdentity ownerIdentity))
+        {
+            return ownerIdentity;
+        }
+        return null;
+    }
 }

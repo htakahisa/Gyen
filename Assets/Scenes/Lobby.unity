@@ -1026,6 +1026,9 @@ MonoBehaviour:
   - {fileID: 3539715179979286606, guid: bd31141f5512fd54cb6f630b21bbcc0d, type: 3}
   - {fileID: 3539715179979286606, guid: f1da8575e7eddbd4999750a4669202b3, type: 3}
   - {fileID: 6823302871133167919, guid: 3138a83bedbd6ad4481ba0b061da2eb6, type: 3}
+  - {fileID: 8571021629717422302, guid: 958972a926b06324b91b5a5c78c52495, type: 3}
+  - {fileID: 3543936278411775571, guid: e87ef2e7ed5434843a55de1a0da3f7a4, type: 3}
+  - {fileID: 3539715179979286606, guid: aafd3b8ea80e21d439da7d5d77ff0bf3, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -1048,6 +1051,7 @@ MonoBehaviour:
   playerPrefabs:
   - {fileID: 3543936278411775571, guid: 60313309513db6342a6e5ebb00dae860, type: 3}
   - {fileID: 3543936278411775571, guid: 2432d290de03a804a93340e02e3657ab, type: 3}
+  - {fileID: 3543936278411775571, guid: e87ef2e7ed5434843a55de1a0da3f7a4, type: 3}
 --- !u!4 &783319032
 Transform:
   m_ObjectHideFlags: 0

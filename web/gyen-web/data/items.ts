@@ -74,7 +74,8 @@ export const weapons: Item[] = [
         rank: "S",
     description: "連射速度、火力、マガジンサイズ全てにおいてハイスペックなライフル。使いやすさはピカイチ。",
     history: [
-      { version: "1.0.1", change: "胴体ダメージを40から45へ増加" , type: "buff" as const }
+      { version: "1.0.1", change: "胴体ダメージを40から45へ増加" , type: "buff" as const },
+      { version: "1.0.3", change: "射撃レートを1/0.08から1/0.09に低下" , type: "debuff" as const },
     ],
   },
     {
@@ -101,6 +102,8 @@ export const weapons: Item[] = [
     history: [
       { version: "1.0.2", change: "連射レートを1/0.07sから1/0.05sに向上" , type: "buff" as const },
       { version: "1.0.2", change: "マガジンサイズを100から70に減少" , type: "debuff" as const },
+      { version: "1.0.3", change: "連射レートを1/0.05sから1/0.07sに低下" , type: "debuff" as const },
+      { version: "1.0.3", change: "縦リコイルを0.05から0.07に増加" , type: "debuff" as const },
     ],
   },
     {
@@ -109,6 +112,8 @@ export const weapons: Item[] = [
     description: "超重量ライトマシンガン。連射速度、マガジンサイズ共に最強の武器であるが、意外と一発のダメージ自体は控えめなので通常の打ち合いになると負けることが多い。",
     history: [
       { version: "1.0.2", change: "連射レートを1/0.06sから1/0.045sに向上" , type: "buff" as const },
+      { version: "1.0.3", change: "連射レートを1/0.045sから1/0.06sに低下" , type: "debuff" as const },
+      { version: "1.0.3", change: "縦リコイルを0.55から0.03に減少" , type: "buff" as const },
     ],
   },
    

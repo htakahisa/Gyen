@@ -77,7 +77,7 @@ public class AutoLaserTurret : NetworkBehaviour
 
         if (hp != null)
         {
-            RoundManager.rm.GetMyPlayer().GetComponent<AudioManager>().CmdPlaySoundAtPoint("laser", transform.position, 1);
+            RoundManager.rm.GetMyPlayer().GetComponent<AudioManager>().CmdPlaySoundAtPoint(AudioManager.Sounds.LASER, transform.position, 1);
             hp.TakeDamage(damage);
         }
 

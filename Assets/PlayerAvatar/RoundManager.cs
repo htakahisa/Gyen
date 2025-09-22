@@ -70,7 +70,7 @@ public class RoundManager : NetworkBehaviour
     {
         if (!hasLoaded)
         {
-            if (NetworkClient.localPlayer.gameObject != null && NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>() != null)
+            if (NetworkClient.localPlayer != null && NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>() != null)
             {
                 if (NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>().hasLoaded)
                 {

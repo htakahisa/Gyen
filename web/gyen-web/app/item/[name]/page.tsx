@@ -11,17 +11,13 @@ export default function DetailPage({ params }: Props) {
   const router = useRouter();
   const { name } = params;
 
-  // アイテムを探す
   const item = items.find((i) => i.name === name);
-  // キャラを探す
   const character = characters.find((c) => c.name === name);
 
-  // どちらもなければエラーメッセージ
   if (!item && !character) {
     return <p>このデータの情報がありません。</p>;
   }
 
-  // 共通化のため、対象データをまとめる
   const target = item || character;
   const typeLabel = item ? "アイテム" : "キャラクター";
 
@@ -32,7 +28,30 @@ export default function DetailPage({ params }: Props) {
       </h2>
       <p>{target?.description}</p>
 
-      <h3>調整履歴</h3>
+      {/* キャラクターの場合のみスキル表示 */}
+      {character && character.skills && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>スキル</h3>
+          <ul>
+            {character.skills.map((skill, idx) => (
+              <li
+                key={idx}
+                style={{
+                  marginBottom: "10px",
+                  background: "#2a2a40",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+                }}
+              >
+                <strong>{skill.name}</strong>
+                <p style={{ margin: "4px 0 0" }}>{skill.description}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <h3 style={{ marginTop: "20px" }}>調整履歴</h3>
       <ul>
         {target?.history.map((h, idx) => (
           <li

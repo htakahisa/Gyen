@@ -145,7 +145,7 @@ namespace StarterAssets
                     // ÅŒã‚ÌËŒ‚Œã‚Í‘Ò‹@‚µ‚È‚¢
                     if (i < currentWeapon.burst - 1)
                     {
-                        yield return new WaitForSeconds(currentWeapon.rate);
+                        yield return new WaitForSeconds(currentWeapon.burstRate);
                     }
                 
             }
@@ -251,7 +251,7 @@ namespace StarterAssets
 
                 }
 
-                audioManager.CmdPlaySoundAtPoint("shoot", transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.06f);
+                audioManager.CmdPlaySoundAtPoint(AudioManager.Sounds.SHOOT, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.06f);
                 if (weaponManager.magazine >= 1)
                 {
                     weaponManager.magazine--;

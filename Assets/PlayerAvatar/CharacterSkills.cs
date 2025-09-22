@@ -6,12 +6,16 @@ using UnityEngine;
 public class CharacterSkills : NetworkBehaviour
 {
     // スキル1, スキル2のデリゲート（メソッド参照）
-    public Action Skill1;
-    public Action Skill2;
+    
+    public Action Skill1;    
+    public Action Skill2;   
     public Action Skill3;
 
+    [SyncVar]
     public int skill1Energy;
+    [SyncVar]
     public int skill2Energy;
+    [SyncVar]
     public int skill3Energy;
 
     public int default1Energy;

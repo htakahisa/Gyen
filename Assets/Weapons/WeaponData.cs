@@ -22,11 +22,13 @@ public class WeaponData
     public float zoomRatio;
     public float zoomSpeed;
 
+    
     public int burst;
+    public float burstRate;
 
     public bool isAuto;
 
-    public WeaponData(string name, int damage, int headDamage, float rate, float Xrecoil, float Yrecoil, int magazineSize, float reloadTime ,bool zoomable, bool isNeedZoom, float zoomRatio, float zoomSpeed, int burst, bool isAuto)
+    public WeaponData(string name, int damage, int headDamage, float rate, float Xrecoil, float Yrecoil, int magazineSize, float reloadTime ,bool zoomable, bool isNeedZoom, float zoomRatio, float zoomSpeed, int burst, float burstRate, bool isAuto)
     {
         this.weaponName = name;
 
@@ -48,6 +50,7 @@ public class WeaponData
         
 
         this.burst = burst;
+        this.burstRate = burstRate;
 
         this.isAuto = isAuto;
     }

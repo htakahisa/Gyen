@@ -486,7 +486,7 @@ namespace StarterAssets
 
         private void JumpAndGravity()
         {
-            bool jump = Input.GetKey(KeyCode.Space);
+            bool jump = Input.GetKeyDown(KeyCode.Space);
 
             if (Grounded)
             {
@@ -788,7 +788,7 @@ namespace StarterAssets
             if (Grounded)
             {
 
-                audioManager.CmdPlaySoundAtPoint("footStep", transform.TransformPoint(controller.center), FootstepAudioVolume);
+                audioManager.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume);
                     
                 
             }
@@ -797,7 +797,7 @@ namespace StarterAssets
         private void OnLand()
         {
 
-            audioManager.CmdPlaySoundAtPoint("land", transform.TransformPoint(controller.center), FootstepAudioVolume);
+            audioManager.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume);
             
         }
 
