@@ -714,6 +714,12 @@ MonoBehaviour:
   Blood: {fileID: 4178278509775477463, guid: 3d0463f291d0351418a22c3bcd66ccdd, type: 3}
   Fragment: {fileID: 6236630861130584601, guid: a87e483792b9d194b8616c7e2be9bdca,
     type: 3}
+  isDarkness: 0
+  darkOrb: {fileID: 0}
+  darkRadius: 2
+  ground:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &812295573239222740
 GameObject:
   m_ObjectHideFlags: 0
@@ -1891,6 +1897,7 @@ MonoBehaviour:
   yellow: {fileID: 8300000, guid: 24ebbea79964fd14d8c60ad56cd6a6ea, type: 3}
   laser: {fileID: 8300000, guid: 97bd6926c8e6a234daf1bee10616d31b, type: 3}
   hitBlood: {fileID: 8300000, guid: 4508c3c219b554b48a5a21ab31ab3452, type: 3}
+  horusDestroyed: {fileID: 8300000, guid: f32fa28c58783dc4182881c38094e182, type: 3}
   soundBlockLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -2867,7 +2874,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2004230261111871792
 Transform:
   m_ObjectHideFlags: 0
@@ -3417,7 +3424,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8863095346397794356
 Transform:
   m_ObjectHideFlags: 0

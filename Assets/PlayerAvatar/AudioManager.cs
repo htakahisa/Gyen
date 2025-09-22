@@ -13,6 +13,8 @@ public class AudioManager : NetworkBehaviour
     public AudioClip yellow;
     public AudioClip laser;
     public AudioClip hitBlood;
+    public AudioClip horusDestroyed;
+
 
     public LayerMask soundBlockLayer;
 
@@ -26,6 +28,7 @@ public class AudioManager : NetworkBehaviour
         YELLOW,
         LASER,
         HITBLOOD,
+        HORUSDESTROYED,
     }
 
     // Update is called once per frame
@@ -84,6 +87,10 @@ public class AudioManager : NetworkBehaviour
 
             case Sounds.HITBLOOD:
                 soundClip = hitBlood;
+                break;
+
+            case Sounds.HORUSDESTROYED:
+                soundClip = horusDestroyed;
                 break;
         }
 

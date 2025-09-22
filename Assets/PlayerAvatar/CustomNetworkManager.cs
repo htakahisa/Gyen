@@ -150,7 +150,7 @@ public class CustomNetworkManager : NetworkManager
 
             // ƒvƒŒƒCƒ„[¶¬
             GameObject player = Instantiate(
-                playerPrefabs[2],
+                playerPrefabs[1],
                 spawnPos,
                 Quaternion.identity
             );

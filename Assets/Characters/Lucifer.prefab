@@ -720,7 +720,6 @@ MonoBehaviour:
   ground:
     serializedVersion: 2
     m_Bits: 520
-  darkOrbPrefabs: []
 --- !u!1 &812295573239222740
 GameObject:
   m_ObjectHideFlags: 0
@@ -2035,6 +2034,7 @@ MonoBehaviour:
   yellow: {fileID: 8300000, guid: 24ebbea79964fd14d8c60ad56cd6a6ea, type: 3}
   laser: {fileID: 8300000, guid: 97bd6926c8e6a234daf1bee10616d31b, type: 3}
   hitBlood: {fileID: 8300000, guid: 4508c3c219b554b48a5a21ab31ab3452, type: 3}
+  horusDestroyed: {fileID: 8300000, guid: f32fa28c58783dc4182881c38094e182, type: 3}
   soundBlockLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -2146,6 +2146,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 889da83e688acf64eb01daf3d46d9fee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   scanCamera: {fileID: 7824298977660000667}
 --- !u!20 &3864067455441857837
 Camera:
@@ -3861,7 +3864,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8863095346397794356
 Transform:
   m_ObjectHideFlags: 0

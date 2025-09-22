@@ -76,6 +76,12 @@ public class HpMaster : NetworkBehaviour
         {
             NetworkServer.Destroy(gameObject);
         }
+        if (onDeath == EventOnDeath.HORUSDESTROY)
+        {
+            NetworkIdentity owner = GetComponent<SpawnOwner>().WhoseThis();
+            owner.GetComponent<AudioManager>().CmdPlaySoundAtPoint(AudioManager.Sounds.HORUSDESTROYED, transform.position, 1f);
+            NetworkServer.Destroy(gameObject);
+        }
         if (onDeath == EventOnDeath.FORMTOHUMAN)
         {
             GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
@@ -107,6 +113,7 @@ public class HpMaster : NetworkBehaviour
         LOSEROUND,
         RESPAWNTARGET,
         DESTROY,
+        HORUSDESTROY,
         FORMTOHUMAN,
         LIGHTLOAD,
     }

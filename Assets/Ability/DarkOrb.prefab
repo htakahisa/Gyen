@@ -165,7 +165,7 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
-  onDeath: 4
+  onDeath: 5
 --- !u!114 &2406217616670742984
 MonoBehaviour:
   m_ObjectHideFlags: 0

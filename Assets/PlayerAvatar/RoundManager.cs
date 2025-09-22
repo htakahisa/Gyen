@@ -141,7 +141,7 @@ public class RoundManager : NetworkBehaviour
         // クライアント側でオブジェクトをリセット
         foreach(var spawn in spawns)
         {
-            ClientDestroy(spawn);
+            NetworkServer.Destroy(spawn);
         }
 
         // クライアント側でオブジェクトをリセット
@@ -150,12 +150,6 @@ public class RoundManager : NetworkBehaviour
             ServerSpawn(respawns);
         }
 
-    }
-
-    [ClientRpc]
-    public void ClientDestroy(GameObject instance)
-    {
-        Destroy(instance);
     }
 
     [Server]

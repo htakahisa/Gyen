@@ -166,7 +166,7 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
-  onDeath: 2
+  onDeath: 3
 --- !u!114 &-607898583553318301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -179,6 +179,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11d2b0d0215a3a7419ae746ae984000e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   detectionRange: 10
   damage: 10
   laserDuration: 0.2

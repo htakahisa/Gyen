@@ -186,7 +186,7 @@ public class ServerCheckShoot : NetworkBehaviour
                 NetworkServer.Spawn(darkOrbPrefab);
                 darkOrbPrefab.GetComponent<DarknessSize>().SetSize(damage);
                 darkOrbPrefabs.Add(darkOrbPrefab);
-                RoundManager.rm.respawns.Add(darkOrbPrefab);
+                RoundManager.spawns.Add(darkOrbPrefab);
                 return; // ê¨å˜ÇµÇΩÇÁèIóπ
             }
         }
@@ -225,7 +225,7 @@ public class ServerCheckShoot : NetworkBehaviour
         {
             darkOrbPrefabs.Remove(orb);
         }
-        RoundManager.rm.respawns.Remove(orb);
+        RoundManager.spawns.Remove(orb);
         NetworkServer.Destroy(orb);
 
     }
