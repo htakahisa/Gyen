@@ -161,7 +161,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  hp: 100
+  hp: 70
   armer: 1
   isInvincible: 0
   isDead: 0
@@ -182,3 +182,5 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   darknessSize: 1
+  sparksLightLoad: {fileID: 8500920156052182585, guid: 3e4fc7ad22753a2498ac3ac3ab605fcb,
+    type: 3}

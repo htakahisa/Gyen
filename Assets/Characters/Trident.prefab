@@ -640,7 +640,7 @@ MonoBehaviour:
   middleBrow: {fileID: 4549604650611393894}
   controller: {fileID: 1112727817626628774}
   xRotation: 0
-  audioManager: {fileID: 5256954999152019067}
+  audioManager: {fileID: 0}
   canGetOrb: 1
   Aiscream: {fileID: 3549720354301209160, guid: d5e0e2b6b05dc444dac6a9fd7a7f3c73,
     type: 3}
@@ -665,7 +665,7 @@ MonoBehaviour:
   weaponManager: {fileID: 1470853562863111889}
   IsZooming: 0
   isBursting: 0
-  audioManager: {fileID: 5256954999152019067}
+  audioManager: {fileID: 0}
   canShoot: 1
   shootInputAhead: 0
   wallMask:
@@ -1681,7 +1681,6 @@ GameObject:
   - component: {fileID: 5264078432467384439}
   - component: {fileID: 7767665597172722380}
   - component: {fileID: 7131634090093216591}
-  - component: {fileID: 5256954999152019067}
   - component: {fileID: 1112727817626628774}
   m_Layer: 0
   m_Name: Trident
@@ -1876,31 +1875,6 @@ MonoBehaviour:
   currentWeaponPaying: 0
   currentArmerPaying: 0
   rounds: 0
---- !u!114 &5256954999152019067
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3543936278411775571}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b9d2d5ebf75f5346a6318beb4adad9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  footStep: {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
-  land: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
-  shoot: {fileID: 8300000, guid: d3b601780ff4a2b438134d888c39454e, type: 3}
-  yellow: {fileID: 8300000, guid: 24ebbea79964fd14d8c60ad56cd6a6ea, type: 3}
-  laser: {fileID: 8300000, guid: 97bd6926c8e6a234daf1bee10616d31b, type: 3}
-  hitBlood: {fileID: 8300000, guid: 4508c3c219b554b48a5a21ab31ab3452, type: 3}
-  horusDestroyed: {fileID: 8300000, guid: f32fa28c58783dc4182881c38094e182, type: 3}
-  soundBlockLayer:
-    serializedVersion: 2
-    m_Bits: 512
 --- !u!143 &1112727817626628774
 CharacterController:
   m_ObjectHideFlags: 0
@@ -3535,7 +3509,7 @@ MonoBehaviour:
   UpSpeed: 1
   TurnSpeed: 0.3
   characterController: {fileID: 1112727817626628774}
-  audioManager: {fileID: 5256954999152019067}
+  audioManager: {fileID: 0}
   smoothSpeed: 5
   mainCamera: {fileID: 5846571374343232750}
   abilityController: {fileID: 3159636760548436729}

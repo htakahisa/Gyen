@@ -123,7 +123,7 @@ public class ServerCheckShoot : NetworkBehaviour
                         NetworkServer.Spawn(blood);
                         if (!hitList.Contains(hpMaster.gameObject))
                         {
-                            playerObject.GetComponent<AudioManager>().CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f);
+                            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f);
                             int finalDamage = (int)((hit.tag == "Head" ? originalHeadDamage : originalDamage) * currentDamageRate);
 
                             if(hit.tag == "Head")
@@ -184,7 +184,7 @@ public class ServerCheckShoot : NetworkBehaviour
                 // àÀóäé“ÇÃnetIdÇãLò^
                 ownerTag.ownerNetId = playerObject.GetComponent<NetworkIdentity>().netId; 
                 NetworkServer.Spawn(darkOrbPrefab);
-                darkOrbPrefab.GetComponent<DarknessSize>().SetSize(damage);
+                darkOrbPrefab.GetComponent<Darkness>().SetSize(damage);
                 darkOrbPrefabs.Add(darkOrbPrefab);
                 RoundManager.spawns.Add(darkOrbPrefab);
                 return; // ê¨å˜ÇµÇΩÇÁèIóπ

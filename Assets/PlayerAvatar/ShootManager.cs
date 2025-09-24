@@ -251,7 +251,7 @@ namespace StarterAssets
 
                 }
 
-                audioManager.CmdPlaySoundAtPoint(AudioManager.Sounds.SHOOT, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.06f);
+                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.SHOOT, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.06f);
                 if (weaponManager.magazine >= 1)
                 {
                     weaponManager.magazine--;

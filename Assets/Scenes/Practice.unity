@@ -9559,6 +9559,7 @@ GameObject:
   - component: {fileID: 966734462}
   - component: {fileID: 966734461}
   - component: {fileID: 966734460}
+  - component: {fileID: 966734465}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -9682,6 +9683,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &966734465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966734459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b9d2d5ebf75f5346a6318beb4adad9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  footStep: {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
+  land: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
+  shoot: {fileID: 8300000, guid: d3b601780ff4a2b438134d888c39454e, type: 3}
+  yellow: {fileID: 8300000, guid: 24ebbea79964fd14d8c60ad56cd6a6ea, type: 3}
+  laser: {fileID: 8300000, guid: 97bd6926c8e6a234daf1bee10616d31b, type: 3}
+  hitBlood: {fileID: 8300000, guid: 4508c3c219b554b48a5a21ab31ab3452, type: 3}
+  horusDestroyed: {fileID: 8300000, guid: f32fa28c58783dc4182881c38094e182, type: 3}
+  soundBlockLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!1 &983318238
 GameObject:
   m_ObjectHideFlags: 0

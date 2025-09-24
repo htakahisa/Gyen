@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class AudioManager : NetworkBehaviour
 {
-
+    public static AudioManager Instance;
 
     public AudioClip footStep;
     public AudioClip land;
@@ -18,6 +18,11 @@ public class AudioManager : NetworkBehaviour
 
     public LayerMask soundBlockLayer;
 
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
     // Start is called before the first frame update
     public enum Sounds
@@ -37,7 +42,7 @@ public class AudioManager : NetworkBehaviour
         
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdPlaySoundAtPoint(Sounds name, Vector3 position, float volume)
     {
 

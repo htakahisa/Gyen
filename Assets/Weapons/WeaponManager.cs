@@ -34,7 +34,7 @@ public class WeaponManager : NetworkBehaviour
         { WeaponType.Hazard, new WeaponData("Hazard", 200, 400, 1f, 0f, 0f, 2, 3f,true, true, 25f, 0.1f, 1, 0, false) },
         { WeaponType.RapetPuppet, new WeaponData("RapetPuppet", 30, 50, 0.07f, 0.3f, 0.4f, 70, 2f,true, false, 40f, 0.1f, 1, 0, true) },
         { WeaponType.Violets, new WeaponData("Violets", 45, 100, 0.06f, 0.4f, 0.3f, 152, 4f,true, false, 45f, 0.2f, 1, 0, true) },
-        { WeaponType.Rebelliousness, new WeaponData("Rebelliousness", 50, 400, 0.5f, 0f, 0.6f, 3, 1f, true, false, 65f, 0.05f, 2, 0.2f, false) },
+        { WeaponType.Rebelliousness, new WeaponData("Rebelliousness", 70, 400, 0.5f, 0f, 0.6f, 3, 1f, true, false, 65f, 0.05f, 2, 0.2f, false) },
     };
 
 

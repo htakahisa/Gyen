@@ -222,7 +222,8 @@ public class RoundManager : NetworkBehaviour
 
         attacker.GetComponent<HpMaster>().ResetHp();
         defender.GetComponent<HpMaster>().ResetHp();
-
+        attacker.GetComponent<HpMaster>().armer = 1;
+        defender.GetComponent<HpMaster>().armer = 1;
     }
 
     [Server]

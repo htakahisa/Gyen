@@ -87,7 +87,7 @@ public class HpMaster : NetworkBehaviour
         if (onDeath == EventOnDeath.HORUSDESTROY)
         {
             NetworkIdentity owner = GetComponent<SpawnOwner>().WhoseThis();
-            owner.GetComponent<AudioManager>().CmdPlaySoundAtPoint(AudioManager.Sounds.HORUSDESTROYED, transform.position, 1f);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HORUSDESTROYED, transform.position, 1f);
             NetworkServer.Destroy(gameObject);
         }
         if (onDeath == EventOnDeath.FORMTOHUMAN)
@@ -100,13 +100,13 @@ public class HpMaster : NetworkBehaviour
             NetworkIdentity owner = GetComponent<SpawnOwner>().WhoseThis();
 
             int healHp = 0;
-            if (owner.GetComponent<HpMaster>().hp + GetComponent<DarknessSize>().darknessSize >= 100)
+            if (owner.GetComponent<HpMaster>().hp + GetComponent<Darkness>().darknessSize >= 100)
             {
                 healHp = 100 - owner.GetComponent<HpMaster>().hp;
             }
             else
             {
-                healHp  = GetComponent<DarknessSize>().darknessSize;
+                healHp  = GetComponent<Darkness>().darknessSize;
             }
 
            

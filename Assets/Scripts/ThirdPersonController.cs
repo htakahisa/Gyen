@@ -788,7 +788,7 @@ namespace StarterAssets
             if (Grounded)
             {
 
-                audioManager.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume);
+                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume);
                     
                 
             }
@@ -797,7 +797,7 @@ namespace StarterAssets
         private void OnLand()
         {
 
-            audioManager.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume);
             
         }
 

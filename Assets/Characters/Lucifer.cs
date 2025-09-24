@@ -53,6 +53,7 @@ public class Lucifer : CharacterSkills
 
     public void CmdCollectOrb()
     {
+        GetComponentInChildren<ServerCheckShoot>().GetDarkOrb().GetComponent<Darkness>().Collected();
         currentCharacter.skill2Energy--;
         GetComponentInChildren<ServerCheckShoot>().DestroyOrb(GetComponentInChildren<ServerCheckShoot>().GetDarkOrb());
         GetComponentInChildren<ScanCamera>().CameraTimeOn(1f);

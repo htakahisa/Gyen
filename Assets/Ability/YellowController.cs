@@ -123,7 +123,7 @@ public class YellowController : NetworkBehaviour
 
         if (audioTimer >= audioInterval)
         {
-            audioManager.CmdPlaySoundAtPoint(AudioManager.Sounds.YELLOW, transform.TransformPoint(characterController.center), audioVolume);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.YELLOW, transform.TransformPoint(characterController.center), audioVolume);
             audioTimer = 0;
         }
 

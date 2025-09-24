@@ -464,7 +464,6 @@ GameObject:
   - component: {fileID: 6143808281815225490}
   - component: {fileID: -2900896035119755407}
   - component: {fileID: 1498373660023880406}
-  - component: {fileID: 8135213472563124772}
   - component: {fileID: 1378437777043357892}
   - component: {fileID: 4778909579915623695}
   m_Layer: 0
@@ -563,29 +562,6 @@ MonoBehaviour:
   hasLoaded: 0
   canMove: 1
   canAbility: 1
---- !u!114 &8135213472563124772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1378437777043357902}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b9d2d5ebf75f5346a6318beb4adad9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  footStep: {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
-  land: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
-  shoot: {fileID: 8300000, guid: d3b601780ff4a2b438134d888c39454e, type: 3}
-  yellow: {fileID: 8300000, guid: 24ebbea79964fd14d8c60ad56cd6a6ea, type: 3}
-  laser: {fileID: 8300000, guid: 97bd6926c8e6a234daf1bee10616d31b, type: 3}
-  soundBlockLayer:
-    serializedVersion: 2
-    m_Bits: 512
 --- !u!143 &1378437777043357892
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1533,7 +1509,8 @@ MonoBehaviour:
   _speed: 0
   middleBrow: {fileID: 3929690982290694602}
   controller: {fileID: 1378437777043357892}
-  audioManager: {fileID: 8135213472563124772}
+  xRotation: 0
+  audioManager: {fileID: 0}
   canGetOrb: 1
   Aiscream: {fileID: 3549720354301209160, guid: d5e0e2b6b05dc444dac6a9fd7a7f3c73,
     type: 3}
@@ -1558,7 +1535,7 @@ MonoBehaviour:
   weaponManager: {fileID: 577424751439312189}
   IsZooming: 0
   isBursting: 0
-  audioManager: {fileID: 8135213472563124772}
+  audioManager: {fileID: 0}
   canShoot: 1
   shootInputAhead: 0
   wallMask:
@@ -1607,6 +1584,12 @@ MonoBehaviour:
   Blood: {fileID: 4178278509775477463, guid: 3d0463f291d0351418a22c3bcd66ccdd, type: 3}
   Fragment: {fileID: 6236630861130584601, guid: a87e483792b9d194b8616c7e2be9bdca,
     type: 3}
+  isDarkness: 0
+  darkOrb: {fileID: 0}
+  darkRadius: 2
+  ground:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &3448821516858525512
 GameObject:
   m_ObjectHideFlags: 0

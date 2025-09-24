@@ -146,6 +146,7 @@ public class Ejah : CharacterSkills
                 Debug.LogWarning("prefabToSpawn が設定されていません。");
                 return;
             }
+
             Vector3 origin = t.position;
             Vector3 direction = t.forward;
 
@@ -153,35 +154,31 @@ public class Ejah : CharacterSkills
             Vector3 spawnPos;
             Quaternion spawnRot = Quaternion.identity;
 
-            // ---- 1. 前方レイキャスト（壁チェック） ----
+            // ---- 1. 前方レイキャスト（壁チェックのみ） ----
             if (Physics.Raycast(origin, direction, out hit, horusMaxDistance, ground, QueryTriggerInteraction.Ignore))
             {
+                // 壁の手前に配置
                 spawnPos = hit.point + hit.normal * horusSurfaceOffset;
                 spawnRot = GetProjectedRotation(direction, hit.normal);
+
+                // 仮設置（プレ表示）
+                HorusPre(spawnPos, spawnRot);
+
+                // 左クリックで確定
+                if (Input.GetMouseButtonDown(0))
+                {
+                    currentCharacter.skill2Energy--;
+                    CmdHorus(spawnPos, spawnRot);
+                }
             }
             else
             {
-                spawnPos = origin + direction.normalized * horusMaxDistance;
-                spawnRot = GetProjectedRotation(direction, Vector3.up);
+                // 壁がなければプレビューを消す
+                DestroyHorusPre();
             }
 
-            // ---- 2. 下方向に地面チェック ----
-            RaycastHit groundHit;
-            if (Physics.Raycast(spawnPos + Vector3.up * 1f, Vector3.down, out groundHit, 2f, ground, QueryTriggerInteraction.Ignore))
-            {
-                // 地面が近くにあったら、めり込み防止で地面の上に配置
-                spawnPos = groundHit.point + Vector3.up * horusUpOffset;
-            }
-
-            HorusPre(spawnPos, spawnRot);
-
-            if (Input.GetMouseButtonDown(0))
-            {
-                currentCharacter.skill2Energy--;
-                CmdHorus(spawnPos, spawnRot);
 
 
-            }
         }
         else
         {
