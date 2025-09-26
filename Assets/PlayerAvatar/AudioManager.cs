@@ -14,6 +14,8 @@ public class AudioManager : NetworkBehaviour
     public AudioClip laser;
     public AudioClip hitBlood;
     public AudioClip horusDestroyed;
+    public AudioClip ITweakDestroyed;
+    public AudioClip IMirrorDestroyed;
 
 
     public LayerMask soundBlockLayer;
@@ -34,6 +36,8 @@ public class AudioManager : NetworkBehaviour
         LASER,
         HITBLOOD,
         HORUSDESTROYED,
+        ITWEAKSDESTROYED,
+        IMIRRORDESTROYED,
     }
 
     // Update is called once per frame
@@ -96,6 +100,14 @@ public class AudioManager : NetworkBehaviour
 
             case Sounds.HORUSDESTROYED:
                 soundClip = horusDestroyed;
+                break;
+
+            case Sounds.ITWEAKSDESTROYED:
+                soundClip = ITweakDestroyed;
+                break;
+
+            case Sounds.IMIRRORDESTROYED:
+                soundClip = IMirrorDestroyed;
                 break;
         }
 

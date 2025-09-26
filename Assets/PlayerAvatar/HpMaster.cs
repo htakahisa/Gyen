@@ -1,6 +1,7 @@
 using UnityEngine;
 using Mirror;
 using UnityEngine.Events;
+using StarterAssets;
 
 public class HpMaster : NetworkBehaviour
 {
@@ -16,6 +17,8 @@ public class HpMaster : NetworkBehaviour
 
     public EventOnDeath onDeath;
 
+    public GameObject lightLoadEffect;
+
     private void OnHpChanged(int oldValue, int newValue)
     {
         Debug.Log($"{netId} ÇÃHPÇ™ {oldValue} Å® {newValue} Ç…ïœçX");
@@ -26,6 +29,7 @@ public class HpMaster : NetworkBehaviour
         {
             TakeDamage(10);
         }
+
     }
     
 
@@ -69,6 +73,20 @@ public class HpMaster : NetworkBehaviour
 
     }
 
+    [Server]
+    public void TakeStun(float stunLevel, float duration)
+    {
+        if (isDead || isInvincible)
+        {
+            return;
+        }
+
+        if (hp <= 0) return;
+
+        GetComponentInChildren<ThirdPersonController>()?.TargetCameraStun(GetComponent<NetworkIdentity>().connectionToClient, stunLevel, duration);
+
+    }
+
     public void OnDeath()
     {
         if (onDeath == EventOnDeath.LOSEROUND)
@@ -86,7 +104,6 @@ public class HpMaster : NetworkBehaviour
         }
         if (onDeath == EventOnDeath.HORUSDESTROY)
         {
-            NetworkIdentity owner = GetComponent<SpawnOwner>().WhoseThis();
             AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HORUSDESTROYED, transform.position, 1f);
             NetworkServer.Destroy(gameObject);
         }
@@ -109,10 +126,19 @@ public class HpMaster : NetworkBehaviour
                 healHp  = GetComponent<Darkness>().darknessSize;
             }
 
-           
+            Vector3 pos = owner.transform.position;
+            pos.y += 1;
 
+            GameObject instance = Instantiate(lightLoadEffect, pos, owner.transform.rotation);
+            NetworkServer.Spawn(instance);
+            
             owner.GetComponent<HpMaster>().TakeDamage(-healHp);
             owner.GetComponentInChildren<ServerCheckShoot>().DestroyOrb(gameObject);
+        }
+        if (onDeath == EventOnDeath.ITWEAKSDESTROY)
+        {
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.ITWEAKSDESTROYED, transform.position, 1f);
+            NetworkServer.Destroy(gameObject);
         }
     }
 
@@ -124,6 +150,7 @@ public class HpMaster : NetworkBehaviour
         HORUSDESTROY,
         FORMTOHUMAN,
         LIGHTLOAD,
+        ITWEAKSDESTROY,
     }
 
 

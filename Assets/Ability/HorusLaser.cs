@@ -50,14 +50,18 @@ public class AutoLaserTurret : NetworkBehaviour
 
                 // ターゲット方向にRayを飛ばす
                 Vector3 dir = (nearest.position - firePoint.position).normalized;
-                if (Physics.Raycast(firePoint.position, dir, out RaycastHit hit, detectionRange, 1 << bodyLayer))
+                if (Physics.Raycast(firePoint.position, dir, out RaycastHit hit, detectionRange))
                 {
-                    if (laserCoroutine == null)
+                    if (hit.collider.tag == "Body" || hit.collider.tag == "Head")
                     {
-                        lastFireTime = Time.time;
-                        RpcShowLaser(hit.point);
-                        var networkIdentity = hit.collider.GetComponentInParent<NetworkIdentity>();
-                        ServerFireLaser(networkIdentity);
+
+                        if (laserCoroutine == null)
+                        {
+                            lastFireTime = Time.time;
+                            RpcShowLaser(hit.point);
+                            var networkIdentity = hit.collider.GetComponentInParent<NetworkIdentity>();
+                            ServerFireLaser(networkIdentity);
+                        }
                     }
 
 

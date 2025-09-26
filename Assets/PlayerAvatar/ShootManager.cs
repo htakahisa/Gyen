@@ -44,6 +44,8 @@ namespace StarterAssets
 
         public CharacterTransfromNetwork transformNetwork;
         public GameObject parentOfPlayer;
+        public GameObject hazardScope;
+
 
         // Start is called before the first frame update
 
@@ -101,12 +103,25 @@ namespace StarterAssets
 
             if (Input.GetMouseButtonDown(1))
             {
-                zoomCoroutine = StartCoroutine(Zoom());
+                if (!IsZooming)
+                {
+                    zoomCoroutine = StartCoroutine(Zoom());
+                }
+                else
+                {
+                    ResetZoom();
+                }
             }
-            if (Input.GetMouseButtonUp(1))
+
+            if (IsZooming && weaponManager.GetCurrentWeaponData().weaponName == "Hazard")
             {
-                ResetZoom();
+                hazardScope.SetActive(true);
             }
+            else
+            {
+                hazardScope.SetActive(false);
+            }
+
 
         }
 
@@ -197,7 +212,7 @@ namespace StarterAssets
                 {
                     StopCoroutine(recoilBounce);
                 }
-
+                
                 if (Input.GetMouseButton(3))
                 {   
 
@@ -263,6 +278,11 @@ namespace StarterAssets
                     Vector3 direction = _mainCamera.transform.forward;
                     if (!currentWeapon.isNeedZoom || IsZooming)
                     {
+                        if (weaponManager.GetCurrentWeaponData().weaponName == "Hazard")
+                        {
+                            ResetZoom();
+                        }
+
                         GetComponent<ServerCheckShoot>().CmdGetShoot(transform.parent.parent.gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage, weaponPos.transform.position);
                     }
 

@@ -9560,6 +9560,8 @@ GameObject:
   - component: {fileID: 966734461}
   - component: {fileID: 966734460}
   - component: {fileID: 966734465}
+  - component: {fileID: 966734467}
+  - component: {fileID: 966734466}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -9668,21 +9670,25 @@ MonoBehaviour:
   currentBotMove: 0
   respawns: []
   playerManager: {fileID: 0}
---- !u!4 &966734464
-Transform:
+--- !u!224 &966734464
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 966734459}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.200601, y: -1.7804376, z: 19.960733}
+  m_LocalPosition: {x: 0, y: 0, z: 19.960733}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -10.200601, y: -1.7804376}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &966734465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9705,9 +9711,52 @@ MonoBehaviour:
   laser: {fileID: 8300000, guid: 97bd6926c8e6a234daf1bee10616d31b, type: 3}
   hitBlood: {fileID: 8300000, guid: 4508c3c219b554b48a5a21ab31ab3452, type: 3}
   horusDestroyed: {fileID: 8300000, guid: f32fa28c58783dc4182881c38094e182, type: 3}
+  ITweakDestroyed: {fileID: 8300000, guid: 303b76e69ec1ad645a4b499107cf1be9, type: 3}
+  IMirrorDestroyed: {fileID: 8300000, guid: 096af0472fab27a4e9da5e291fdd275c, type: 3}
   soundBlockLayer:
     serializedVersion: 2
     m_Bits: 512
+--- !u!114 &966734466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966734459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef4b0028ab524f74bbed2e403eebd37d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sourceCamera: {fileID: 0}
+  targets: []
+  overlayCanvas: {fileID: 0}
+  overlayImage: {fileID: 0}
+  fade: 1
+  fadeDuration: 0.25
+--- !u!223 &966734467
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966734459}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &983318238
 GameObject:
   m_ObjectHideFlags: 0
@@ -18364,7 +18413,7 @@ SceneRoots:
   - {fileID: 2137067418}
   - {fileID: 575179500}
   - {fileID: 1441669898}
-  - {fileID: 966734464}
   - {fileID: 256061644}
   - {fileID: 1225341049}
   - {fileID: 521908497}
+  - {fileID: 966734464}

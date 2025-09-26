@@ -1030,6 +1030,11 @@ MonoBehaviour:
   - {fileID: 3543936278411775571, guid: e87ef2e7ed5434843a55de1a0da3f7a4, type: 3}
   - {fileID: 3539715179979286606, guid: aafd3b8ea80e21d439da7d5d77ff0bf3, type: 3}
   - {fileID: 8500920156052182585, guid: 3e4fc7ad22753a2498ac3ac3ab605fcb, type: 3}
+  - {fileID: 2944396702758532163, guid: cba92c89d5cb90942837088b7b03065d, type: 3}
+  - {fileID: 3543936278411775571, guid: 259ec57fea54abd40a59a40b411a381f, type: 3}
+  - {fileID: 3539715179979286606, guid: aa368046966557e49892aa3252f4ac9b, type: 3}
+  - {fileID: 3539715179979286606, guid: 0db30ad600550f947998e40ca4084f5f, type: 3}
+  - {fileID: 358637981425055526, guid: 8eb503696b886e04faff8fc0f480d473, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -1053,6 +1058,7 @@ MonoBehaviour:
   - {fileID: 3543936278411775571, guid: 60313309513db6342a6e5ebb00dae860, type: 3}
   - {fileID: 3543936278411775571, guid: 2432d290de03a804a93340e02e3657ab, type: 3}
   - {fileID: 3543936278411775571, guid: e87ef2e7ed5434843a55de1a0da3f7a4, type: 3}
+  - {fileID: 3543936278411775571, guid: 259ec57fea54abd40a59a40b411a381f, type: 3}
 --- !u!4 &783319032
 Transform:
   m_ObjectHideFlags: 0

@@ -137,7 +137,7 @@ namespace StarterAssets
 
         public CharacterTransfromNetwork transformNetwork;
 
-        
+        public Coroutine stunCoroutine;
 
         public override void OnStartAuthority() 
         {
@@ -338,13 +338,45 @@ namespace StarterAssets
 
         }
 
+        [TargetRpc]
+        public void TargetCameraStun(NetworkConnection target, float stunLevel, float duration)
+        {
+            if(stunCoroutine == null)
+            stunCoroutine = StartCoroutine(StunCoroutine(stunLevel, duration));
+        }
+
+        public IEnumerator StunCoroutine(float stunLevel, float duration)
+        {
+            float endTime = Time.time + duration;
+            float xRotation = _mainCamera.transform.localRotation.eulerAngles.x;
+
+            while (Time.time <= endTime)
+            {
+                float random = (Random.Range(0, 2) == 0) ? 1f : -1f;
+
+                // カメラの上下回転
+                xRotation -= stunLevel * random;
+                _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+                // 身体の左右回転 (Yaw)
+                transformNetwork.yaw += random * stunLevel * (_CameraComponent.fieldOfView / 74.03f);
+                parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+
+                yield return null; // 毎フレーム繰り返す
+            }
+
+            stunCoroutine = null;
+
+        }
+
         private void Move()
         {
 
             bool walk = Input.GetKey(KeyCode.LeftControl);
             bool crouch = Input.GetKey(KeyCode.LeftShift);
 
-            bool sneak = Input.GetMouseButton(1);
+            bool sneak = _shootManager.IsZooming;
 
             // **Input.GetAxis ではなく、Input.GetKey で即時判定**
             float horiMove = Input.GetAxisRaw("Horizontal");
