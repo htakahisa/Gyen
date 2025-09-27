@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using static WeaponManager;
+using static WeaponStatus;
 
 public class BuyWeapon : MonoBehaviour
 {
@@ -27,7 +27,7 @@ public class BuyWeapon : MonoBehaviour
         if (RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, true))       
         {
             RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CmdBuyWeapon(cost);
-            RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().BuyWeapon(name);
+            RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().CmdBuyWeapon(name);
         }
     }
 

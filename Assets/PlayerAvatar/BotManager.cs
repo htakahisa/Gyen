@@ -75,10 +75,10 @@ public class BotManager : NetworkBehaviour
                 {
                     crouchTime += Time.deltaTime;
 
-                    if (crouchTime >= crouchDuration + Random.Range(0.1f, 5.0f))
+                    if (crouchTime >= crouchDuration + Random.Range(1f, 2.0f))
                     {
                         crouchTime = 0;
-                        crouchDuration = Random.Range(0.1f, 1.0f);
+                        crouchDuration = Random.Range(0.3f, 1.0f);
                     }
 
 

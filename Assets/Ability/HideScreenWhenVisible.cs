@@ -1,29 +1,43 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Mirror;
 
-public class HideScreenWhenVisible : MonoBehaviour
+public class HideScreenWhenVisible : NetworkBehaviour
 {
-[System.Serializable]
-public class FlashTarget
-{
-    public Renderer renderer;
-    public float flashDuration;
-    [HideInInspector] public float flashTimer;
-    [HideInInspector] public bool hasFlashed; // 追加
-
-    public FlashTarget(Renderer rend, float duration)
+    [System.Serializable]
+    public class FlashTargetData
     {
-        renderer = rend;
-        flashDuration = duration;
-        flashTimer = 0f;
-        hasFlashed = false; // 初期化
+        public uint netId;          // ネットワークID
+        public float flashDuration;
+
+        [HideInInspector] public float flashTimer;
+        [HideInInspector] public bool hasFlashed;
+
+        // デフォルトコンストラクタ（必須）
+        public FlashTargetData()
+        {
+            netId = 0;
+            flashDuration = 0f;
+            flashTimer = 0f;
+            hasFlashed = false;
+        }
+
+        // 便利コンストラクタ（任意）
+        public FlashTargetData(uint netId, float duration)
+        {
+            this.netId = netId;
+            this.flashDuration = duration;
+            this.flashTimer = 0f;
+            this.hasFlashed = false;
+        }
     }
-}
+
 
     [Header("Camera & Targets")]
     public Camera sourceCamera;
-    public List<FlashTarget> targets = new List<FlashTarget>();
+
+    public SyncList<FlashTargetData> targets = new SyncList<FlashTargetData>();
 
     [Header("UI Overlay")]
     public Canvas overlayCanvas;
@@ -35,7 +49,6 @@ public class FlashTarget
 
     private float overlayAlpha = 0f;
     public static HideScreenWhenVisible instance;
-
 
     void Awake()
     {
@@ -57,13 +70,18 @@ public class FlashTarget
 
         foreach (var t in targets)
         {
-            if (t.renderer == null) continue;
+            // ネットワーク上のオブジェクトからRendererを取得
+            Renderer rend = null;
+            if (NetworkClient.spawned.TryGetValue(t.netId, out NetworkIdentity identity))
+            {
+                rend = identity.GetComponentInChildren<Renderer>();
+            }
 
             // まだフラッシュしていない場合のみ、映っていたらフラッシュ開始
-            if (!t.hasFlashed && IsVisibleFrom(t.renderer, sourceCamera))
+            if (!t.hasFlashed && IsVisibleFrom(rend, sourceCamera))
             {
                 t.flashTimer = t.flashDuration;
-                t.hasFlashed = true; // 1度だけフラッシュ開始
+                t.hasFlashed = true;
             }
 
             // タイマー > 0 の間はフラッシュ継続
@@ -74,7 +92,6 @@ public class FlashTarget
             }
             else
             {
-                // タイマーが切れたらフラグをリセット
                 t.hasFlashed = false;
             }
         }
@@ -94,15 +111,21 @@ public class FlashTarget
         SetOverlayAlpha(overlayAlpha);
     }
 
-
     /// <summary>
-    /// スクリプトからターゲット追加可能
+    /// ターゲット追加（Rendererを持つオブジェクト）
     /// </summary>
-    public void AddTarget(Renderer rend, float duration)
+    public void AddTarget(GameObject obj, float duration)
     {
-        if (rend != null)
+        if (obj == null) return;
+
+        NetworkIdentity ni = obj.GetComponent<NetworkIdentity>();
+        if (ni != null)
         {
-            targets.Add(new FlashTarget(rend, duration));
+            targets.Add(new FlashTargetData(ni.netId, duration));
+        }
+        else
+        {
+            Debug.LogWarning("AddTarget: オブジェクトにNetworkIdentityが必要です");
         }
     }
 
@@ -118,7 +141,6 @@ public class FlashTarget
 
     private void CreateOverlayUI()
     {
-        // Canvas を生成
         GameObject canvasGO = new GameObject("OverlayCanvas");
         canvasGO.transform.SetParent(transform, false);
         overlayCanvas = canvasGO.AddComponent<Canvas>();
@@ -126,25 +148,20 @@ public class FlashTarget
         canvasGO.AddComponent<CanvasScaler>();
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        // Image を生成
         GameObject imageGO = new GameObject("OverlayImage");
         imageGO.transform.SetParent(canvasGO.transform, false);
         overlayImage = imageGO.AddComponent<Image>();
 
-        // RectTransform を画面いっぱいに
         RectTransform rt = overlayImage.rectTransform;
         rt.anchorMin = Vector2.zero;
         rt.anchorMax = Vector2.one;
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
-        rt.sizeDelta = Vector2.zero;
 
-        // スクリーンサイズに合わせる
         rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Screen.width);
         rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Screen.height);
 
-        // 黒（透明度は後で制御）
         overlayImage.color = new Color(0f, 0f, 0f, 0f);
     }
 
@@ -157,19 +174,15 @@ public class FlashTarget
 
         Vector3 viewPos = cam.WorldToViewportPoint(rend.bounds.center);
 
-        // カメラの前にない
         if (viewPos.z < 0f) return false;
-
-        // ビューポート範囲内
         if (viewPos.x < 0f || viewPos.x > 1f || viewPos.y < 0f || viewPos.y > 1f)
             return false;
 
-        // 遮蔽物チェック
         Vector3 dir = rend.bounds.center - cam.transform.position;
         if (Physics.Raycast(cam.transform.position, dir.normalized, out RaycastHit hit, dir.magnitude + 0.01f))
         {
             if (!hit.collider.transform.IsChildOf(rend.transform))
-                return false; // 他のオブジェクトに隠れている
+                return false;
         }
 
         return true;

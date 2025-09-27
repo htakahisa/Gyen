@@ -167,6 +167,7 @@ MonoBehaviour:
   isInvincible: 0
   isDead: 0
   onDeath: 3
+  lightLoadEffect: {fileID: 0}
 --- !u!114 &-607898583553318301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,8 +183,8 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  detectionRange: 10
-  damage: 10
+  detectionRange: 30
+  damage: 15
   laserDuration: 0.2
   fireInterval: 1
   firePoint: {fileID: 3686285212251059756}

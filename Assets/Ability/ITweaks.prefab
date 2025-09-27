@@ -186,7 +186,7 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
-  onDeath: 3
+  onDeath: 6
   lightLoadEffect: {fileID: 0}
 --- !u!33 &9023816951373079812
 MeshFilter:
@@ -219,7 +219,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b9e3a6502ba612340aea492b32ba5756, type: 2}
+  - {fileID: 2100000, guid: 4e9485fbd507f9c4f8a29ed76bf3f51d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

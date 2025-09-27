@@ -48,85 +48,87 @@ public class ServerCheckShoot : NetworkBehaviour
 
 
 
+    // レイヤーごとの減衰率設定（1mあたりの減衰率）
+    private Dictionary<int, float> layerAttenuation = new Dictionary<int, float>()
+{
+    { 3, 0.5f },  // Ground: 1mごとに exp(-0.2*thickness) 減衰
+    { 9, 999f },  // PhaseWall: 通過不可（ほぼ即死）
+    { 10, 0.1f }, // Smoke: ほぼ影響なし（厚さ依存で微減衰）
+};
+
     [Command]
     public void CmdGetShoot(GameObject playerObject, Vector3 position, Vector3 direction, int damage, int headDamage, Vector3 weaponPos)
     {
         Debug.Log("shoot");
 
         ThirdPersonController tpc = playerObject.GetComponentInChildren<ThirdPersonController>();
-
-        RaycastHit[] results = new RaycastHit[10]; // 検出可能な最大数
-
-        Ray ray = new Ray(position, direction);
-
+        Vector3 dir = direction.normalized; // ← 正規化する
+        Ray ray = new Ray(position, dir);
         DrawBulletLine(weaponPos, direction, playerObject);
 
         if (tpc.GetSpeed() == 0 && tpc.Grounded)
         {
-            
-            int hitCount = Physics.RaycastNonAlloc(ray, results, 100, hitMask);
-            // 距離順にソート（もし順序が狂っている場合の保険）
-            Array.Sort(results, 0, hitCount, new RaycastHitDistanceComparer());
-
- 
             float originalDamage = damage;
             float originalHeadDamage = headDamage;
-            float currentDamageRate = 1f; // 毎回リセット
+            float currentDamageRate = 1f;
             List<GameObject> hitList = new List<GameObject>();
 
-            for (int i = 0; i < hitCount; i++)
+            // --- RaycastAll のみを使う（RaycastNonAlloc は使わない） ---
+            RaycastHit[] results = Physics.RaycastAll(ray, 100f, hitMask);
+            Array.Sort(results, (a, b) => a.distance.CompareTo(b.distance));
+
+            for (int i = 0; i < results.Length; i++)
             {
-                Debug.Log($"HitOrder: [{i}] {results[i].collider.name} (Dist: {results[i].distance}m)");
-                GameObject hit = results[i].collider.gameObject;
                 RaycastHit hitpoint = results[i];
+                GameObject hit = hitpoint.collider.gameObject;
+                int hitLayer = hit.layer;
 
-                // フェーズウォールチェック（先に減衰率を計算）
-                if (hit.layer == 9)
+                Debug.Log($"HitOrder: [{i}] {hitpoint.collider.name} (Dist: {hitpoint.distance:F3}) Layer:{hitLayer}");
+
+                // ★「レイヤーごとの減衰」扱いがあるならここで処理
+                if (layerAttenuation != null && layerAttenuation.ContainsKey(hitLayer))
                 {
-                    GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
-                    NetworkServer.Spawn(fragment);
-                    currentDamageRate *= 0f;
-                    Debug.Log($"地面通過: 減衰率 {currentDamageRate}");
-                    continue; // 地面自体にはダメージを与えない
+                    float k = layerAttenuation[hitLayer]; // 1mあたりの減衰係数と仮定
+
+                    // 入力: entryHit, 発射方向 dir, 射程 100f
+                    float thickness = GetWallThickness(hitpoint, dir, 100f);
+
+                    if (k >= 999f) // 貫通不可フラグの扱い（例）
+                    {
+                        // 元コードでやっていた Fragment 生成を再現
+                        GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
+                        NetworkServer.Spawn(fragment);
+
+                        currentDamageRate = 0f;
+                        Debug.Log($"Layer {hitLayer} is impassable. Stopping bullet.");
+                        break;
+                    }
+                    else if (thickness > 0f)
+                    {
+                        // 元コードでやっていた Fragment 生成を再現
+                        GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
+                        NetworkServer.Spawn(fragment);
+                        currentDamageRate *= Mathf.Exp(-k * thickness);
+                        Debug.Log($"{hit.gameObject.name} thickness {thickness:F3}m, k={k:F3} => damageRate={currentDamageRate:F4}");
+                    }
+
+                    continue; // 壁自体にはダメージを与えない
                 }
 
-
-                // スモークチェック（先に減衰率を計算）
-                if (hit.layer == 10)
-                {
-                    currentDamageRate *= 0.9f;
-                    Debug.Log($"地面通過: 減衰率 {currentDamageRate}");
-                    continue; // 地面自体にはダメージを与えない
-                }
-
-
-                // 地面チェック（先に減衰率を計算）
-                if (hit.layer == 3)
-                {
-                    GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
-                    NetworkServer.Spawn(fragment);
-                    currentDamageRate *= 0.5f;
-                    Debug.Log($"地面通過: 減衰率 {currentDamageRate}");
-                    continue; // 地面自体にはダメージを与えない
-                }
-
-
-
-                // 敵へのダメージ処理
-                if (hit.layer == 6)
+                // ★ 敵へのダメージ処理（既存のロジックを維持）
+                if (hitLayer == 6)
                 {
                     HpMaster hpMaster = hit.GetComponentInParent<HpMaster>();
                     if (hpMaster != null && playerObject.GetComponent<NetworkIdentity>().netId != hit.GetComponentInParent<NetworkIdentity>().netId)
                     {
-                        
                         GameObject blood = Instantiate(Blood, hitpoint.point, Quaternion.identity);
                         NetworkServer.Spawn(blood);
                         if (!hitList.Contains(hpMaster.gameObject))
                         {
                             AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f);
-                            int finalDamage = (int)((hit.tag == "Head" ? originalHeadDamage : originalDamage) * currentDamageRate);
+                            int finalDamage = (int)((hitpoint.collider.tag == "Head" ? originalHeadDamage : originalDamage) * currentDamageRate);
 
-                            if(hit.tag == "Head")
+                            if (hitpoint.collider.tag == "Head")
                             {
                                 headShot++;
                             }
@@ -137,19 +139,45 @@ public class ServerCheckShoot : NetworkBehaviour
 
                             hpMaster.TakeDamage(finalDamage);
                             hitList.Add(hpMaster.gameObject);
-                            Debug.Log($"ヒット: {hit.tag}, ダメージ {finalDamage}");
+                            Debug.Log($"ヒット: {hitpoint.collider.tag}, ダメージ {finalDamage}");
 
                             if (isDarkness)
                             {
-                                Darkness(hpMaster.transform, finalDamage, playerObject);                              
+                                Darkness(hpMaster.transform, finalDamage, playerObject);
                             }
-
                         }
                     }
                 }
-          
-            }
+            } // for results
+        } // if can shoot
+    }
+
+    // --- 入口から同じ方向にわずかに inside して出口を探す関数 ---
+    float GetWallThickness(RaycastHit entryHit, Vector3 dir, float maxDistance)
+    {
+        Collider col = entryHit.collider;
+        dir = dir.normalized;
+        const float eps = 0.001f;
+
+        // 入口点のほんの内側から、同じ方向へレイを飛ばす（出口検出）
+        Vector3 insideOrigin = entryHit.point + dir * eps;
+        Ray insideRay = new Ray(insideOrigin, dir);
+
+        // 残り射程（元のレイの距離を使う）
+        float remaining = Mathf.Max(0f, maxDistance - entryHit.distance - eps);
+
+        RaycastHit exitHit;
+        if (col.Raycast(insideRay, out exitHit, remaining))
+        {
+            // exitHit.point は insideOrigin + dir * exitHit.distance
+            float thickness = Vector3.Distance(entryHit.point, exitHit.point);
+            return thickness;
         }
+
+        // 失敗した場合は境界の大きさから近似（安全策）
+        Vector3 absDir = new Vector3(Mathf.Abs(dir.x), Mathf.Abs(dir.y), Mathf.Abs(dir.z));
+        float approxThickness = Vector3.Dot(col.bounds.size, absDir); // bounds.size は全長
+        return approxThickness;
     }
 
     public void Darkness(Transform target, int damage, GameObject playerObject)

@@ -5,9 +5,10 @@ using System.Collections;
 public class IMirror : NetworkBehaviour
 {
     public float speed = 10f; // ˆÚ“®‘¬“x
-    public float radius = 1f; // Ž©•ª‚Ì”¼Œa
+    public float radius = 0.5f; // Ž©•ª‚Ì”¼Œa
     private Vector3 direction; // ˆÚ“®•ûŒü
     private LayerMask ground;
+    [SyncVar]
     private bool isMoving = true;
     public GameObject flashEffect;
     public float flashDuration;
@@ -23,6 +24,7 @@ public class IMirror : NetworkBehaviour
 
     void Update()
     {
+        if (!isServer) return;
         if (!isMoving) return;
 
         float moveDistance = speed * Time.deltaTime;
@@ -41,7 +43,7 @@ public class IMirror : NetworkBehaviour
         }
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdFlash()
     {
         StartCoroutine(FlashCoroutine());
@@ -49,14 +51,14 @@ public class IMirror : NetworkBehaviour
 
     public IEnumerator FlashCoroutine()
     {
-        HideScreenWhenVisible.instance.AddTarget(GetComponent<Renderer>(), flashDuration);
+        HideScreenWhenVisible.instance.AddTarget(gameObject, flashDuration);
         GameObject instance = Instantiate(flashEffect, transform.position, transform.rotation);
         NetworkServer.Spawn(instance);
-
-        yield return new WaitForSeconds(0.2f);
-        instance.GetComponent<DestroyTimer>().enabled = false;
         isMoving = false;
+
         yield return new WaitForSeconds(0.3f);
+        instance.GetComponent<DestroyTimer>().enabled = false;
+        yield return new WaitForSeconds(0.2f);
 
         AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IMIRRORDESTROYED, transform.position, 1);
         NetworkServer.Destroy(gameObject);

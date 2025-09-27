@@ -33,7 +33,7 @@ public class ReloadBar : MonoBehaviour
             {
                 if (reloadCoroutine == null)
                 {
-                    reloadCoroutine = StartCoroutine(CountingReload(weaponManager.GetCurrentWeaponData().magazineSize - weaponManager.magazine));
+                    reloadCoroutine = StartCoroutine(CountingReload(weaponManager.GetCurrentWeaponStats().magazineSize - weaponManager.magazine));
                 }
             }
             else
@@ -54,9 +54,9 @@ public class ReloadBar : MonoBehaviour
 
         while (weaponManager.isReloading)
         {
-            reloadBar.value = reloadDeltaTime / weaponManager.GetCurrentWeaponData().reloadTime;
-            yield return new WaitForSeconds(weaponManager.GetCurrentWeaponData().reloadTime / reloadingMagazineNumber - (weaponManager.GetCurrentWeaponData().reloadTime / reloadingMagazineNumber * 0.1f));
-            reloadDeltaTime += weaponManager.GetCurrentWeaponData().reloadTime / reloadingMagazineNumber;
+            reloadBar.value = reloadDeltaTime / weaponManager.GetCurrentWeaponStats().reloadTime;
+            yield return new WaitForSeconds(weaponManager.GetCurrentWeaponStats().reloadTime / reloadingMagazineNumber - (weaponManager.GetCurrentWeaponStats().reloadTime / reloadingMagazineNumber * 0.1f));
+            reloadDeltaTime += weaponManager.GetCurrentWeaponStats().reloadTime / reloadingMagazineNumber;
         }
 
         

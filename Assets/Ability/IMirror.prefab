@@ -34,7 +34,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -55,9 +55,10 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   speed: 10
+  radius: 0.3
   flashEffect: {fileID: 358637981425055526, guid: 8eb503696b886e04faff8fc0f480d473,
     type: 3}
-  flashDuration: 1
+  flashDuration: 3
 --- !u!114 &7940360131424509677
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,11 +74,11 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  hp: 100
+  hp: 50
   armer: 1
   isInvincible: 0
   isDead: 0
-  onDeath: 3
+  onDeath: 7
   lightLoadEffect: {fileID: 0}
 --- !u!33 &9023816951373079812
 MeshFilter:
@@ -209,7 +210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a553cb17010b2403e8523b558bffbc14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 1
+  syncDirection: 0
   syncMode: 0
   syncInterval: 0
   target: {fileID: 1493729241264079235}

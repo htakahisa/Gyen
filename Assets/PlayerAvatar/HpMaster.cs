@@ -97,6 +97,7 @@ public class HpMaster : NetworkBehaviour
         {
             ResetHp();
             GetComponent<BotManager>().ResetPos();
+            FinisherManager.instance.PlayPlayerFinisher(RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), gameObject);
         }
         if (onDeath == EventOnDeath.DESTROY)
         {
@@ -140,6 +141,11 @@ public class HpMaster : NetworkBehaviour
             AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.ITWEAKSDESTROYED, transform.position, 1f);
             NetworkServer.Destroy(gameObject);
         }
+        if (onDeath == EventOnDeath.IMIRRORDESTROY)
+        {
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IMIRRORDESTROYED, transform.position, 1f);
+            NetworkServer.Destroy(gameObject);
+        }
     }
 
     public enum EventOnDeath
@@ -151,6 +157,7 @@ public class HpMaster : NetworkBehaviour
         FORMTOHUMAN,
         LIGHTLOAD,
         ITWEAKSDESTROY,
+        IMIRRORDESTROY,
     }
 
 

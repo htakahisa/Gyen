@@ -109,12 +109,12 @@ public class AbilityController : NetworkBehaviour
 
         if (newForm == PlayerForm.Human)
         {
-
+            GetComponent<HpMaster>().isInvincible = false;
             nowControlled = objectList.FirstOrDefault(obj => obj.name == "PlayerObject");
 
             if (isLocalPlayer)
             {
-                _controller.radius = 0.2f;
+                _controller.radius = 0.3f;
                 _controller.height = 2.1f;
                 _controller.center = new Vector3(0, 1.1f, 0);
 
@@ -132,6 +132,8 @@ public class AbilityController : NetworkBehaviour
         }
         else if (newForm == PlayerForm.Bird)
         {
+            GetComponentInChildren<ThirdPersonController>().ResetLastMove();
+            GetComponent<HpMaster>().isInvincible = true;
             nowControlled = objectList.FirstOrDefault(obj => obj.name == "YellowObject");
             if (isLocalPlayer)
             {

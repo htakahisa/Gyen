@@ -4937,7 +4937,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  time: 0.3
+  time: 1
   onTimeOut: 0
 --- !u!1 &5084589283769131857
 GameObject:

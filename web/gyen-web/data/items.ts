@@ -41,6 +41,7 @@ export const weapons: Item[] = [
     description: "高火力なサイレンサーピストル。アーマーがない相手の頭に当てると一撃確殺なため、ファーストラウンドで言えば最強の武器と言える。",
     history: [
       { version: "1.0.2", change: "射撃レートを1/0.16sから1/0.15sに向上", type: "buff" as const },
+      { version: "1.0.4", change: "頭ダメージを120から125に増加", type: "buff" as const },
     ],
   },
    {

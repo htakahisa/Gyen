@@ -16,7 +16,11 @@ public class AudioManager : NetworkBehaviour
     public AudioClip horusDestroyed;
     public AudioClip ITweakDestroyed;
     public AudioClip IMirrorDestroyed;
-
+    public AudioClip ITweaksLaser;
+    public AudioClip LoverFinisher;
+    public AudioClip StarFinisher;
+    public AudioClip IceFinisher;
+    public AudioClip MeteorFinisher;
 
     public LayerMask soundBlockLayer;
 
@@ -38,6 +42,11 @@ public class AudioManager : NetworkBehaviour
         HORUSDESTROYED,
         ITWEAKSDESTROYED,
         IMIRRORDESTROYED,
+        ITWEAKSLASER,
+        LOVERFINISHER,
+        STARFINISHER,
+        ICEFINISHER,
+        METEORFINISHER,
     }
 
     // Update is called once per frame
@@ -46,12 +55,29 @@ public class AudioManager : NetworkBehaviour
         
     }
 
+
+
     [Command(requiresAuthority = false)]
     public void CmdPlaySoundAtPoint(Sounds name, Vector3 position, float volume)
     {
 
         RpcPlaySoundAtPoint(name, position, volume);
     }
+
+
+    [Command(requiresAuthority = false)]
+    public void CmdStopBGM()
+    {
+        RpcStopBGM();
+    }
+
+    [ClientRpc]
+    public void RpcStopBGM()
+    {
+        GetComponent<AudioSource>().Stop();
+    }
+
+
 
     [ClientRpc]
     private void RpcPlaySoundAtPoint(Sounds name, Vector3 position, float volume)
@@ -109,10 +135,40 @@ public class AudioManager : NetworkBehaviour
             case Sounds.IMIRRORDESTROYED:
                 soundClip = IMirrorDestroyed;
                 break;
+
+            case Sounds.ITWEAKSLASER:
+                soundClip = ITweaksLaser;
+                break;
+
+            case Sounds.LOVERFINISHER:
+                soundClip = LoverFinisher;
+                break;
+
+            case Sounds.STARFINISHER:
+                soundClip = StarFinisher;
+                break;
+
+            default:
+                switch (name)
+                {
+                    case Sounds.ICEFINISHER:
+                        soundClip = IceFinisher;
+                        break;
+
+                    case Sounds.METEORFINISHER:
+                        soundClip = MeteorFinisher;
+                        break;
+
+
+                }
+                GetComponent<AudioSource>().resource = soundClip;
+                GetComponent<AudioSource>().Play();
+                return;
+
         }
-
-
         AudioSource.PlayClipAtPoint(soundClip, position, volume);
+
+ 
         
     }
 

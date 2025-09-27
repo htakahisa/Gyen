@@ -88,20 +88,25 @@ public class RoundManager : NetworkBehaviour
 
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
 
-        ResetRound();
-        RpcResetWeapons();
+        FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
+        StartCoroutine(ResetRound());
         GiveCredits(winner, loser);
         GiveRound(winner);
 
         RpcSwitchBuyPhase();
         RpcResultText(loser);
-        Invoke("RpcSwitchBattlePhase", 15f);
-
+        Invoke("RpcSwitchBattlePhase", 20f);
     }
 
     [ClientRpc]
     public void RpcSwitchBuyPhase()
     {
+        StartCoroutine(SwitchBuyPhase());
+    }
+
+    public IEnumerator SwitchBuyPhase()
+    {
+        yield return new WaitForSeconds(5f);
         CurrentPhase = Phase.BUY;
     }
 
@@ -129,10 +134,15 @@ public class RoundManager : NetworkBehaviour
 
 
 
-    public void ResetRound()
+    public IEnumerator ResetRound()
     {
-        ServerResetAllObjects();
         StartCoroutine(ResetPlayers());
+
+        yield return new WaitForSeconds(5f);
+
+        ResetWeapons();
+        ServerResetAllObjects();
+        AudioManager.Instance.CmdStopBGM();
     }
 
     [Server]
@@ -173,7 +183,7 @@ public class RoundManager : NetworkBehaviour
             otherPlayer.GetComponentInChildren<ShootManager>().canShoot = false;
         }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(5f);
 
     
 
@@ -195,10 +205,14 @@ public class RoundManager : NetworkBehaviour
         players.Add(myPlayer);
         players.Add(otherPlayer);
 
-        myPlayer.GetComponentInChildren<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
+        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         if (Mode == "Practice")
         {
             myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999 - 800);
+        }
+        else
+        {
+            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         }
     }
 
@@ -244,12 +258,12 @@ public class RoundManager : NetworkBehaviour
 
     }
 
-    [ClientRpc]
-    public void RpcResetWeapons()
+    [Server]
+    public void ResetWeapons()
     {
         myPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
         myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
-        myPlayer.GetComponentInChildren<WeaponManager>().BuyWeapon(WeaponManager.WeaponType.Lover);
+        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
 
         myPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();

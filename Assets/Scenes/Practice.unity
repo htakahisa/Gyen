@@ -9555,6 +9555,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 966734464}
+  - component: {fileID: 966734468}
   - component: {fileID: 966734463}
   - component: {fileID: 966734462}
   - component: {fileID: 966734461}
@@ -9562,6 +9563,7 @@ GameObject:
   - component: {fileID: 966734465}
   - component: {fileID: 966734467}
   - component: {fileID: 966734466}
+  - component: {fileID: 966734469}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -9713,6 +9715,11 @@ MonoBehaviour:
   horusDestroyed: {fileID: 8300000, guid: f32fa28c58783dc4182881c38094e182, type: 3}
   ITweakDestroyed: {fileID: 8300000, guid: 303b76e69ec1ad645a4b499107cf1be9, type: 3}
   IMirrorDestroyed: {fileID: 8300000, guid: 096af0472fab27a4e9da5e291fdd275c, type: 3}
+  ITweaksLaser: {fileID: 8300000, guid: 0d31be8f932a1d84f8f26fc3b3674fb9, type: 3}
+  LoverFinisher: {fileID: 8300000, guid: 71ec01ec713314d4dbdff5161bb2127c, type: 3}
+  StarFinisher: {fileID: 8300000, guid: b49124fcad5260847adf62273a7f4f5f, type: 3}
+  IceFinisher: {fileID: 8300000, guid: 1793f50d33876684cbfb47f6c01ed995, type: 3}
+  MeteorFinisher: {fileID: 8300000, guid: ef67f668ad8fd7643ba8682bd17bb395, type: 3}
   soundBlockLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -9757,6 +9764,135 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &966734468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966734459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a48e8018ecce1846b07daeadfb26f25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  finishers:
+  - weaponID: Lover
+    finisherPrefab: {fileID: 9070474633162843459, guid: 356cf4dca1465b54fabbb8cd9b1cd190,
+      type: 3}
+    soundEffect: 10
+  - weaponID: Leo
+    finisherPrefab: {fileID: 4535006216103734310, guid: 98c4704d0fd7211449bcf5c451095a60,
+      type: 3}
+    soundEffect: 11
+  - weaponID: KasMi
+    finisherPrefab: {fileID: 7478731271839673279, guid: 4d3c8045dd8857a4b8d34c2361c61045,
+      type: 3}
+    soundEffect: 12
+  - weaponID: ReiNe
+    finisherPrefab: {fileID: 7957833072274404953, guid: 3355f6bfa6db8b24281b827de929694c,
+      type: 3}
+    soundEffect: 13
+--- !u!82 &966734469
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966734459}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 0.1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &983318238
 GameObject:
   m_ObjectHideFlags: 0

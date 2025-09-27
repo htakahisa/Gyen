@@ -97,6 +97,8 @@ namespace StarterAssets
         private int _animIDMotionSpeed;
         private int _animDance;
         private int _animCrouching;
+        private int _animReloading;
+        private int _animZooming;
 
         public Transform middleBrow;
 
@@ -276,6 +278,8 @@ namespace StarterAssets
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
             _animDance = Animator.StringToHash("Dance");
             _animCrouching = Animator.StringToHash("Crouching");
+            _animReloading = Animator.StringToHash("Reloading");
+            _animZooming = Animator.StringToHash("Zooming");
         }
 
         private void GroundedCheck()
@@ -372,9 +376,9 @@ namespace StarterAssets
 
         private void Move()
         {
-
+            AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0); // 0 = Base Layer
             bool walk = Input.GetKey(KeyCode.LeftControl);
-            bool crouch = Input.GetKey(KeyCode.LeftShift);
+            bool crouch = stateInfo.IsName("Idle Crouching") || stateInfo.IsName("Idle CrouchingAiming");
 
             bool sneak = _shootManager.IsZooming;
 
@@ -385,9 +389,9 @@ namespace StarterAssets
 
             bool isMove = (horiMove != 0 || verMove != 0);
 
-            
 
-            if (!crouch)
+
+            if (!_animator.IsInTransition(0) && !crouch)
             {
 
                 // **地上にいる場合のみ移動方向と速度を更新**
@@ -477,14 +481,17 @@ namespace StarterAssets
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
                 _animator.SetFloat(_animIDMotionSpeed, _speed);
-                _animator.SetBool(_animCrouching, crouch);
+                _animator.SetBool(_animCrouching, Input.GetKey(KeyCode.LeftShift));
             }
 
 
 
         }
 
-        
+        public void ResetLastMove()
+        {
+            _lastMoveDirection = new Vector3(0,0,0);
+        }
 
 
         private void GetOrb()
@@ -598,15 +605,51 @@ namespace StarterAssets
             }
         }
 
+        [ClientRpc]
+        public void RpcReloading() 
+        {
+            _animator.SetBool(_animReloading, true);
+        }
+
+        [ClientRpc]
+        public void RpcEndReloading()
+        {
+            _animator.SetBool(_animReloading, false);
+        }
+
+        [ClientRpc]
+        public void RpcChangeGunType(string type)
+        {
+            if (type == "Rifle")
+            {
+                // "RifleLayer" というレイヤーの重みを1にして有効化
+                _animator.SetLayerWeight(_animator.GetLayerIndex("RifleLayer"), 1f);
+
+                // "PistolLayer" の重みを0にして無効化
+                _animator.SetLayerWeight(_animator.GetLayerIndex("PistolLayer"), 0f);
+            }
+            if (type == "Pistol")
+            {
+                // "RifleLayer" というレイヤーの重みを1にして有効化
+                _animator.SetLayerWeight(_animator.GetLayerIndex("RifleLayer"), 0f);
+
+                // "PistolLayer" の重みを0にして無効化
+                _animator.SetLayerWeight(_animator.GetLayerIndex("PistolLayer"), 1f);
+            }
+        }
+
         public void BotMove(float horiMove, bool isWalk, bool isCrouch)
         {
-
+            AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0); // 0 = Base Layer
+            bool crouch = stateInfo.IsName("Idle Crouching") || stateInfo.IsName("Idle CrouchingAiming");
             bool isMove = (horiMove != 0);
 
             _animator.SetBool(_animCrouching, isCrouch);
 
-            if (!isCrouch)
+            // 立ち上がりアニメーション中なら移動禁止
+            if (!_animator.IsInTransition(0) && !crouch)
             {
+
 
                 // **地上にいる場合のみ移動方向と速度を更新**
                 if (Grounded)

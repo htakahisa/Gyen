@@ -756,6 +756,92 @@ MonoBehaviour:
   shootManager: {fileID: 8334744245603090709}
   magazine: 0
   isReloading: 0
+  weaponHolder: {fileID: 650716402390897772}
+  weapons:
+  - weaponIndex: 0
+    weaponType: 0
+    weaponPrefab: {fileID: 6891580169314388076, guid: 66ae442726d1cf4428dacb34edd61ac4,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 8f0a693a9cf6ddb4cac67da16d091d81, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 1
+    weaponType: 1
+    weaponPrefab: {fileID: 422713420238989602, guid: 6644337b902b6a94b839175230c9eaa7,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 2a71ad2ffb0255943a28472aa000f3ff, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 2
+    weaponType: 2
+    weaponPrefab: {fileID: 2457657994689332589, guid: 4afdeb10b5234f14a961d5427b6e6583,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: d7d9804355180244a8bd932d50526e9b, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 3
+    weaponType: 3
+    weaponPrefab: {fileID: 1792580310216211318, guid: 7242136b06f2f134ab29a8faf34a22a3,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 06924c60f1ebd0646bacfa69f86b5668, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 4
+    weaponType: 4
+    weaponPrefab: {fileID: 7462238120259734954, guid: 435ef7021b240754da46a578524912a6,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 9081158e665480245bd5a60d57e203a6, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 5
+    weaponType: 5
+    weaponPrefab: {fileID: 63599377355506524, guid: 07d08b64711fd03408f0283c4c5dcdeb,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 82ba5a06da1c99045a1e517ca1c8adb1, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 6
+    weaponType: 6
+    weaponPrefab: {fileID: 1195754019668130, guid: b5f885624a7be3842a9b6d65c31e0343,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 3c3fc5ff11cefef4ab30c344b0b623b6, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 7
+    weaponType: 7
+    weaponPrefab: {fileID: 5235552067488195745, guid: a8a16c995cb60674ca1d69a97fff59fb,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 2483792239e96ef489c544f402a65c5f, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 8
+    weaponType: 8
+    weaponPrefab: {fileID: 2252451789159712168, guid: c457978d90a56c6408c31c246f1bce36,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 9e04d6751d9c7e64d8abda94036364dc, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 9
+    weaponType: 9
+    weaponPrefab: {fileID: 809686047582357796, guid: a131e584bcda5e34bab2f3c6c620dc81,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 3ebbe75d4baf64b4d926ab004b1367f5, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 10
+    weaponType: 10
+    weaponPrefab: {fileID: 3857938929377093991, guid: 8fb8f18004f60704c97e66f708c93383,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 5182ab85379970344a24e5013ead2814, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  - weaponIndex: 11
+    weaponType: 11
+    weaponPrefab: {fileID: 8484409069104812788, guid: 23fcac21a037ce34ca8f2d22999800dd,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 05d7f1104f589ac4a964d61320b50842, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
 --- !u!114 &4248758210931635522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1212,6 +1298,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 650716402390897772}
   - {fileID: 1226360074376055059}
   - {fileID: 9212307531442988099}
   - {fileID: 2273842666618516599}
@@ -4036,6 +4123,7 @@ GameObject:
   - component: {fileID: 1619691889089860974}
   - component: {fileID: 8390951464836155913}
   - component: {fileID: 6860544754505300519}
+  - component: {fileID: 6783833227013146217}
   m_Layer: 6
   m_Name: Yellow
   m_TagString: Untagged
@@ -4163,6 +4251,27 @@ MonoBehaviour:
   audioTimer: 0
   parentOfPlayer: {fileID: 3543936278411775571}
   audioListener: {fileID: 4081695471351277210}
+--- !u!114 &6783833227013146217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7031267788165057374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2002fa1f0854574fa2647c5715fece7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  hp: 40
+  armer: 1
+  isInvincible: 0
+  isDead: 0
+  onDeath: 4
+  lightLoadEffect: {fileID: 0}
 --- !u!1 &7236088950303693030
 GameObject:
   m_ObjectHideFlags: 0
@@ -4426,6 +4535,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3627787299491913062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7484643266732156354
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 650716402390897772}
+  m_Layer: 0
+  m_Name: RightHandSocket
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &650716402390897772
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7484643266732156354}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.3087085, y: 0.6373472, z: -0.703327, w: -0.06179605}
+  m_LocalPosition: {x: 0.042000055, y: -0.23300014, z: -0.08600014}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4940844313148860072}
+  m_LocalEulerAnglesHint: {x: 69.177, y: -269.512, z: -120.41}
 --- !u!1 &7607922495544384897
 GameObject:
   m_ObjectHideFlags: 0

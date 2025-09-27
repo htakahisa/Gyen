@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fe551f6c63e700449543cf46d06cac1, type: 3}
+  m_Name: Kafka
+  m_EditorClassIdentifier: 
+  gunType: Rifle
+  weaponName: Kafka
+  damage: 25
+  headDamage: 80
+  rate: 0.065
+  Xrecoil: 0.3
+  Yrecoil: 0.4
+  magazineSize: 20
+  reloadTime: 1.5
+  zoomable: 1
+  isNeedZoom: 0
+  zoomRatio: 65
+  zoomSpeed: 0.02
+  burst: 5
+  burstRate: 0.06
+  isAuto: 1

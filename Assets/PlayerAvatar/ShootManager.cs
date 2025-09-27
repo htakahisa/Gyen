@@ -35,6 +35,7 @@ namespace StarterAssets
 
         private bool hasLoaded = false;
 
+        [SyncVar]
         public bool canShoot = true;
         public bool shootInputAhead;
 
@@ -49,9 +50,9 @@ namespace StarterAssets
 
         // Start is called before the first frame update
 
-        private void Awake()
+        private void Start()
         {
-            weaponManager.SwitchWeapon(WeaponType.Liet);
+            weaponManager.EquipWeapon(WeaponStatus.WeaponType.Lover);
         }
 
         public override void OnStartAuthority()
@@ -93,7 +94,7 @@ namespace StarterAssets
             // ïêäÌÉäÉçÅ[Éh
             if (Input.GetKeyDown(KeyCode.R))
             {
-                weaponManager.Reload();
+                weaponManager.CmdReload();
             }
 
             if (BuyPanel.buyPanel.isCursorLocked)
@@ -110,16 +111,19 @@ namespace StarterAssets
                 else
                 {
                     ResetZoom();
+                        
                 }
             }
 
-            if (IsZooming && weaponManager.GetCurrentWeaponData().weaponName == "Hazard")
+            if (IsZooming && weaponManager.GetCurrentWeaponStats().weaponName == "Hazard")
             {
                 hazardScope.SetActive(true);
+                weaponManager.HideWeapon();
             }
             else
             {
                 hazardScope.SetActive(false);
+                weaponManager.EquipWeapon(weaponManager.GetCurrentWeaponType());
             }
 
 
@@ -127,11 +131,11 @@ namespace StarterAssets
 
         private void Shoot()
         {
-            WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
 
             if (currentWeapon != null && !isBursting)
             {
-                if (IsZooming && currentWeapon.burst != 1)
+                if (IsZooming && currentWeapon.burst != 0)
                 {
                     if (CanShoot(false))
                     {
@@ -151,7 +155,7 @@ namespace StarterAssets
         public IEnumerator BurstFire()
         {
             isBursting = true;
-            WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
 
             for (int i = 0; i < currentWeapon.burst; i++)
             {
@@ -171,7 +175,7 @@ namespace StarterAssets
 
         private IEnumerator Zoom()
         {
-            WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
             if (currentWeapon != null)
             {
                 if (currentWeapon.zoomable)
@@ -191,7 +195,7 @@ namespace StarterAssets
 
         public void ResetZoom()
         {
-            WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
             if (currentWeapon != null)
             {
                 if (currentWeapon.zoomable && zoomCoroutine != null)
@@ -272,13 +276,13 @@ namespace StarterAssets
                     weaponManager.magazine--;
                 }
                 lastAttackTime = Time.time;
-                WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
+                WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
                 if (currentWeapon != null)
                 {
                     Vector3 direction = _mainCamera.transform.forward;
                     if (!currentWeapon.isNeedZoom || IsZooming)
                     {
-                        if (weaponManager.GetCurrentWeaponData().weaponName == "Hazard")
+                        if (weaponManager.GetCurrentWeaponStats().weaponName == "Hazard")
                         {
                             ResetZoom();
                         }
@@ -326,7 +330,7 @@ namespace StarterAssets
                 return false;
             }
 
-            WeaponData currentWeapon = weaponManager.GetCurrentWeaponData();
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
 
             if (currentWeapon == null) return false;
 
