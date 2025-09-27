@@ -75,7 +75,7 @@ public class RoundManager : NetworkBehaviour
                 if (NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>().hasLoaded)
                 {
                     playerManager = NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>();
-                    StartGetPlayers();
+                    StartCoroutine(StartGetPlayers());
                     hasLoaded = true;
                 }
             }
@@ -193,8 +193,11 @@ public class RoundManager : NetworkBehaviour
     }
 
 
-    private void StartGetPlayers()
+    private IEnumerator StartGetPlayers()
     {
+
+        yield return new WaitForSeconds(1f);
+
         // ©•ª‚ÌƒvƒŒƒCƒ„[‚ğæ“¾
         myPlayer = playerManager.GetLocalPlayer();
 
