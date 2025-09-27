@@ -608,18 +608,21 @@ namespace StarterAssets
         [ClientRpc]
         public void RpcReloading() 
         {
+            if (!isLocalPlayer) return;
             _animator.SetBool(_animReloading, true);
         }
 
         [ClientRpc]
         public void RpcEndReloading()
         {
+            if (!isLocalPlayer) return;
             _animator.SetBool(_animReloading, false);
         }
 
         [ClientRpc]
         public void RpcChangeGunType(string type)
         {
+            if (!isLocalPlayer) return;
             if (type == "Rifle")
             {
                 // "RifleLayer" というレイヤーの重みを1にして有効化

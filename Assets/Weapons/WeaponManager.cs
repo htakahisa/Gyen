@@ -44,20 +44,21 @@ public class WeaponManager : NetworkBehaviour
     //};
 
 
-    private void Awake()
+private void Awake()
+{
+    int count = weapons.Count;
+    for (int i = 0; i < count; i++)
     {
-        // データベースからインスタンスを作成（キャラごと）
-        foreach (var data in weapons)
-        {
-            WeaponStatus slot = new WeaponStatus();
-            slot.weaponType = data.weaponType;
-            slot.weaponPrefab = data.weaponPrefab;
-            slot.instance = null;
+        var data = weapons[i];
 
-            weapons.Add(slot);
-        }
+        WeaponStatus slot = new WeaponStatus();
+        slot.weaponType = data.weaponType;
+        slot.weaponPrefab = data.weaponPrefab;
+        slot.instance = null;
+
+        weapons.Add(slot);
     }
-
+}
     public WeaponType GetCurrentWeaponType()
     {
         if (currentWeaponIndex == -1)
