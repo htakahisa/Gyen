@@ -201,15 +201,20 @@ public class RoundManager : NetworkBehaviour
         // 自分のプレイヤーを取得
         myPlayer = playerManager.GetLocalPlayer();
 
-        // 相手のプレイヤーを取得
-        otherPlayer = playerManager.GetOtherPlayer();
+        if (Mode != "Practice")
+        {
+            // 相手のプレイヤーを取得
+            otherPlayer = playerManager.GetOtherPlayer();
+            players.Add(otherPlayer);
 
 
-        players.Add(myPlayer);
-        players.Add(otherPlayer);
+            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+        }
 
         myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
-        otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+
+        players.Add(myPlayer);
+
         if (Mode == "Practice")
         {
             myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999 - 800);

@@ -118,15 +118,18 @@ namespace StarterAssets
                 }
             }
 
-            if (IsZooming && weaponManager.GetCurrentWeaponStats().weaponName == "Hazard")
+            if (weaponManager.GetCurrentWeaponStats().weaponName == "Hazard")
             {
-                hazardScope.SetActive(true);
-                weaponManager.HideWeapon();
-            }
-            else
-            {
-                hazardScope.SetActive(false);
-                weaponManager.CmdEquipWeapon(weaponManager.GetCurrentWeaponType());
+                if (IsZooming)
+                {
+                    hazardScope.SetActive(true);
+                    weaponManager.HideWeapon();
+                }
+                else
+                {
+                    hazardScope.SetActive(false);
+                    weaponManager.ReHideWeapon();
+                }
             }
 
 

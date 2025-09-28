@@ -115,21 +115,33 @@ private void Awake()
         weapons[currentWeaponIndex].instance.SetActive(false);
     }
 
+    //You should call this method only when you have hideweapon then reset that
+    public void ReHideWeapon()
+    {
+        weapons[currentWeaponIndex].instance.SetActive(true);
+    }
 
     // •Ší‚ðw“ü
     [Command(requiresAuthority = false)]
     public void CmdBuyWeapon(WeaponType type)
     {
+        StartCoroutine(BuyWeaponAndSetMagazine(type));
+    }
+
+    public IEnumerator BuyWeaponAndSetMagazine(WeaponType type)
+    {
         var slot = weapons.Find(w => w.weaponType == type);
         if (slot != null)
         {
             RpcEquipWeapon(type);
-            SetMagazineMax();
+
             Debug.Log($"Switched to {type}");
         }
+
+        yield return new WaitWhile(() => GetCurrentWeaponType() == type); 
+
+        SetMagazineMax();
     }
-
-
 
 
     [Command(requiresAuthority = false)]

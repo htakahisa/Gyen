@@ -717,7 +717,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 874658293c580a549bc6caae98dae13e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
+  syncDirection: 1
   syncMode: 0
   syncInterval: 0
   shootManager: {fileID: 8334744245603090709}
@@ -1113,14 +1113,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1250094954403214227}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.99258024, y: -0.04327539, z: -0.113521874, w: 0.004949396}
-  m_LocalPosition: {x: 0.0009571358, y: 0.19149381, z: -0.008727803}
+  m_LocalRotation: {x: 0.8321873, y: -0.09779996, z: -0.07207743, w: 0.5410216}
+  m_LocalPosition: {x: 0.0009571387, y: -0.183, z: 0.017}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4982434984907724903}
-  m_Father: {fileID: 8827786269231802925}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 7399087043400797327}
+  m_LocalEulerAnglesHint: {x: 117.58, y: 29.188004, z: 31.334}
 --- !u!136 &3308120892788136681
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2459,6 +2459,7 @@ Transform:
   - {fileID: 667894833543275150}
   - {fileID: 912724806246323987}
   - {fileID: 6130141939683258577}
+  - {fileID: 7130251284388284077}
   m_Father: {fileID: 8727971832061936366}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3120054151736583649
@@ -4644,7 +4645,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6308830331666956915}
-  - {fileID: 7130251284388284077}
   - {fileID: 8489847118744047083}
   m_Father: {fileID: 8244192804076092689}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
