@@ -605,24 +605,28 @@ namespace StarterAssets
             }
         }
 
-        [ClientRpc]
-        public void RpcReloading() 
+        public void Reloading() 
         {
             if (!isLocalPlayer) return;
             _animator.SetBool(_animReloading, true);
         }
-
-        [ClientRpc]
-        public void RpcEndReloading()
+        public void EndReloading()
         {
             if (!isLocalPlayer) return;
             _animator.SetBool(_animReloading, false);
+        }
+
+        [Command (requiresAuthority = false)]
+        public void CmdChangeGunType(string type)
+        {
+            RpcChangeGunType(type);
         }
 
         [ClientRpc]
         public void RpcChangeGunType(string type)
         {
             if (!isLocalPlayer) return;
+            if (!_hasAnimator) return;
             if (type == "Rifle")
             {
                 // "RifleLayer" というレイヤーの重みを1にして有効化

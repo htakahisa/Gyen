@@ -36,7 +36,7 @@ public class Lucifer : CharacterSkills
             return;
         }
         currentCharacter.skill2Energy--;
-        weaponManager.EquipWeapon(WeaponStatus.WeaponType.Rebelliousness);
+        weaponManager.CmdEquipWeapon(WeaponStatus.WeaponType.Rebelliousness);
     }
     public void Lightload()
     {

@@ -76,7 +76,7 @@ public class RoundManager : NetworkBehaviour
                 {
                     playerManager = NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>();
                     StartCoroutine(StartGetPlayers());
-                    hasLoaded = true;
+                    
                 }
             }
         }
@@ -196,7 +196,7 @@ public class RoundManager : NetworkBehaviour
     private IEnumerator StartGetPlayers()
     {
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.1f);
 
         // ©•ª‚ÌƒvƒŒƒCƒ„[‚ğæ“¾
         myPlayer = playerManager.GetLocalPlayer();
@@ -209,6 +209,7 @@ public class RoundManager : NetworkBehaviour
         players.Add(otherPlayer);
 
         myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+        otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         if (Mode == "Practice")
         {
             myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999 - 800);
@@ -217,6 +218,7 @@ public class RoundManager : NetworkBehaviour
         {
             otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         }
+        hasLoaded = true;
     }
 
     [Server]

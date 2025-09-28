@@ -52,7 +52,7 @@ namespace StarterAssets
 
         private void Start()
         {
-            weaponManager.EquipWeapon(WeaponStatus.WeaponType.Lover);
+            
         }
 
         public override void OnStartAuthority()
@@ -78,6 +78,9 @@ namespace StarterAssets
             // Update is called once per frame
         private void Update()
         {
+
+            if (!isLocalPlayer) return;
+
             if (RoundManager.rm != null)
             {
                 if (RoundManager.rm.hasLoaded && GetComponentInParent<PlayerManager>().hasLoaded && !hasLoaded)
@@ -87,7 +90,7 @@ namespace StarterAssets
                 }
             }
 
-            if (!isLocalPlayer) return;
+            
 
 
 
@@ -123,7 +126,7 @@ namespace StarterAssets
             else
             {
                 hazardScope.SetActive(false);
-                weaponManager.EquipWeapon(weaponManager.GetCurrentWeaponType());
+                weaponManager.CmdEquipWeapon(weaponManager.GetCurrentWeaponType());
             }
 
 

@@ -21,6 +21,7 @@ public class WeaponManager : NetworkBehaviour
     public Transform weaponHolder;
     public List<WeaponStatus> weapons;
 
+    [SyncVar]
     private int currentWeaponIndex = -1;
 
 
@@ -80,7 +81,15 @@ private void Awake()
         return weapons[currentWeaponIndex].dataBase;
     }
 
-    public void EquipWeapon(WeaponType type)
+    [Command]
+    public void CmdEquipWeapon(WeaponType type)
+    {
+        RpcEquipWeapon(type);
+    }
+
+
+    [ClientRpc]
+    public void RpcEquipWeapon(WeaponType type)
     {
         int index = weapons.FindIndex(w => w.weaponType == type);
         if (index == -1) return;
@@ -97,7 +106,7 @@ private void Awake()
         weapons[index].instance.SetActive(true);
         currentWeaponIndex = index;
 
-        GetComponent<ThirdPersonController>().RpcChangeGunType(weapons[currentWeaponIndex].dataBase.gunType);
+        GetComponent<ThirdPersonController>().CmdChangeGunType(weapons[currentWeaponIndex].dataBase.gunType);
 
     }
 
@@ -114,7 +123,7 @@ private void Awake()
         var slot = weapons.Find(w => w.weaponType == type);
         if (slot != null)
         {
-            EquipWeapon(type);
+            RpcEquipWeapon(type);
             SetMagazineMax();
             Debug.Log($"Switched to {type}");
         }
@@ -126,6 +135,12 @@ private void Awake()
     [Command(requiresAuthority = false)]
     public void CmdReload()
     {
+        RpcReload();
+    }
+
+    [ClientRpc]
+    public void RpcReload()
+    {
         var slot = GetCurrentWeaponStats();
         if (slot != null)
         {
@@ -133,18 +148,15 @@ private void Awake()
             {
                 return;
             }
-            GetComponent<ThirdPersonController>().RpcReloading();
+            GetComponent<ThirdPersonController>().Reloading();
             isReloading = true;
             Invoke("SetMagazineMax", GetCurrentWeaponStats().reloadTime);
         }
-        
     }
-
-
 
     public void SetMagazineMax()
     {
-        GetComponent<ThirdPersonController>().RpcEndReloading();
+        GetComponent<ThirdPersonController>().EndReloading();
         isReloading = false;
         magazine = GetCurrentWeaponStats().magazineSize;
     }
