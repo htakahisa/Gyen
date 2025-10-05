@@ -2064,7 +2064,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0.49, z: 0}
-  m_LocalScale: {x: 200, y: 1, z: 200}
+  m_LocalScale: {x: 35.093067, y: 0.9788942, z: 26.76}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2143670170}
@@ -3923,7 +3923,7 @@ MeshCollider:
   m_Mesh: {fileID: 690925973}
 --- !u!33 &1673763811
 MeshFilter:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 10
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}

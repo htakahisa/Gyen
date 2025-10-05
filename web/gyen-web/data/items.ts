@@ -1,121 +1,197 @@
 // data/items.js
 
-// 武器の履歴の型
+
 export interface HistoryEntry {
   version: string;
   change: string;
   type: "buff" | "debuff" | "neutral";
 }
 
-// 武器の型
 export interface Item {
   name: string;
-  rank: "S" | "A" | "B" | "C";
+  rank: "1" | "2" | "3" | "4";
   description: string;
   history: HistoryEntry[];
+
+  // ▼ 追加項目 ▼
+  type: string;              // 例: "展開型" "汎用型" など
+  difficulty: string;        // 例: "簡単" "普通" "難しい"
+  cost: string;              // 例: "高" "中" "低"
+  features: string[];        // 特徴リスト
+  details: string;         // 詳しい解説（任意）
 }
+
 
 export const weapons: Item[] = [
     {
     name: "Lover",
-        rank: "C",
-    description: "軽量ピストル。無料で使える武器であるため高望みは出来ないが、それを考慮しても使いたくない武器である。",
-    history: [
+        rank: "4",
+    description: "とにかく安い軽量ピストル",
+        history: [
       { version: "1.0.2", change: "胴体ダメージを30から20に低下", type: "debuff" as const },
       { version: "1.0.2", change: "頭ダメージを70から80に増加", type: "buff" as const },
     ],
+        type: "ピストル",
+    difficulty: "普通",
+    cost: "0",
+    features: ["頭の火力はそれなりに高い", "値段が無料なので出費を抑えられる", "連射速度と火力の低さがどうしても気になる"],
+    details:
+      "連射速度と火力共に弱い。ファーストラウンドかエコラウンド以外で使うことはない。この武器でライフルに勝てるなら相当なエイマーであると言える。",
   },
+  
    {
     name: "Leo",
-        rank: "A",
-    description: "ハイスペックなマシンピストル。値段が300creditで済むにもかかわらず、性能はLoverよりもかなり良いため、せめてこの武器は買っておきたい。",
+        rank: "2",
+    description: "値段に対してハイスペックなマシンピストル",
     history: [
       { version: "1.0.2", change: "胴体ダメージを35から30に低下", type: "debuff" as const },
       { version: "1.0.2", change: "頭ダメージを60から70に増加", type: "buff" as const },
       { version: "1.0.2", change: "リロード時間を1sから1.2sに増加", type: "debuff" as const },
     ],
+        type: "マシンピストル",
+    difficulty: "簡単",
+    cost: "300",
+    features: ["初心者でも扱いやすい", "胴体射ちでも火力が出るため、安定感がある"],
+    details:
+      "特に序盤で役に立つ。同じレベルの装備相手に、先に撃ち始めればエイムに自信がなくても基本的に勝てるため、安定感があるが、逆にアーマーなど高い装備の相手に対するワンチャンは狙いにくい。",
   },
+  
      {
     name: "Liet",
-        rank: "B",
-    description: "高火力なサイレンサーピストル。アーマーがない相手の頭に当てると一撃確殺なため、ファーストラウンドで言えば最強の武器と言える。",
+        rank: "3",
+    description: "高火力なサイレンサーピストル",
     history: [
       { version: "1.0.2", change: "射撃レートを1/0.16sから1/0.15sに向上", type: "buff" as const },
       { version: "1.0.4", change: "頭ダメージを120から125に増加", type: "buff" as const },
     ],
+    type: "サイレンサーピストル",
+    difficulty: "普通",
+    cost: "800",
+    features: ["連射速度、ヘッドショット火力共に平均より高い", "圧倒的な強みはないがコスパが高い"],
+    details:
+      "勿論できればヘッドショットを狙っていきたいが、胴体火力も悪くなく、連射速度も速いため、グダって全く当たらず負けるということは少ない。",
+    
   },
    {
     name: "Anti-REX",
-        rank: "A",
-    description: "重たいヘビーピストル。火力と値段の割合が圧倒的で、頭に当てれば必ず仕留めることができるが、連射速度がかなり低い。",
+        rank: "2",
+    description: "重たいリボルバー",
     history: [
       { version: "1.0.2", change: "射撃レートを1/0.8sから1/0.7sに向上", type: "buff" as const },
     ],
+    type: "リボルバー",
+    difficulty: "とても難しい",
+    cost: "1200",
+    features: ["初心者にはオススメできない", "難しいが使いこなせれば破格の性能", "ヘッドショットの癖がないと使えない"],
+    details:
+      "ヘッドショットに自信がある人以外は使わないほうがいい。ヘッドショット前提で作られた性能といっていいほど、火力以外がお粗末な性能。",
   },
      {
     name: "Kafka",
-        rank: "A",
-    description: "スタンダードなサブマシンガン。連射レートが高いため、ズーム時に5点バーストとなる。",
+        rank: "2",
+    description: "スタンダードなサブマシンガン",
     history: [
       { version: "1.0.2", change: "射撃レートを1/0.07sから1/0.065sに向上", type: "buff" as const },
     ],
+    type: "サブマシンガン",
+    difficulty: "普通",
+    cost: "1600",
+    features: ["連射速度がとにかく速い", "リコイルさえコントロール出来ればDPSはとても高い", "胴体でもいいのでとにかく当てたい"],
+    details:
+      "連射速度が高く、セミオートの武器よりは使いやすいが、反動が大きいため、リコイル制御の練習は必要になる。また、スコープ時に射撃すると5点バーストになり、射撃速度が上がる。",
   },
   {
     name: "FALLEN",
-        rank: "A",
-    description: "一撃が強力なヘビーライフル。連射速度は低めなため、若干使いにくいのが玉に瑕。",
+        rank: "2",
+    description: "一撃が強力なヘビーライフル",
     history: [
       { version: "1.0.1", change: "胴体ダメージを65から70へ増加",  type: "buff" as const },
       { version: "1.0.1", change: "スコープ視野角を60から45へ減少", type: "neutral" as const },
       { version: "1.0.2", change: "値段を2000creditから1800creditへ減少", type: "buff" as const },
     ],
+    type: "ヘビーライフル",
+    difficulty: "難しい",
+    cost: "1800",
+    features: ["火力がとにかく高い", "置きエイムに向いている", "遠距離も得意"],
+    details:
+      "ヘッドショットに自信がある人が使うべき。一応ボディーショットで倒し切るのも可能。スコープ倍率が高いため、遠くの敵を倒すのが得意な武器。",
   },
     {
     name: "kasMi",
-        rank: "S",
-    description: "連射速度、火力、マガジンサイズ全てにおいてハイスペックなライフル。使いやすさはピカイチ。",
+        rank: "1",
+    description: "ライフル界のクイーン",
     history: [
       { version: "1.0.1", change: "胴体ダメージを40から45へ増加" , type: "buff" as const },
       { version: "1.0.3", change: "射撃レートを1/0.08から1/0.09に低下" , type: "debuff" as const },
     ],
+    type: "アサルトライフル",
+    difficulty: "簡単",
+    cost: "2500",
+    features: ["初心者でも比較的扱いやすい", "安定感の獣", "使い手を選ばなく簡単"],
+    details:
+      "バランスが完璧で、買える時はとりあえず買っておけば損はしないだろう。殆どの場面で対して勝算がある、オールマイティ",
   },
     {
     name: "ReiNe",
-        rank: "S",
-    description: "ヘッドショットで必ず敵を仕留めることができる、最強のライフル。リコイルが激しいため、最初の5発以内に倒しておきたい。",
+        rank: "1",
+    description: "ライフル界のビショップ",
     history: [
       { version: "1.0.1", change: "胴体ダメージを50から60へ増加" , type: "buff" as const },
     ],
+    type: "アサルトライフル",
+    difficulty: "普通",
+    cost: "2500",
+    features: ["全てを瞬殺する破壊力", "弱い装備の相手を軽々踏み潰す", "使いこなせないならKasMiを使おう"],
+    details:
+      "圧倒的破壊力で、この武器を使いこなすものが真のGyenと言える。",
   },
       {
     name: "Hazard",
-        rank: "S",
-    description: "一撃必殺のライフル。貫通で胴体にあてた場合を除き必ず相手を仕留めることができる。ただし外した時の隙には目をつぶろう。",
+        rank: "1",
+    description: "一撃必殺のスナイパーライフル",
     history: [
       { version: "1.0.1", change: "頭ダメージを300から400へ増加" , type: "buff" as const },
       { version: "1.0.2", change: "スコープ視野角を30から25へ減少" , type: "neutral" as const },
     ],
+    type: "スナイパーライフル",
+    difficulty: "やや難しい",
+    cost: "4000",
+    features: ["直接ヒットすれば必殺", "覗いていないとまっすぐ飛ばない"],
+    details:
+      "相手がピークする場所にエイムをしておいて、来たら撃つというのが正しい使い方。値段が高いため、負けると次のラウンドは経済的にピンチになる。",
   },
     {
     name: "RapetPuppet",
-        rank: "B",
-    description: "高速ライトマシンガン。連射速度が速く、壁抜きをするときの選択肢として入る武器であるが、それ以外の使い方ではあまりメリットがない。",
+        rank: "3",
+    description: "高速ライトマシンガン",
     history: [
       { version: "1.0.2", change: "連射レートを1/0.07sから1/0.05sに向上" , type: "buff" as const },
       { version: "1.0.2", change: "マガジンサイズを100から70に減少" , type: "debuff" as const },
       { version: "1.0.3", change: "連射レートを1/0.05sから1/0.07sに低下" , type: "debuff" as const },
       { version: "1.0.3", change: "縦リコイルを0.05から0.07に増加" , type: "debuff" as const },
     ],
+    type: "ライトマシンガン",
+    difficulty: "かなり難しい",
+    cost: "2000",
+    features: ["連射速度が高いため、壁抜きが簡単", "正面からの撃ち合いは苦手"],
+    details:
+      "使い手を選ぶというより、使い方がよくわからない武器。それなりに値段がかかる割に強いのは連射速度だけ。",
   },
     {
     name: "Violets",
-        rank: "A",
-    description: "超重量ライトマシンガン。連射速度、マガジンサイズ共に最強の武器であるが、意外と一発のダメージ自体は控えめなので通常の打ち合いになると負けることが多い。",
+        rank: "2",
+    description: "超重量ライトマシンガン",
     history: [
       { version: "1.0.2", change: "連射レートを1/0.06sから1/0.045sに向上" , type: "buff" as const },
       { version: "1.0.3", change: "連射レートを1/0.045sから1/0.06sに低下" , type: "debuff" as const },
       { version: "1.0.3", change: "縦リコイルを0.55から0.03に減少" , type: "buff" as const },
     ],
+    type: "ライトマシンガン",
+    difficulty: "かなり難しい",
+    cost: "4500",
+    features: ["壁抜き用の採用なら圧倒的な性能", "お金にかなり余裕があるとき以外購入は非推奨"],
+    details:
+      "RapetPuppetの上位互換。値段が跳ね上がったため性能の向上も著しく、壁抜きの適正は勿論、ライフルに正面から撃ち勝てなくもない。",
   },
    
 ];

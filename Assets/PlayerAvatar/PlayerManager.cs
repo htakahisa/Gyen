@@ -1,6 +1,7 @@
 using Mirror;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class PlayerManager : NetworkBehaviour
 {
@@ -15,6 +16,13 @@ public class PlayerManager : NetworkBehaviour
 
     public void Update()
     {
+        if (!isLocalPlayer)
+        {
+            if(GetComponent<PlayerInput>() != null)
+            {
+                GetComponent<PlayerInput>().enabled = false;
+            }
+        }
         if (!Players.Contains(this))
         {
             Players.Add(this);

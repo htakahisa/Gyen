@@ -38,6 +38,10 @@ public class ReloadBar : MonoBehaviour
             }
             else
             {
+                if (reloadCoroutine != null)
+                {
+                    StopCoroutine(reloadCoroutine);
+                }
                 reloadCoroutine = null;
                 reloadDeltaTime = 0;
                 reloadBar.gameObject.SetActive(false);

@@ -96,6 +96,7 @@ public class BotManager : NetworkBehaviour
     public void ResetPos()
     {
         transform.position = new Vector3(Random.Range(-8.53f, 2.77f), -0.02000034f, Random.Range(1.20f, 3.27f));
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
         GetComponent<CharacterTransfromNetwork>().ServerPos(transform.position);
     }
 }

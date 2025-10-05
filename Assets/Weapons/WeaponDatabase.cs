@@ -6,6 +6,8 @@ public class WeaponDatabase : ScriptableObject
 {
     public string gunType;
     public string weaponName;
+    public string description;
+    public int cost;
     public int damage;
     public int headDamage;
 

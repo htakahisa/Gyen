@@ -110,7 +110,7 @@ public class HpMaster : NetworkBehaviour
         }
         if (onDeath == EventOnDeath.FORMTOHUMAN)
         {
-            GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
+            GetComponentInParent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
         }
         if (onDeath == EventOnDeath.LIGHTLOAD)
         {

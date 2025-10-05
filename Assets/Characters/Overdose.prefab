@@ -645,7 +645,7 @@ MonoBehaviour:
   RotationSmoothTime: 0.12
   SpeedChangeRate: 10
   FootstepAudioVolume: 0.3
-  JumpHeight: 1
+  JumpHeight: 0.8
   Gravity: -15
   JumpTimeout: 0
   FallTimeout: 0.15
@@ -677,6 +677,11 @@ MonoBehaviour:
     type: 3}
   parentOfPlayer: {fileID: 3543936278411775571}
   transformNetwork: {fileID: -4732923928998472460}
+  currentControlScheme: Keyboard&Mouse
+  assistRange: 30
+  maxAssistAngle: 6
+  assistStrength: 10
+  enemies: []
 --- !u!114 &8334744245603090709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -717,98 +722,121 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 874658293c580a549bc6caae98dae13e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 1
+  syncDirection: 0
   syncMode: 0
   syncInterval: 0
   shootManager: {fileID: 8334744245603090709}
-  magazine: 0
-  isReloading: 0
   weaponHolder: {fileID: 1239335872710865887}
   weapons:
-  - weaponIndex: 0
+  - currentAmmo: 0
+    weaponIndex: 0
     weaponType: 0
     weaponPrefab: {fileID: 6891580169314388076, guid: 66ae442726d1cf4428dacb34edd61ac4,
       type: 3}
     dataBase: {fileID: 11400000, guid: 8f0a693a9cf6ddb4cac67da16d091d81, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 1
+  - currentAmmo: 0
+    weaponIndex: 1
     weaponType: 1
     weaponPrefab: {fileID: 422713420238989602, guid: 6644337b902b6a94b839175230c9eaa7,
       type: 3}
     dataBase: {fileID: 11400000, guid: 2a71ad2ffb0255943a28472aa000f3ff, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 2
+  - currentAmmo: 0
+    weaponIndex: 2
     weaponType: 2
     weaponPrefab: {fileID: 2457657994689332589, guid: 4afdeb10b5234f14a961d5427b6e6583,
       type: 3}
     dataBase: {fileID: 11400000, guid: d7d9804355180244a8bd932d50526e9b, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 3
+  - currentAmmo: 0
+    weaponIndex: 3
     weaponType: 3
     weaponPrefab: {fileID: 1792580310216211318, guid: 7242136b06f2f134ab29a8faf34a22a3,
       type: 3}
     dataBase: {fileID: 11400000, guid: 06924c60f1ebd0646bacfa69f86b5668, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 4
+  - currentAmmo: 0
+    weaponIndex: 4
     weaponType: 4
     weaponPrefab: {fileID: 7462238120259734954, guid: 435ef7021b240754da46a578524912a6,
       type: 3}
     dataBase: {fileID: 11400000, guid: 9081158e665480245bd5a60d57e203a6, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 5
+  - currentAmmo: 0
+    weaponIndex: 5
     weaponType: 5
     weaponPrefab: {fileID: 63599377355506524, guid: 07d08b64711fd03408f0283c4c5dcdeb,
       type: 3}
     dataBase: {fileID: 11400000, guid: 82ba5a06da1c99045a1e517ca1c8adb1, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 6
+  - currentAmmo: 0
+    weaponIndex: 6
     weaponType: 6
     weaponPrefab: {fileID: 1195754019668130, guid: b5f885624a7be3842a9b6d65c31e0343,
       type: 3}
     dataBase: {fileID: 11400000, guid: 3c3fc5ff11cefef4ab30c344b0b623b6, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 7
+  - currentAmmo: 0
+    weaponIndex: 7
     weaponType: 7
     weaponPrefab: {fileID: 5235552067488195745, guid: a8a16c995cb60674ca1d69a97fff59fb,
       type: 3}
     dataBase: {fileID: 11400000, guid: 2483792239e96ef489c544f402a65c5f, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 8
+  - currentAmmo: 0
+    weaponIndex: 8
     weaponType: 8
     weaponPrefab: {fileID: 2252451789159712168, guid: c457978d90a56c6408c31c246f1bce36,
       type: 3}
     dataBase: {fileID: 11400000, guid: 9e04d6751d9c7e64d8abda94036364dc, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 9
+  - currentAmmo: 0
+    weaponIndex: 9
     weaponType: 9
     weaponPrefab: {fileID: 809686047582357796, guid: a131e584bcda5e34bab2f3c6c620dc81,
       type: 3}
     dataBase: {fileID: 11400000, guid: 3ebbe75d4baf64b4d926ab004b1367f5, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 10
+  - currentAmmo: 0
+    weaponIndex: 10
     weaponType: 10
     weaponPrefab: {fileID: 3857938929377093991, guid: 8fb8f18004f60704c97e66f708c93383,
       type: 3}
     dataBase: {fileID: 11400000, guid: 5182ab85379970344a24e5013ead2814, type: 2}
     instance: {fileID: 0}
     isOwned: 0
-  - weaponIndex: 11
+  - currentAmmo: 0
+    weaponIndex: 11
     weaponType: 11
     weaponPrefab: {fileID: 8484409069104812788, guid: 23fcac21a037ce34ca8f2d22999800dd,
       type: 3}
     dataBase: {fileID: 11400000, guid: 05d7f1104f589ac4a964d61320b50842, type: 2}
     instance: {fileID: 0}
     isOwned: 0
+  - currentAmmo: 0
+    weaponIndex: 12
+    weaponType: 12
+    weaponPrefab: {fileID: 6299132473643528638, guid: 24ef36ab51dfa9b48ad0a68381ae8656,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 04cfe3358ec8a1b4a915c1b8ce0f0067, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
+  magazine: 0
+  isReloading: 0
+  mainWeaponType: 0
+  subWeaponType: 0
+  abilityWeaponType: 0
 --- !u!114 &4248758210931635522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2163,6 +2191,7 @@ GameObject:
   - component: {fileID: 7767665597172722380}
   - component: {fileID: 7131634090093216591}
   - component: {fileID: 1112727817626628774}
+  - component: {fileID: 2098345893234454253}
   m_Layer: 0
   m_Name: Overdose
   m_TagString: Untagged
@@ -2361,8 +2390,9 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   credit: 800
-  currentWeaponPaying: 0
-  currentArmerPaying: 0
+  currentPrimaryPaying: 0
+  currentSidearmPaying: 0
+  currentArmorPaying: 0
   rounds: 0
 --- !u!143 &1112727817626628774
 CharacterController:
@@ -2384,11 +2414,42 @@ CharacterController:
   serializedVersion: 3
   m_Height: 2.1
   m_Radius: 0.3
-  m_SlopeLimit: 45
+  m_SlopeLimit: 50
   m_StepOffset: 0.5
   m_SkinWidth: 0.02
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 1.1, z: 0}
+--- !u!114 &2098345893234454253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: 67a207dd0b01404418c9737b41a5d682,
+    type: 3}
+  m_NotificationBehavior: 3
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: Keyboard&Mouse
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &3561717742706190703
 GameObject:
   m_ObjectHideFlags: 0

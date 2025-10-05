@@ -46,7 +46,10 @@ namespace StarterAssets
         public CharacterTransfromNetwork transformNetwork;
         public GameObject parentOfPlayer;
         public GameObject hazardScope;
-
+        private PlayerInputActions inputActions;
+        private bool autoFireInput;
+        private bool currentFireState;
+        private bool lastFireState = false;
 
         // Start is called before the first frame update
 
@@ -65,6 +68,16 @@ namespace StarterAssets
                 _mainCamera = _CameraComponent.gameObject;
 
             }
+            inputActions = new PlayerInputActions();
+            enabled = true;
+            inputActions.Player.Enable();
+
+            inputActions.Player.Fire.performed += _ => autoFireInput = true;
+            inputActions.Player.Fire.canceled += _ => autoFireInput = false;
+
+            inputActions.Player.Reload.performed += _ => weaponManager.CmdReload();
+
+            inputActions.Player.Zoom.performed += _ => TryZoom();
 
         }
 
@@ -80,59 +93,58 @@ namespace StarterAssets
         {
 
             if (!isLocalPlayer) return;
-
-            if (RoundManager.rm != null)
+            if (RoundManager.rm.hasLoaded && GetComponentInParent<PlayerManager>().hasLoaded && !hasLoaded)
             {
-                if (RoundManager.rm.hasLoaded && GetComponentInParent<PlayerManager>().hasLoaded && !hasLoaded)
-                {
                     StartGetTpc();
                     hasLoaded = true;
-                }
             }
 
-            
 
 
-
-            // 武器リロード
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                weaponManager.CmdReload();
-            }
 
             if (BuyPanel.buyPanel.isCursorLocked)
             {
                 Shoot();
             }
 
-            if (Input.GetMouseButtonDown(1))
-            {
-                if (!IsZooming)
-                {
-                    zoomCoroutine = StartCoroutine(Zoom());
-                }
-                else
-                {
-                    ResetZoom();
-                        
-                }
-            }
+        
 
-            if (weaponManager.GetCurrentWeaponStats().weaponName == "Hazard")
+            if (weaponManager.GetCurrentWeaponStats() != null)
             {
-                if (IsZooming)
+                if (weaponManager.GetCurrentWeaponStats().weaponName == "Hazard")
                 {
-                    hazardScope.SetActive(true);
-                    weaponManager.HideWeapon();
-                }
-                else
-                {
-                    hazardScope.SetActive(false);
-                    weaponManager.ReHideWeapon();
+                    if (IsZooming)
+                    {
+                        hazardScope.SetActive(true);
+                        weaponManager.HideWeapon();
+                    }
+                    else
+                    {
+                        hazardScope.SetActive(false);
+                        weaponManager.ReHideWeapon();
+                    }
                 }
             }
 
 
+        }
+
+        public void TryZoom()
+        {
+
+            if (BuyPanel.buyPanel.isCursorLocked)
+            {
+                    if (!IsZooming)
+                    {
+                        zoomCoroutine = StartCoroutine(Zoom());
+                    }
+                    else
+                    {
+                        ResetZoom();
+
+                    }
+            }
+            
         }
 
         private void Shoot()
@@ -206,6 +218,8 @@ namespace StarterAssets
             {
                 if (currentWeapon.zoomable && zoomCoroutine != null)
                 {
+                    hazardScope.SetActive(false);
+                    weaponManager.ReHideWeapon();
                     StopCoroutine(zoomCoroutine);
                     _CameraComponent.fieldOfView = 74.03f;
                     IsZooming = false;
@@ -328,7 +342,7 @@ namespace StarterAssets
 
             if (shootInputAhead)
             {
-                if (!Input.GetMouseButton(0))
+                if (!autoFireInput)
                 {
                     shootInputAhead = false;
                 }
@@ -344,11 +358,19 @@ namespace StarterAssets
 
             if (Auto)
             {
-                shoot = Input.GetMouseButton(0);
+                shoot = autoFireInput;
             }
             else
             {
-                shoot = Input.GetMouseButtonDown(0);
+                // ボタンが押されているか
+                bool currentFireState = inputActions.Player.Fire.ReadValue<float>() > 0.5f;
+
+                // 押された瞬間だけ true
+                bool pressedThisFrame = currentFireState && !lastFireState;
+
+                // 状態を更新
+                lastFireState = currentFireState;
+                shoot = pressedThisFrame;
             }
 
             if (!shoot) return false;

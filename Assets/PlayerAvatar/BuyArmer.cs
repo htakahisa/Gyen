@@ -1,23 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using static WeaponManager;
 
-public class BuyArmer : MonoBehaviour
+public class BuyArmer : MonoBehaviour, IPointerClickHandler
 {
     public float armer;
     public int cost;
 
-    // Start is called before the first frame update
-    void Start()
-    {
+    private UIGradient image;
 
+
+    private void Start()
+    {
+        image = GetComponentInChildren<UIGradient>();
+        image.bottomColor = Color.black;
     }
+
 
     // Update is called once per frame
     void Update()
     {
+        if (armer == RoundManager.rm.GetMyPlayer().GetComponent<HpMaster>().armer)
+        {
+            image.bottomColor = Color.blue;
+        }
+        else
+        {
+            image.bottomColor = Color.black;
+        }
+    }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            Buy();
+        }
     }
 
     public void Buy()
@@ -27,9 +48,9 @@ public class BuyArmer : MonoBehaviour
         if (roundManager.Mode == "1VS1")
         {
 
-            if (roundManager.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, false))
+            if (roundManager.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, CreditManager.PurchaseSlot.Armor))
             {
-                roundManager.GetMyPlayer().GetComponent<CreditManager>().CmdBuyArmer(cost);
+                roundManager.GetMyPlayer().GetComponent<CreditManager>().CmdBuy(cost, CreditManager.PurchaseSlot.Armor);
                 roundManager.GetMyPlayer().GetComponent<HpMaster>().armer = armer;
             }
         }

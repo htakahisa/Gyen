@@ -1,76 +1,112 @@
 using Mirror;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CreditManager : NetworkBehaviour
 {
+    [SyncVar] public int credit = 800;
 
-    [SyncVar]
-    public int credit = 800;
+    // スロットごとの現在の支払い金額
+    [SyncVar] public int currentPrimaryPaying = 0;
+    [SyncVar] public int currentSidearmPaying = 0;
+    [SyncVar] public int currentArmorPaying = 0;
 
-    [SyncVar]
-    public int currentWeaponPaying = 0;
+    [SyncVar] public int rounds = 0;
 
-    [SyncVar]
-    public int currentArmerPaying = 0;
-
-    [SyncVar]
-    public int rounds = 0;
-
-    // Start is called before the first frame update
-    void Start()
+    // 購入対象のスロット
+    public enum PurchaseSlot
     {
-        
+        Sidearm,
+        Primary,
+        Armor
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    // クレジットを追加（サーバー専用）
     [Server]
     public void AddCredit(int value)
     {
         credit += value;
     }
 
-    [Command]
-    public void CmdBuyWeapon(int value)
-    {
-
-        credit += currentWeaponPaying;
-        credit -= value;
-        currentWeaponPaying = value;
-        
-    }
-
-    [Command]
-    public void CmdBuyArmer(int value)
-    {
-
-        credit += currentArmerPaying;
-        credit -= value;
-        currentArmerPaying = value;
-
-    }
-
+    // ラウンド数追加（サーバー専用）
     [Server]
     public void GiveRound()
     {
         rounds++;
     }
 
-    public bool CanBuy(int cost, bool isWeapon)
+    // 購入コマンド（払い戻し対応）
+    [Command]
+    public void CmdBuy(int cost, PurchaseSlot slot)
     {
-        return cost <= credit + (isWeapon ? currentWeaponPaying : currentArmerPaying);
+        switch (slot)
+        {
+            case PurchaseSlot.Primary:
+                credit += currentPrimaryPaying;
+                credit -= cost;
+                currentPrimaryPaying = cost;
+                break;
+
+            case PurchaseSlot.Sidearm:
+                credit += currentSidearmPaying;
+                credit -= cost;
+                currentSidearmPaying = cost;
+                break;
+
+            case PurchaseSlot.Armor:
+                credit += currentArmorPaying;
+                credit -= cost;
+                currentArmorPaying = cost;
+                break;
+        }
     }
 
+    [Command]
+    public void CmdSell(PurchaseSlot slot)
+    {
+        switch (slot)
+        {
+            case PurchaseSlot.Primary:
+                credit += currentPrimaryPaying;
+                currentPrimaryPaying = 0;
+                break;
+
+            case PurchaseSlot.Sidearm:
+                credit += currentSidearmPaying;
+                currentSidearmPaying = 0;
+                break;
+
+            case PurchaseSlot.Armor:
+                credit += currentArmorPaying;
+                currentArmorPaying = 0;
+                break;
+        }
+    }
+
+    // 所持金＋払い戻し分で購入可能かどうか
+    public bool CanBuy(int cost, PurchaseSlot slot)
+    {
+        int refundable = 0;
+        switch (slot)
+        {
+            case PurchaseSlot.Primary:
+                refundable = currentPrimaryPaying;
+                break;
+            case PurchaseSlot.Sidearm:
+                refundable = currentSidearmPaying;
+                break;
+            case PurchaseSlot.Armor:
+                refundable = currentArmorPaying;
+                break;
+        }
+
+        return cost <= credit + refundable;
+    }
+
+    // ラウンド開始時などに支払い履歴をリセット
     public void ResetCurrentPaying()
     {
-        currentWeaponPaying = 0;
-        currentArmerPaying = 0;
+        currentPrimaryPaying = 0;
+        currentSidearmPaying = 0;
+        currentArmorPaying = 0;
     }
-
 }

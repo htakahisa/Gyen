@@ -31,12 +31,17 @@ public class Lucifer : CharacterSkills
 
     public void Rebelliousness()
     {
-        if (currentCharacter.skill2Energy <= 0)
+        if (currentCharacter.skill2Energy != 0)
         {
-            return;
+            weaponManager.CmdBuyWeapon(WeaponStatus.WeaponType.Rebelliousness);
+            currentCharacter.skill2Energy--;
         }
-        currentCharacter.skill2Energy--;
-        weaponManager.CmdEquipWeapon(WeaponStatus.WeaponType.Rebelliousness);
+        else
+        {
+            weaponManager.CmdSwitchWeapon(WeaponStatus.WeaponType.Rebelliousness);
+        }
+        
+        
     }
     public void Lightload()
     {

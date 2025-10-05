@@ -1,8 +1,10 @@
+
 "use client";
 import Link from "next/link";
 import { useState } from "react";
 import { items } from "../../data/items";
-import { characters } from "../../data/characters"; // キャラデータを追加
+import { characters } from "../../data/characters";
+import { systems } from "../../data/systems";
 import { CardButton } from "../components/UI";
 
 interface HistoryEntry {
@@ -14,50 +16,142 @@ interface HistoryEntry {
 export default function Patches() {
   const [openItems, setOpenItems] = useState<string[]>([]);
 
-  // バージョンごとにアイテムとキャラをまとめる
+  // バージョンごとにまとめるマップ
   const versionMap: Record<
     string,
-    { items: { [name: string]: HistoryEntry[] }; characters: { [name: string]: HistoryEntry[] } }
+    {
+      items: Record<string, HistoryEntry[]>;
+      characters: Record<string, HistoryEntry[]>;
+      systems: Record<string, HistoryEntry[]>;
+    }
   > = {};
 
-  // アイテムをまとめる
+  // items
   items.forEach((item) => {
     item.history.forEach((h) => {
-      if (!versionMap[h.version]) {
-        versionMap[h.version] = { items: {}, characters: {} };
-      }
-      if (!versionMap[h.version].items[item.name]) {
+      if (!versionMap[h.version])
+        versionMap[h.version] = { items: {}, characters: {}, systems: {} };
+      if (!versionMap[h.version].items[item.name])
         versionMap[h.version].items[item.name] = [];
-      }
       versionMap[h.version].items[item.name].push(h);
     });
   });
 
-  // キャラをまとめる
+  // characters
   characters.forEach((char) => {
     char.history.forEach((h) => {
-      if (!versionMap[h.version]) {
-        versionMap[h.version] = { items: {}, characters: {} };
-      }
-      if (!versionMap[h.version].characters[char.name]) {
+      if (!versionMap[h.version])
+        versionMap[h.version] = { items: {}, characters: {}, systems: {} };
+      if (!versionMap[h.version].characters[char.name])
         versionMap[h.version].characters[char.name] = [];
-      }
       versionMap[h.version].characters[char.name].push(h);
     });
   });
 
-  const toggleItem = (key: string) => {
+  // systems
+  systems.forEach((sys) => {
+    sys.history.forEach((h) => {
+      if (!versionMap[h.version])
+        versionMap[h.version] = { items: {}, characters: {}, systems: {} };
+      if (!versionMap[h.version].systems[sys.name])
+        versionMap[h.version].systems[sys.name] = [];
+      versionMap[h.version].systems[sys.name].push(h);
+    });
+  });
+
+  const toggleItem = (name: string) => {
     setOpenItems((prev) =>
-      prev.includes(key) ? prev.filter((n) => n !== key) : [...prev, key]
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
     );
   };
+
+  // 展開枠の共通UI（items / characters / systems共通）
+const renderHistoryBlock = (
+  version: string,
+  category: "items" | "characters" | "systems",
+  name: string,
+  histories: HistoryEntry[]
+) => {
+  const key = `${version}-${category}-${name}`;
+  const isOpen = openItems.includes(key);
+
+  const linkBase = "/item"; // ← ここを修正！
+
+  return (
+    <div
+      key={name}
+      style={{
+        marginBottom: "16px",
+        borderRadius: "12px",
+        background: "#1f1f2e",
+        overflow: "hidden",
+        boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+        transition: "all 0.3s ease",
+      }}
+    >
+      <div
+        onClick={() => toggleItem(key)}
+        style={{
+          padding: "12px 16px",
+          cursor: "pointer",
+          background: "#2a2a40",
+          userSelect: "none",
+        }}
+      >
+        <h3 style={{ margin: 0 }}>
+          {isOpen ? "▼" : "▶"} {name}
+        </h3>
+      </div>
+      <div
+        style={{
+          maxHeight: isOpen ? "1000px" : "0px",
+          overflow: "hidden",
+          transition: "max-height 0.3s ease",
+          padding: isOpen ? "12px 16px" : "0 16px",
+        }}
+      >
+        {isOpen && (
+          <>
+            {histories.map((h, idx) => (
+              <div
+                key={idx}
+                style={{
+                  padding: "4px 0",
+                  color:
+                    h.type === "buff"
+                      ? "limegreen"
+                      : h.type === "debuff"
+                      ? "red"
+                      : "white",
+                }}
+              >
+                {h.change}
+              </div>
+            ))}
+            <Link href={`${linkBase}/${encodeURIComponent(name)}`}>
+              <CardButton style={{ marginTop: "8px" }}>
+                この
+                {category === "items"
+                  ? "アイテム"
+                  : category === "characters"
+                  ? "キャラクター"
+                  : "システム"}
+                の過去のパッチも見る
+              </CardButton>
+            </Link>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif", color: "white" }}>
       {/* ホームに戻るボタン */}
       <div style={{ marginBottom: "20px" }}>
-        <Link href={"/"}>
-          <CardButton>ホームに戻る</CardButton>
+        <Link href="/">
+          <CardButton style={{ width: "fit-content" }}>ホームに戻る</CardButton>
         </Link>
       </div>
 
@@ -65,139 +159,24 @@ export default function Patches() {
 
       {Object.entries(versionMap)
         .sort((a, b) => (a[0] < b[0] ? 1 : -1)) // 新しいバージョンを上に
-        .map(([version, data]) => (
+        .map(([version, entry]) => (
           <div key={version} style={{ marginBottom: "32px" }}>
             <h2 style={{ fontSize: "1.5rem", marginBottom: "12px" }}>v{version}</h2>
 
-            {/* キャラクター変更点 */}
-            {Object.entries(data.characters).map(([charName, histories]) => {
-              const key = `${version}-char-${charName}`;
-              const isOpen = openItems.includes(key);
-              return (
-                <div
-                  key={charName}
-                  style={{
-                    marginBottom: "16px",
-                    borderRadius: "12px",
-                    background: "#1f1f2e",
-                    overflow: "hidden",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-                    transition: "all 0.3s ease",
-                  }}
-                >
-                  <div
-                    onClick={() => toggleItem(key)}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      background: "#2a2a40",
-                      userSelect: "none",
-                    }}
-                  >
-                    <h3 style={{ margin: 0 }}>
-                      {isOpen ? "▼" : "▶"} {charName}（キャラクター）
-                    </h3>
-                  </div>
-                  <div
-                    style={{
-                      maxHeight: isOpen ? "1000px" : "0px",
-                      overflow: "hidden",
-                      transition: "max-height 0.3s ease",
-                      padding: isOpen ? "12px 16px" : "0 16px",
-                    }}
-                  >
-                    {isOpen && (
-                      <>
-                        {histories.map((h, idx) => (
-                          <div
-                            key={idx}
-                            style={{
-                              padding: "4px 0",
-                              color:
-                                h.type === "buff"
-                                  ? "limegreen"
-                                  : h.type === "debuff"
-                                  ? "red"
-                                  : "white",
-                            }}
-                          >
-                            {h.change}
-                          </div>
-                        ))}
-                        <Link href={`/item/${encodeURIComponent(charName)}`}>
-                          <CardButton>このキャラクターの過去のパッチも見る</CardButton>
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {/* アイテム */}
+            {Object.entries(entry.items).map(([name, histories]) =>
+              renderHistoryBlock(version, "items", name, histories)
+            )}
 
-            {/* アイテム変更点 */}
-            {Object.entries(data.items).map(([itemName, histories]) => {
-              const key = `${version}-item-${itemName}`;
-              const isOpen = openItems.includes(key);
-              return (
-                <div
-                  key={itemName}
-                  style={{
-                    marginBottom: "16px",
-                    borderRadius: "12px",
-                    background: "#1f1f2e",
-                    overflow: "hidden",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-                    transition: "all 0.3s ease",
-                  }}
-                >
-                  <div
-                    onClick={() => toggleItem(key)}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      background: "#2a2a40",
-                      userSelect: "none",
-                    }}
-                  >
-                    <h3 style={{ margin: 0 }}>
-                      {isOpen ? "▼" : "▶"} {itemName}（アイテム）
-                    </h3>
-                  </div>
-                  <div
-                    style={{
-                      maxHeight: isOpen ? "1000px" : "0px",
-                      overflow: "hidden",
-                      transition: "max-height 0.3s ease",
-                      padding: isOpen ? "12px 16px" : "0 16px",
-                    }}
-                  >
-                    {isOpen && (
-                      <>
-                        {histories.map((h, idx) => (
-                          <div
-                            key={idx}
-                            style={{
-                              padding: "4px 0",
-                              color:
-                                h.type === "buff"
-                                  ? "limegreen"
-                                  : h.type === "debuff"
-                                  ? "red"
-                                  : "white",
-                            }}
-                          >
-                            {h.change}
-                          </div>
-                        ))}
-                        <Link href={`/item/${encodeURIComponent(itemName)}`}>
-                          <CardButton>このアイテムの過去のパッチも見る</CardButton>
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {/* キャラクター */}
+            {Object.entries(entry.characters).map(([name, histories]) =>
+              renderHistoryBlock(version, "characters", name, histories)
+            )}
+
+            {/* システム */}
+            {Object.entries(entry.systems).map(([name, histories]) =>
+              renderHistoryBlock(version, "systems", name, histories)
+            )}
           </div>
         ))}
     </div>

@@ -217,7 +217,8 @@ public class RoundManager : NetworkBehaviour
 
         if (Mode == "Practice")
         {
-            myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999 - 800);
+            myPlayer.GetComponentInChildren<CreditManager>().credit = 0;
+            myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999);
         }
         else
         {
@@ -275,8 +276,12 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
         myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
-
         myPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
+        otherPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
+        otherPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
+        otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+        otherPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
+        otherPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
     }
 
 

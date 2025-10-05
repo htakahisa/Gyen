@@ -1,68 +1,46 @@
 using Mirror;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class BotSetting : NetworkBehaviour
 {
 
-    public GameObject Bot;
+    private UIGradient image;
+    public RoundManager.BotMove mode;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
-        
+        image = GetComponent<UIGradient>();
+        image.bottomColor = Color.black;
     }
 
-    // Update is called once per frame
+
+    // Start is called before the first frame update
     void Update()
     {
-        
-    }
-
-    public void AddBot()
-    {
-        GameObject bot = Instantiate(Bot);
-        NetworkServer.Spawn(bot);
-        //ƒIƒ“ƒ‰ƒCƒ““¯Šú‚·‚é‚È‚çSpawn‚·‚×‚«
-        SetBot(bot);
-    }
-
-    public void DeleteBot()
-    {
-        if (RoundManager.rm.GetBots().Count >= 1)
+        if (RoundManager.rm.currentBotMove == mode)
         {
-            Destroy(RoundManager.rm.GetBots()[Random.Range(0, RoundManager.rm.GetBots().Count - 1)]);
+            image.bottomColor = Color.gray;
+        }
+        else
+        {
+            image.bottomColor = Color.black;
+        }
+    }
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            ChangeBotMode();
         }
     }
 
-    public void SetBot(GameObject bot)
-    {
-        bot.GetComponent<BotManager>().ResetPos();
-        bot.GetComponent<HpMaster>().armer = RoundManager.rm.GetMyPlayer().GetComponent<HpMaster>().armer;
-    }
+  
 
-    public void BotStopping()
+    public void ChangeBotMode()
     {
-        RoundManager.rm.currentBotMove = RoundManager.BotMove.STOP;
-    }
-
-    public void BotWalking()
-    {
-        RoundManager.rm.currentBotMove = RoundManager.BotMove.WALK;
-    }
-
-    public void BotRunning()
-    {
-        RoundManager.rm.currentBotMove = RoundManager.BotMove.RUN;
-    }
-
-    public void BotJumping()
-    {
-        RoundManager.rm.currentBotMove = RoundManager.BotMove.JUMP;
-    }
-
-    public void BotCrouching()
-    {
-        RoundManager.rm.currentBotMove = RoundManager.BotMove.CROUCH;
+        RoundManager.rm.currentBotMove = mode;
     }
 
 }

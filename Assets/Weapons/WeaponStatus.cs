@@ -24,7 +24,10 @@ public class WeaponStatus
 
 
     }
-   
+
+
+    // š c’e”‚ğ’Ç‰Á
+    public int currentAmmo;
     public int weaponIndex;
     public WeaponType weaponType;
     public GameObject weaponPrefab;

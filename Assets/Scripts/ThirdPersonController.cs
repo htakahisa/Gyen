@@ -1,6 +1,10 @@
 ﻿using Mirror;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.InputSystem.Users;
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 #endif
 
@@ -139,26 +143,101 @@ namespace StarterAssets
 
         public CharacterTransfromNetwork transformNetwork;
 
-        public Coroutine stunCoroutine;
+        private PlayerInputActions inputActions;
+        private Vector2 moveInput;
+        private Vector2 lookInput;
+        private bool jump;
+        private bool isCrouching = false;
+        private bool isWalking = false;
 
-        public override void OnStartAuthority() 
+        public Coroutine stunCoroutine;
+        public string currentControlScheme = "Keyboard&Mouse"; // 初期値
+
+        [Header("Aim Assist")]
+        [Header("エイムアシスト設定")]
+        public float assistRange = 30f;         // 敵を補正対象とする最大距離
+        public float maxAssistAngle = 6f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
+        public float assistStrength = 10f;      // 補正の強さ（回転スピード）
+
+        public List<Transform> enemies = new List<Transform>();   // 敵のキャッシュリスト
+        private Transform targetEnemy;
+
+        private float currentPitch = 0f;    // カメラの上下角度
+        private PlayerInput playerInput;
+
+        public override void OnStartAuthority()
         {
+            playerInput = GetComponentInParent<PlayerInput>();
+
+            inputActions = new PlayerInputActions();
+            inputActions.Player.Enable();
+            inputActions.Player.Jump.performed += OnJump;
+            inputActions.Player.Interact.performed += _ => GetOrb();
+
+
+            // 起動時に初期デバイスを判定
+            InitializeControlScheme();
+
+            // デバイス入力の変更を検知
+            InputSystem.onEvent += OnInputEvent;
+            InputSystem.onDeviceChange += OnDeviceChange;
+
+            // しゃがみ：長押しでON、離したらOFF
+            inputActions.Player.Crouch.performed += _ => isCrouching = true;
+            inputActions.Player.Crouch.canceled += _ => isCrouching = false;
+
+            // 歩き：長押しでON、離したらOFF
+            inputActions.Player.Walk.performed += _ => isWalking = true;
+            inputActions.Player.Walk.canceled += _ => isWalking = false;
             if (_mainCamera == null)
             {
                 _CameraComponent = GetComponentInChildren<Camera>();
                 _mainCamera = _CameraComponent.gameObject;
                 _UiCameraComponent = _mainCamera.transform.GetChild(0).GetComponent<Camera>();
                 _UiCamera = _UiCameraComponent.gameObject;
-                Canvas canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>();
-                canvas.worldCamera = _CameraComponent;
+                Canvas canvas = GameObject.FindGameObjectWithTag("Canvas")?.GetComponent<Canvas>();
                 _shootManager = GetComponent<ShootManager>();
                 _hpMaster = GetComponentInParent<HpMaster>();
             }
+
+            
 
             myBody.layer = 7;
             _CameraComponent.enabled = true;
             _UiCameraComponent.enabled = true;
         }
+        public void RefreshEnemyTargets()
+        {
+            enemies.Clear();
+
+            List<GameObject> targets = new List<GameObject>();
+            targets.Add(RoundManager.rm.GetOtherPlayer());
+            if (targets == null || targets.Count == 0 || targets.Contains(null))
+            {
+                // RoundManager から全ボット取得
+                targets = RoundManager.rm.GetBots();
+            }
+                
+            
+
+            foreach (var target in targets)
+            {
+                if (target == null) continue;
+
+                // 子オブジェクトから Body と Head を探す
+                Transform[] children = target.GetComponentsInChildren<Transform>(true);
+                foreach (Transform child in children)
+                {
+                    if (child.CompareTag("Body") || child.CompareTag("Head"))
+                    {
+                        enemies.Add(child);
+                        Debug.Log(child);
+                    }
+                }
+            }
+        }
+
+
 
         private void Start()
         {
@@ -177,9 +256,69 @@ namespace StarterAssets
             
 
         }
-
-        private void Update()
+        private void InitializeControlScheme()
         {
+            if (Gamepad.all.Count > 0 && Gamepad.all.Count == 0)
+            {
+                // 最初の接続されているGamepadを使用
+                SwitchScheme("Gamepad", Gamepad.all[0]);
+            }
+            else
+            {
+                // キーボードとマウス
+                SwitchScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
+            }
+        }
+
+        private void SwitchScheme(string schemeName, params InputDevice[] devices)
+        {
+            if (playerInput.currentControlScheme != schemeName)
+            {
+                playerInput.SwitchCurrentControlScheme(schemeName, devices);
+                currentControlScheme = schemeName;
+                Debug.Log($"Switched to: {schemeName}");
+            }
+        }
+
+        // 入力イベントを監視して、最後に操作したデバイスを判定
+        private void OnInputEvent(InputEventPtr eventPtr, InputDevice device)
+        {
+            if (!isLocalPlayer) return;
+
+            // 無効なデバイスやUI入力は無視
+            if (!device.added || device is Pointer) return;
+
+            if (device is Keyboard || device is Mouse)
+            {
+                SwitchScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
+            }
+            else if (device is Gamepad)
+            {
+                SwitchScheme("Gamepad", device);
+            }
+        }
+
+        // デバイスが追加・切断された場合の対応
+        private void OnDeviceChange(InputDevice device, InputDeviceChange change)
+        {
+            if (!isLocalPlayer) return;
+
+            if (change == InputDeviceChange.Removed || change == InputDeviceChange.Disconnected)
+            {
+                // 現在のデバイスが切断された場合、他のデバイスに切替
+                InitializeControlScheme();
+            }
+        }
+
+        // 外部で現在のスキームを取得する場合
+        public string GetCurrentScheme()
+        {
+            return currentControlScheme;
+        }
+    
+
+    private void Update()
+    {
 
             GroundedCheck();
 
@@ -196,7 +335,8 @@ namespace StarterAssets
             }
             else
             {
-
+                if (RoundManager.rm != null)
+                {
                     if (RoundManager.rm.Mode == "Practice" || (RoundManager.rm.Mode == "1VS1" && isLocalPlayer))
                     {
                         _audioListener.enabled = true;
@@ -205,14 +345,19 @@ namespace StarterAssets
                     {
                         _audioListener.enabled = false;
                     }
+                }
 
             }
 
+            if (GetComponentInParent<NetworkIdentity>() == null)
+            {
+                return;
+            }
             if (!isLocalPlayer)
             {
                 return;
             }
-
+            
             _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
             _hasAnimator = TryGetComponent(out _animator);
 
@@ -228,17 +373,17 @@ namespace StarterAssets
                 GetOrb();
             }
 
-            if(Input.GetKeyDown(KeyCode.P))
-            {
-                if (_animator.GetInteger(_animDance) == 0)
-                {
-                    CmdCallDance();
-                }
-                else
-                {
-                    CmdCallEndDance();
-                }
-            }
+            //if(Input.GetKeyDown(KeyCode.P))
+            //{
+            //    if (_animator.GetInteger(_animDance) == 0)
+            //    {
+            //        CmdCallDance();
+            //    }
+            //    else
+            //    {
+            //        CmdCallEndDance();
+            //    }
+            //}
 
             
 
@@ -267,7 +412,122 @@ namespace StarterAssets
         {
             if (!isLocalPlayer) return;
             CameraRotation();
+            if (currentControlScheme == "Gamepad")
+            {  
+
+                // 補正対象の敵を検索
+                targetEnemy = FindBestEnemyTarget();
+
+                
+               
+                ApplyAimAssist();
+                
+            }
         }
+
+
+        private Transform FindBestEnemyTarget()
+        {
+            Transform bestTarget = null;
+            float bestAngle = maxAssistAngle;
+
+            foreach (var enemy in enemies)
+            {
+                if (enemy == null) continue;
+
+                Vector3 dirToEnemy = (enemy.position - _mainCamera.transform.position).normalized;
+                float distance = Vector3.Distance(_mainCamera.transform.position, enemy.position);
+                if (distance > assistRange) continue;
+
+                float angle = Vector3.Angle(_mainCamera.transform.forward, dirToEnemy);
+
+                if (angle < bestAngle)
+                {
+                    bestAngle = angle;
+                    bestTarget = enemy;
+                }
+            }
+
+            return bestTarget;
+        }
+
+        private void ApplyAimAssist()
+        {
+
+            RefreshEnemyTargets();
+            
+            Vector3 camPos = Camera.main.transform.position;
+            Vector3 camFwd = Camera.main.transform.forward;
+
+            Transform bestTargetPart = null;
+            Vector3 bestTargetPoint = Vector3.zero;
+            float bestAngle = maxAssistAngle;
+
+            // ---- 敵のパーツを全部チェック ----
+            foreach (var enemy in enemies)
+            {
+                if (enemy == null) continue;
+
+                Transform[] parts = enemy.GetComponentsInChildren<Transform>();
+                foreach (var part in parts)
+                {
+                    Vector3 point = part.position;
+                    var col = part.GetComponent<Collider>();
+                    if (col != null) point = col.ClosestPoint(camPos);
+
+                    Vector3 toPart = point - camPos;
+                    float angle = Vector3.Angle(camFwd, toPart);
+
+                    if (angle < bestAngle && !Physics.Linecast(camPos, point, GroundLayers))
+                    {
+                        bestAngle = angle;
+                        bestTargetPart = part;
+                        bestTargetPoint = point;
+                    }
+                }
+            }
+
+            // 入力取得
+            Vector2 lookInput = inputActions.Player.Look.ReadValue<Vector2>();
+            float horizontalInput = lookInput.x;
+            float verticalInput = lookInput.y;
+            bool hasVerticalInput = Mathf.Abs(verticalInput) > 0.05f;
+            bool hasHorizontalInput = Mathf.Abs(horizontalInput) > 0.05f;
+
+            if (bestTargetPart != null)
+            {
+                // ---- 現在カメラ回転 ----
+                Quaternion currentRot = Camera.main.transform.rotation;
+
+                // ---- ターゲット方向 ----
+                Vector3 toTarget = bestTargetPoint - camPos;
+                Quaternion targetRot = Quaternion.LookRotation(toTarget);
+
+                // ---- 入力による補正の弱め方 ----
+                float verticalFactor = hasVerticalInput ? 0.2f : 1f;
+                float horizontalFactor = hasHorizontalInput ? 0.4f : 1f;
+
+                // ---- 回転補正 ----
+                float step = assistStrength * Time.deltaTime;
+                Quaternion finalRot = Quaternion.RotateTowards(
+                    currentRot,
+                    targetRot,
+                    step * Mathf.Max(verticalFactor, horizontalFactor)
+                );
+
+                // ---- カメラに反映 ----
+                Vector3 euler = finalRot.eulerAngles;
+                currentPitch = euler.x > 180f ? euler.x - 360f : euler.x;
+                transformNetwork.yaw = euler.y;
+                CameraParticularRotaion(-currentPitch);
+                parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+            }
+        }
+
+
+
+
 
         private void AssignAnimationIDs()
         {
@@ -296,11 +556,31 @@ namespace StarterAssets
                 _animator.SetBool(_animIDGrounded, Grounded);
             }
         }
+      
 
         private void CameraRotation()
         {
-            float mouseX = Input.GetAxis("Mouse X");
-            float mouseY = Input.GetAxis("Mouse Y");
+            lookInput = inputActions.Player.Look.ReadValue<Vector2>();
+
+            Vector2 look = Mouse.current.delta.ReadValue();
+
+            if (look.sqrMagnitude > 0.001f)
+            {
+                SwitchScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
+            }
+            float magnification = 1;
+
+            if (currentControlScheme == "Keyboard&Mouse")
+            {
+                magnification = 0.05f;
+            }
+            if (currentControlScheme == "Gamepad")
+            {
+                magnification = 2f;
+            }
+            // マウス or スティック両対応
+            float mouseX = lookInput.x * magnification;
+            float mouseY = lookInput.y * magnification;
 
             // 上下方向の回転を蓄積してClamp
             xRotation -= mouseY * _sensitivity;
@@ -311,10 +591,11 @@ namespace StarterAssets
                 // カメラに上下回転を適用
                 _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-                // --- 身体の左右回転 (Yaw) ---
-                transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
-                parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                    // --- 身体の左右回転 (Yaw) ---
+                    transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
+                    parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+                    transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                
             }
 
         }
@@ -377,15 +658,15 @@ namespace StarterAssets
         private void Move()
         {
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0); // 0 = Base Layer
-            bool walk = Input.GetKey(KeyCode.LeftControl);
-            bool crouch = stateInfo.IsName("Idle Crouching") || stateInfo.IsName("Idle CrouchingAiming");
+
+            bool crouch = stateInfo.IsName("Crouch");
 
             bool sneak = _shootManager.IsZooming;
 
-            // **Input.GetAxis ではなく、Input.GetKey で即時判定**
-            float horiMove = Input.GetAxisRaw("Horizontal");
-
-            float verMove = Input.GetAxisRaw("Vertical");
+            // Move アクションから入力を取得
+            moveInput = inputActions.Player.Move.ReadValue<Vector2>();
+            float horiMove = moveInput.x;   // 横方向（A/Dキー、左スティック左右）
+            float verMove = moveInput.y;    // 縦方向（W/Sキー、左スティック上下）
 
             bool isMove = (horiMove != 0 || verMove != 0);
 
@@ -405,7 +686,7 @@ namespace StarterAssets
                     {
 
 
-                        if (walk)
+                        if (isWalking)
                         {
                             targetSpeed = MoveSpeed;
                         }
@@ -447,8 +728,10 @@ namespace StarterAssets
                 _speed = 0;
             }
 
-
-            CmdReportSpeed(_speed);
+            if (isLocalPlayer)
+            {
+                CmdReportSpeed(_speed);
+            }
 
             // **移動ベクトルを計算（空中では最後の移動方向を維持）**
             Vector3 moveDirection = _lastMoveDirection * _speed;
@@ -459,7 +742,7 @@ namespace StarterAssets
             if (_speed > 0)
             {
                 _dashSound -= Time.deltaTime;
-                if (_dashSound <= 0 && !walk)
+                if (_dashSound <= 0 && !isWalking)
                 {
                     OnFootstep();
                     _dashSound = 0.4f;
@@ -474,14 +757,17 @@ namespace StarterAssets
             //Debug.Log("p" + moveDirection);
             // **CharacterControllerで移動**
             controller.Move(moveDirection * Time.deltaTime);
-            transformNetwork.CmdPos(transform.position);
+            if (isLocalPlayer)
+            {
+                transformNetwork.CmdPos(transform.position);
+            }
 
             // **アニメーター更新**
             if (_hasAnimator)
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
                 _animator.SetFloat(_animIDMotionSpeed, _speed);
-                _animator.SetBool(_animCrouching, Input.GetKey(KeyCode.LeftShift));
+                _animator.SetBool(_animCrouching, isCrouching);
             }
 
 
@@ -497,7 +783,6 @@ namespace StarterAssets
         private void GetOrb()
         {
 
-            if(Input.GetKey(KeyCode.F)){
 
                 try
                 {
@@ -519,13 +804,12 @@ namespace StarterAssets
                 {
 
                 }
-            }
+            
 
         }
 
         private void JumpAndGravity()
         {
-            bool jump = Input.GetKeyDown(KeyCode.Space);
 
             if (Grounded)
             {
@@ -604,6 +888,14 @@ namespace StarterAssets
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
         }
+        private void OnJump(InputAction.CallbackContext context)
+        {
+            if (!Grounded) return;
+
+            // ジャンプ開始
+            jump = true;
+        }
+
 
         public void Reloading() 
         {
@@ -648,7 +940,7 @@ namespace StarterAssets
         public void BotMove(float horiMove, bool isWalk, bool isCrouch)
         {
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0); // 0 = Base Layer
-            bool crouch = stateInfo.IsName("Idle Crouching") || stateInfo.IsName("Idle CrouchingAiming");
+            bool crouch = stateInfo.IsName("Crouch");
             bool isMove = (horiMove != 0);
 
             _animator.SetBool(_animCrouching, isCrouch);
@@ -869,7 +1161,7 @@ namespace StarterAssets
         {
             if (Grounded)
             {
-
+                if (!isLocalPlayer) return;
                 AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume);
                     
                 
@@ -878,7 +1170,7 @@ namespace StarterAssets
 
         private void OnLand()
         {
-
+            if (!isLocalPlayer) return;
             AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume);
             
         }

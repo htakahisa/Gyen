@@ -1,84 +1,66 @@
-using Mirror;
+﻿using Mirror;
 using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using static WeaponStatus;
 
 public class WeaponManager : NetworkBehaviour
 {
     public ShootManager shootManager;
-
-
-
-    [SyncVar]
-    public int magazine;
-
-    [SyncVar]
-    public bool isReloading = false;
-
     public Transform weaponHolder;
     public List<WeaponStatus> weapons;
 
-    [SyncVar]
-    private int currentWeaponIndex = -1;
+    [SyncVar] public int magazine;  // ← 現在装備中の武器の残弾数
+    [SyncVar] public bool isReloading = false;
 
+    [SyncVar] private int currentWeaponIndex = -1;
 
+    [SyncVar] public WeaponType mainWeaponType;
+    [SyncVar] public WeaponType subWeaponType;
+    [SyncVar] public WeaponType abilityWeaponType;
+    public Coroutine reloadCoroutine;
 
-    // ����̃f�[�^�x�[�X
-    //private Dictionary<WeaponType, WeaponData> weaponDatabase = new Dictionary<WeaponType, WeaponData>()
-    //{
-    //    { WeaponType.Hotaru, new WeaponData("Hotaru", 50, 400, 0f, 0f, 0f, 0, 0f, true, false, 55f, 0f, 1, 0, false) },
-    //    { WeaponType.Lover, new WeaponData("Lover", 20, 80, 0.17f, 0.04f, 0.3f, 7, 0.8f,false, false, 80f, 0f, 1, 0, false) },
-    //    { WeaponType.Leo, new WeaponData("Leo", 30, 70, 0.11f, 0.1f, 0.35f, 12, 1.2f,false, false, 80f, 0f, 1, 0, true) },
-    //    { WeaponType.Liet, new WeaponData("Liet", 35, 125, 0.15f, 0f, 0.15f, 9, 1.3f,false, false, 80f, 0f ,1, 0, false) },
-    //    { WeaponType.AntiREX, new WeaponData("Anti-REX", 65, 280, 0.7f, 0f, 0.75f, 4, 1.3f, false, false, 80f, 0f , 1, 0, false) },
-    //    { WeaponType.Kafka, new WeaponData("Kafka", 25, 80, 0.065f, 0.3f, 0.4f, 20, 1.5f,true, false, 65f, 0.02f, 5, 0.06f, true) },
-    //    { WeaponType.FALLEN, new WeaponData("FALLEN", 70, 290, 0.4f, 0f, 0.4f, 12, 1.5f,true, false, 45f, 0.03f , 1, 0, false) },
-    //    { WeaponType.KasMi, new WeaponData("KasMi", 45, 190, 0.09f, 0.05f, 0.17f, 30, 1.7f,true, false, 50f, 0.03f, 2, 0.07f, true) },
-    //    { WeaponType.ReiNe, new WeaponData("ReiNe", 60, 200, 0.12f, 0.1f, 0.55f, 20, 1.5f,true, false, 60f, 0.05f, 1, 0, true) },
-    //    { WeaponType.Hazard, new WeaponData("Hazard", 200, 400, 1f, 0f, 0f, 2, 3f,true, true, 25f, 0.1f, 1, 0, false) },
-    //    { WeaponType.RapetPuppet, new WeaponData("RapetPuppet", 30, 50, 0.07f, 0.3f, 0.4f, 70, 2f,true, false, 40f, 0.1f, 1, 0, true) },
-    //    { WeaponType.Violets, new WeaponData("Violets", 45, 100, 0.06f, 0.4f, 0.3f, 152, 4f,true, false, 45f, 0.2f, 1, 0, true) },
-    //    { WeaponType.Rebelliousness, new WeaponData("Rebelliousness", 70, 400, 0.5f, 0f, 0.6f, 3, 1f, true, false, 65f, 0.05f, 2, 0.2f, false) },
-    //};
+    private PlayerInputActions inputActions;
 
-
-private void Awake()
-{
-    int count = weapons.Count;
-    for (int i = 0; i < count; i++)
+    public override void OnStartAuthority()
     {
-        var data = weapons[i];
+        inputActions = new PlayerInputActions();
+        enabled = true;
+        inputActions.Player.Enable();
 
-        WeaponStatus slot = new WeaponStatus();
-        slot.weaponType = data.weaponType;
-        slot.weaponPrefab = data.weaponPrefab;
-        slot.instance = null;
-
-        weapons.Add(slot);
+        inputActions.Player.SwitchPrimary.performed += _ => CmdSwitchWeapon(mainWeaponType);
+        inputActions.Player.SwitchSidearm.performed += _ => CmdSwitchWeapon(subWeaponType);
     }
-}
+
+
+    private void Update()
+    {
+        if (!isLocalPlayer) return;
+
+    }
+
     public WeaponType GetCurrentWeaponType()
     {
         if (currentWeaponIndex == -1)
         {
-            Debug.LogWarning("���ݑ������̕���͂���܂���");
-            return default; // 0�Ԗڂ�enum���Ԃ�iPistol�Ȃǁj
+            Debug.LogWarning("現在装備中の武器はありません");
+            return default;
         }
-
         return weapons[currentWeaponIndex].weaponType;
+    }
+
+    public WeaponStatus GetCurrentWeaponSlot()
+    {
+        if (currentWeaponIndex == -1) return null;
+        return weapons[currentWeaponIndex];
     }
 
     public WeaponDatabase GetCurrentWeaponStats()
     {
-        if (currentWeaponIndex == -1)
-        {
-            Debug.LogWarning("���݁A�������̕���͂���܂���");
-            return null;
-        }
-        return weapons[currentWeaponIndex].dataBase;
+        var slot = GetCurrentWeaponSlot();
+        return slot != null ? slot.dataBase : null;
     }
 
     [Command]
@@ -87,16 +69,25 @@ private void Awake()
         RpcEquipWeapon(type);
     }
 
-
     [ClientRpc]
     public void RpcEquipWeapon(WeaponType type)
     {
+        shootManager.ResetZoom();
         int index = weapons.FindIndex(w => w.weaponType == type);
         if (index == -1) return;
 
+        // 現在の武器の弾数を保存
+        if (currentWeaponIndex != -1)
+        {
+            var prevSlot = weapons[currentWeaponIndex];
+            prevSlot.currentAmmo = magazine;
+        }
+
+        // 非表示
         if (currentWeaponIndex != -1 && weapons[currentWeaponIndex].instance != null)
             weapons[currentWeaponIndex].instance.SetActive(false);
 
+        // インスタンス生成
         if (weapons[index].instance == null)
         {
             var newWeapon = Instantiate(weapons[index].weaponPrefab, weaponHolder);
@@ -106,43 +97,76 @@ private void Awake()
         weapons[index].instance.SetActive(true);
         currentWeaponIndex = index;
 
-        GetComponent<ThirdPersonController>().CmdChangeGunType(weapons[currentWeaponIndex].dataBase.gunType);
+        // ★ 切り替えた武器の弾数を magazine に反映
+        var newSlot = weapons[index];
+        magazine = newSlot.currentAmmo;
 
+        // 見た目・射撃タイプ反映
+        GetComponent<ThirdPersonController>().CmdChangeGunType(newSlot.dataBase.gunType);
     }
 
-    public void HideWeapon()
-    {
-        weapons[currentWeaponIndex].instance.SetActive(false);
-    }
-
-    //You should call this method only when you have hideweapon then reset that
-    public void ReHideWeapon()
-    {
-        weapons[currentWeaponIndex].instance.SetActive(true);
-    }
-
-    // ������w��
+    // 購入処理（メイン／サブ判定は前回実装のまま）
     [Command(requiresAuthority = false)]
     public void CmdBuyWeapon(WeaponType type)
     {
+        var slot = weapons.Find(w => w.weaponType == type);
+        if (slot == null) return;
+
+        var gunType = slot.dataBase.gunType;
+        if (gunType == "Rifle")
+        {
+            mainWeaponType = type;
+        }
+        else if (gunType == "Pistol")
+        {
+            subWeaponType = type;
+        }
+        else if (gunType == "Ability")
+        {
+            abilityWeaponType = type;
+        }
+
+            // ★ 弾数初期化
+            slot.currentAmmo = slot.dataBase.magazineSize;
+
         StartCoroutine(BuyWeaponAndSetMagazine(type));
     }
 
-    public IEnumerator BuyWeaponAndSetMagazine(WeaponType type)
+    // 売却処理（メイン／サブ判定は前回実装のまま）
+    [Command(requiresAuthority = false)]
+    public void CmdSellWeapon(WeaponType type)
+    {
+        var slot = weapons.Find(w => w.weaponType == type);
+        if (slot == null) return;
+
+        var gunType = slot.dataBase.gunType;
+        if (gunType == "Rifle")
+        {
+            mainWeaponType = WeaponType.Hotaru;
+            CmdSwitchWeapon(subWeaponType);
+        }
+        else if (gunType == "Pistol")
+        {
+            subWeaponType = WeaponType.Lover;
+            CmdSwitchWeapon(subWeaponType);
+        }
+
+        // ★ 弾数初期化
+        slot.currentAmmo = slot.dataBase.magazineSize;
+
+        StartCoroutine(BuyWeaponAndSetMagazine(type));
+    }
+
+    private IEnumerator BuyWeaponAndSetMagazine(WeaponType type)
     {
         var slot = weapons.Find(w => w.weaponType == type);
         if (slot != null)
         {
             RpcEquipWeapon(type);
-
-            Debug.Log($"Switched to {type}");
+            yield return new WaitWhile(() => GetCurrentWeaponType() != type);
+            StartCoroutine(SetMagazineMax(0f));
         }
-
-        yield return new WaitWhile(() => GetCurrentWeaponType() == type); 
-
-        SetMagazineMax();
     }
-
 
     [Command(requiresAuthority = false)]
     public void CmdReload()
@@ -153,24 +177,61 @@ private void Awake()
     [ClientRpc]
     public void RpcReload()
     {
-        var slot = GetCurrentWeaponStats();
-        if (slot != null)
-        {
-            if ((isReloading || magazine == slot.magazineSize) && shootManager.canShoot)
-            {
-                return;
-            }
-            GetComponent<ThirdPersonController>().Reloading();
-            isReloading = true;
-            Invoke("SetMagazineMax", GetCurrentWeaponStats().reloadTime);
-        }
+        var slot = GetCurrentWeaponSlot();
+        if (slot == null) return;
+
+        var data = slot.dataBase;
+        if ((isReloading || magazine == data.magazineSize) && shootManager.canShoot)
+            return;
+
+        GetComponent<ThirdPersonController>().Reloading();
+        isReloading = true;
+        reloadCoroutine = StartCoroutine(SetMagazineMax(data.reloadTime));
     }
 
-    public void SetMagazineMax()
+    public IEnumerator SetMagazineMax(float time)
     {
-        GetComponent<ThirdPersonController>().EndReloading();
+        yield return new WaitForSeconds(time);
+
+        var slot = GetCurrentWeaponSlot();
+        if (slot == null) yield break;
+
+        var tpc = GetComponent<ThirdPersonController>();
+        tpc.EndReloading();
         isReloading = false;
-        magazine = GetCurrentWeaponStats().magazineSize;
+
+        magazine = slot.dataBase.magazineSize;
+        slot.currentAmmo = magazine;   // ★ 武器データにも反映
     }
 
+    [Command]
+    public void CmdSwitchWeapon(WeaponType type)
+    {
+        if (mainWeaponType.Equals(default) || subWeaponType.Equals(default) || abilityWeaponType.Equals(default))
+            return;
+
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            isReloading = false;
+            var tpc = GetComponent<ThirdPersonController>();
+            tpc.EndReloading();
+        }
+
+        RpcEquipWeapon(type);
+        
+    }
+
+    public void HideWeapon()
+    {
+        if (currentWeaponIndex != -1)
+            weapons[currentWeaponIndex].instance.SetActive(false);
+    }
+
+    // u should call this method only when u had hide weapon then.
+    public void ReHideWeapon()
+    {
+        if (currentWeaponIndex != -1)
+            weapons[currentWeaponIndex].instance.SetActive(true);
+    }
 }

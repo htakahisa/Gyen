@@ -1,5 +1,6 @@
 using Mirror;
 using StarterAssets;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,7 +10,7 @@ public class AbilityController : NetworkBehaviour
 
     public LayerMask wallLayer;
 
-    [SerializeField] private List<GameObject> objectList; // ŠÇ—‚·‚éƒŠƒXƒg
+    [SerializeField] private List<GameObject> objectList; 
     public GameObject nowControlled;
     public GameObject nowGeometry;
     public GameObject nowCamera;
@@ -17,7 +18,6 @@ public class AbilityController : NetworkBehaviour
     public ShootManager shootManager;
     public SkillManager skillManager;
 
-    
 
 
     [SyncVar]
@@ -26,19 +26,32 @@ public class AbilityController : NetworkBehaviour
     public LayerMask ground;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public override void OnStartAuthority()
+    public void Awake()
     {
+
+        if (GetComponent<NetworkIdentity>() == null)
+        {
+            return;
+        }
+        if (!isLocalPlayer)
+        {
+            return;
+        }
         _controller = GetComponent<CharacterController>();
         SwitchForm(PlayerForm.Human);
-     
+
+
     }
     
 
     // Update is called once per frame
     void Update()
     {
-
-        if (GetComponentInParent<PlayerManager>().canAbility && isLocalPlayer)
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+        if (GetComponentInParent<PlayerManager>().canAbility)
         {
             Ability();
         }
@@ -76,7 +89,7 @@ public class AbilityController : NetworkBehaviour
         Physics.Raycast(pos, dir, out RaycastHit hit, 100, wallLayer);
 
         Vector3 offsetDirection = -dir;
-        float offsetDistance = 0.3f; // ­‚µè‘O‚Ì‹——£i•K—v‚É‰‚¶‚Ä’²®j
+        float offsetDistance = 0.3f; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½Ì‹ï¿½ï¿½ï¿½ï¿½iï¿½Kï¿½vï¿½É‰ï¿½ï¿½ï¿½ï¿½Ä’ï¿½ï¿½ï¿½ï¿½j
 
         return hit.point + offsetDirection * offsetDistance;
 
@@ -109,6 +122,8 @@ public class AbilityController : NetworkBehaviour
 
         if (newForm == PlayerForm.Human)
         {
+
+            StartCoroutine(CorrectCharacterPosition(gameObject));
             GetComponent<HpMaster>().isInvincible = false;
             nowControlled = objectList.FirstOrDefault(obj => obj.name == "PlayerObject");
 
@@ -118,17 +133,10 @@ public class AbilityController : NetworkBehaviour
                 _controller.height = 2.1f;
                 _controller.center = new Vector3(0, 1.1f, 0);
 
-           
-                while (Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), -transform.up, out RaycastHit hit, 2f, ground))
-                {
-                    _controller.Move(Vector3.up);
-                    Debug.Log(transform.position.y);
-                }
             }
 
 
-
-
+           
         }
         else if (newForm == PlayerForm.Bird)
         {
@@ -146,9 +154,40 @@ public class AbilityController : NetworkBehaviour
         }
         nowGeometry = nowControlled.GetComponent<FormManager>().geometry;
         nowCamera = nowControlled.GetComponent<FormManager>().camera;
-
         DisableNowControlled();
     }
+
+    private IEnumerator CorrectCharacterPosition(GameObject character)
+    {
+
+
+        // Raycastã§åœ°é¢ã®é«˜ã•ã‚’å–å¾—
+        Vector3 pos = character.transform.position;
+        Ray ray = new Ray(pos + Vector3.up * 1f, Vector3.down);
+        if (Physics.Raycast(ray, out RaycastHit hit, 5f, ground))
+        {
+            GetComponent<PlayerManager>().canMove = false;
+            GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
+            GetComponent<CharacterController>().enabled = false;
+
+            pos.y += 1f; // å°‘ã—ä¸Šã«ã‚ªãƒ•ã‚»ãƒƒãƒˆã—ã¦åŸ‹ã¾ã‚Šé˜²æ­¢
+            Debug.Log(GetComponent<CharacterController>().enabled +""+ GetComponent<CharacterTransfromNetwork>().isSynchronize);
+            character.transform.position = pos;
+            GetComponent<CharacterTransfromNetwork>().isSynchronize = true;
+            GetComponent<CharacterTransfromNetwork>().CmdPos(transform.position);
+
+            yield return new WaitForSeconds(0.1f);
+            GetComponent<CharacterController>().enabled = true;
+            GetComponent<PlayerManager>().canMove = true;
+
+        }
+
+        DisableNowControlled();
+
+
+
+    }
+
 
     public void DisableNowControlled()
     {

@@ -16,8 +16,18 @@ public class IMirror : NetworkBehaviour
     void Start()
     {
         ground = LayerMask.GetMask("Ground");
-        // カメラの方向に向けて初期ベクトルを決定
-        Transform target = Camera.main.transform;
+        // サーバーが動かすので、サーバー
+
+        Transform target = null;
+
+        if (GetComponent<SpawnOwner>().IsMine())
+        {
+            target = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
+        }
+        else
+        {
+            target = RoundManager.rm.GetOtherPlayer().GetComponentInChildren<Camera>().transform;
+        }
         direction = target.forward;
         Invoke("CmdFlash", 1f);
     }
