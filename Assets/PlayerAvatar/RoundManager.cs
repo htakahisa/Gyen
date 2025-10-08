@@ -274,12 +274,12 @@ public class RoundManager : NetworkBehaviour
     {
         myPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
         myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
-        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+        myPlayer.GetComponentInChildren<WeaponManager>().RpcBuyWeapon(WeaponStatus.WeaponType.Lover);
         myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
         myPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
         otherPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
         otherPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
-        otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+        otherPlayer.GetComponentInChildren<WeaponManager>().RpcBuyWeapon(WeaponStatus.WeaponType.Lover);
         otherPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
         otherPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
     }

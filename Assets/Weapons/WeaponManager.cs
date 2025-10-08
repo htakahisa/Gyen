@@ -105,6 +105,32 @@ public class WeaponManager : NetworkBehaviour
         GetComponent<ThirdPersonController>().CmdChangeGunType(newSlot.dataBase.gunType);
     }
 
+    [ClientRpc]
+    public void RpcBuyWeapon(WeaponType type)
+    {
+        var slot = weapons.Find(w => w.weaponType == type);
+        if (slot == null) return;
+
+        var gunType = slot.dataBase.gunType;
+        if (gunType == "Rifle")
+        {
+            mainWeaponType = type;
+        }
+        else if (gunType == "Pistol")
+        {
+            subWeaponType = type;
+        }
+        else if (gunType == "Ability")
+        {
+            abilityWeaponType = type;
+        }
+
+        // ★ 弾数初期化
+        slot.currentAmmo = slot.dataBase.magazineSize;
+
+        StartCoroutine(BuyWeaponAndSetMagazine(type));
+    }
+
     // 購入処理（メイン／サブ判定は前回実装のまま）
     [Command(requiresAuthority = false)]
     public void CmdBuyWeapon(WeaponType type)

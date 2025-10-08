@@ -544,6 +544,7 @@ MonoBehaviour:
   isInvincible: 0
   isDead: 0
   onDeath: 1
+  lightLoadEffect: {fileID: 0}
 --- !u!114 &1498373660023880406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1479,12 +1480,9 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  MoveSpeed: 2
-  SprintSpeed: 3
-  RotationSmoothTime: 0.12
+  characterStats: {fileID: 11400000, guid: 6322fe3fd72eb614e84fdc6822595dfb, type: 2}
   SpeedChangeRate: 10
   FootstepAudioVolume: 0.3
-  JumpHeight: 1.2
   Gravity: -15
   JumpTimeout: 0
   FallTimeout: 0.15
@@ -1495,9 +1493,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 520
   CinemachineCameraTarget: {fileID: 0}
-  TopClamp: 70
-  BottomClamp: -30
-  CameraAngleOverride: 0
   LockCameraPosition: 0
   myBody: {fileID: 6913742342841936002}
   Invisible:
@@ -1516,6 +1511,8 @@ MonoBehaviour:
     type: 3}
   parentOfPlayer: {fileID: 1378437777043357902}
   transformNetwork: {fileID: 3879268398666100576}
+  currentControlScheme: Keyboard&Mouse
+  enemies: []
 --- !u!114 &9153969548150449125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1543,6 +1540,7 @@ MonoBehaviour:
     m_Bits: 1544
   transformNetwork: {fileID: 3879268398666100576}
   parentOfPlayer: {fileID: 1378437777043357902}
+  hazardScope: {fileID: 0}
 --- !u!114 &577424751439312189
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1559,8 +1557,13 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   shootManager: {fileID: 9153969548150449125}
+  weaponHolder: {fileID: 0}
+  weapons: []
   magazine: 0
   isReloading: 0
+  mainWeaponType: 0
+  subWeaponType: 0
+  abilityWeaponType: 0
 --- !u!114 &4523194813783854721
 MonoBehaviour:
   m_ObjectHideFlags: 0

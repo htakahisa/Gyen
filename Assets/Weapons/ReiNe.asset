@@ -19,7 +19,7 @@ MonoBehaviour:
   damage: 60
   headDamage: 200
   rate: 0.12
-  Xrecoil: 0.1
+  Xrecoil: 0.2
   Yrecoil: 0.55
   magazineSize: 20
   reloadTime: 1.5

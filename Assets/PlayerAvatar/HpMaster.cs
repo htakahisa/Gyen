@@ -8,7 +8,9 @@ public class HpMaster : NetworkBehaviour
     [SyncVar(hook = nameof(OnHpChanged))]
     public int hp = 100; // 各プレイヤーのHP
 
+    [SyncVar]
     public float armer = 1; // 各プレイヤーのHP
+
     [SyncVar]
     public bool isInvincible = false;
 

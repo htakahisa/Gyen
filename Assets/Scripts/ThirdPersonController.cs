@@ -17,16 +17,14 @@ namespace StarterAssets
 
     public class ThirdPersonController : NetworkBehaviour
     {
+
+        public CharacterStats characterStats;
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
-        public float MoveSpeed = 3.0f;
+        private float MoveSpeed = 3.0f;
 
         [Tooltip("Sprint speed of the character in m/s")]
-        public float SprintSpeed = 6f;
-
-        [Tooltip("How fast the character turns to face movement direction")]
-        [Range(0.0f, 0.3f)]
-        public float RotationSmoothTime = 0.12f;
+        private float SprintSpeed = 6f;
 
         [Tooltip("Acceleration and deceleration")]
         public float SpeedChangeRate = 10.0f;
@@ -35,7 +33,7 @@ namespace StarterAssets
 
         [Space(10)]
         [Tooltip("The height the player can jump")]
-        public float JumpHeight = 1.8f;
+        private float JumpHeight = 1.8f;
 
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
         public float Gravity = -18.0f;
@@ -64,14 +62,8 @@ namespace StarterAssets
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
         public GameObject CinemachineCameraTarget;
 
-        [Tooltip("How far in degrees can you move the camera up")]
-        public float TopClamp = 70.0f;
 
-        [Tooltip("How far in degrees can you move the camera down")]
-        public float BottomClamp = -30.0f;
-
-        [Tooltip("Additional degress to override the camera. Useful for fine tuning camera position when locked")]
-        public float CameraAngleOverride = 0.0f;
+        
 
         [Tooltip("For locking the camera position on all axis")]
         public bool LockCameraPosition = false;
@@ -155,9 +147,9 @@ namespace StarterAssets
 
         [Header("Aim Assist")]
         [Header("エイムアシスト設定")]
-        public float assistRange = 30f;         // 敵を補正対象とする最大距離
-        public float maxAssistAngle = 6f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
-        public float assistStrength = 10f;      // 補正の強さ（回転スピード）
+        private float assistRange = 30f;         // 敵を補正対象とする最大距離
+        private float maxAssistAngle = 6f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
+        private float assistStrength = 10f;      // 補正の強さ（回転スピード）
 
         public List<Transform> enemies = new List<Transform>();   // 敵のキャッシュリスト
         private Transform targetEnemy;
@@ -167,28 +159,8 @@ namespace StarterAssets
 
         public override void OnStartAuthority()
         {
-            playerInput = GetComponentInParent<PlayerInput>();
+            StartCoroutine(InitialSetInput());
 
-            inputActions = new PlayerInputActions();
-            inputActions.Player.Enable();
-            inputActions.Player.Jump.performed += OnJump;
-            inputActions.Player.Interact.performed += _ => GetOrb();
-
-
-            // 起動時に初期デバイスを判定
-            InitializeControlScheme();
-
-            // デバイス入力の変更を検知
-            InputSystem.onEvent += OnInputEvent;
-            InputSystem.onDeviceChange += OnDeviceChange;
-
-            // しゃがみ：長押しでON、離したらOFF
-            inputActions.Player.Crouch.performed += _ => isCrouching = true;
-            inputActions.Player.Crouch.canceled += _ => isCrouching = false;
-
-            // 歩き：長押しでON、離したらOFF
-            inputActions.Player.Walk.performed += _ => isWalking = true;
-            inputActions.Player.Walk.canceled += _ => isWalking = false;
             if (_mainCamera == null)
             {
                 _CameraComponent = GetComponentInChildren<Camera>();
@@ -206,6 +178,45 @@ namespace StarterAssets
             _CameraComponent.enabled = true;
             _UiCameraComponent.enabled = true;
         }
+
+        public IEnumerator InitialSetInput()
+        {
+            yield return new WaitForSeconds(0.1f);
+
+            playerInput = GetComponentInParent<PlayerInput>();
+            var jump = playerInput.actions.FindAction("Jump");
+            var interact = playerInput.actions.FindAction("Interact");
+            var crouch = playerInput.actions.FindAction("Crouch");
+            var walk = playerInput.actions.FindAction("Walk");
+
+            // 起動時に初期デバイスを判定
+            StartCoroutine(InitializeControlScheme());
+
+            // デバイス入力の変更を検知
+            InputSystem.onEvent += OnInputEvent;
+            InputSystem.onDeviceChange += OnDeviceChange;
+
+
+            jump.Enable();
+            interact.Enable();
+            crouch.Enable();
+            walk.Enable();
+
+            // ジャンプ：ボタン
+            jump.performed += OnJump;
+
+            // インタラクト：ボタン
+            interact.performed += _ => GetOrb();
+
+            // しゃがみ：長押しでON、離したらOFF
+            crouch.performed += _ => isCrouching = true;
+            crouch.canceled += _ => isCrouching = false;
+
+            // 歩き：長押しでON、離したらOFF
+            walk.performed += _ => isWalking = true;
+            walk.canceled += _ => isWalking = false;
+        }
+
         public void RefreshEnemyTargets()
         {
             enemies.Clear();
@@ -241,6 +252,7 @@ namespace StarterAssets
 
         private void Start()
         {
+            playerInput = GetComponentInParent<PlayerInput>();
             _hasAnimator = TryGetComponent(out _animator);
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 #else
@@ -252,12 +264,20 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
-
-            
+            MoveSpeed = characterStats.defaultMoveSpeed;
+            SprintSpeed = characterStats.defaultSprintSpeed;
+            JumpHeight = characterStats.defaultJumpHeight;
+            Gravity = characterStats.defaultGravity;
+            assistRange = characterStats.defaultAssistRange;
+            maxAssistAngle = characterStats.defaultMaxAssistAngle;
+            assistStrength = characterStats.defaultAssistStrength;
 
         }
-        private void InitializeControlScheme()
+        private IEnumerator InitializeControlScheme()
         {
+
+            yield return null;
+
             if (Gamepad.all.Count > 0 && Gamepad.all.Count == 0)
             {
                 // 最初の接続されているGamepadを使用
@@ -283,6 +303,7 @@ namespace StarterAssets
         // 入力イベントを監視して、最後に操作したデバイスを判定
         private void OnInputEvent(InputEventPtr eventPtr, InputDevice device)
         {
+            if (playerInput == null) return;
             if (!isLocalPlayer) return;
 
             // 無効なデバイスやUI入力は無視
@@ -385,7 +406,6 @@ namespace StarterAssets
             //    }
             //}
 
-            
 
         }
 
@@ -488,7 +508,7 @@ namespace StarterAssets
             }
 
             // 入力取得
-            Vector2 lookInput = inputActions.Player.Look.ReadValue<Vector2>();
+            Vector2 lookInput = playerInput.actions.FindAction("Look").ReadValue<Vector2>();
             float horizontalInput = lookInput.x;
             float verticalInput = lookInput.y;
             bool hasVerticalInput = Mathf.Abs(verticalInput) > 0.05f;
@@ -560,7 +580,7 @@ namespace StarterAssets
 
         private void CameraRotation()
         {
-            lookInput = inputActions.Player.Look.ReadValue<Vector2>();
+            lookInput = playerInput.actions.FindAction("Look").ReadValue<Vector2>();
 
             Vector2 look = Mouse.current.delta.ReadValue();
 
@@ -664,7 +684,7 @@ namespace StarterAssets
             bool sneak = _shootManager.IsZooming;
 
             // Move アクションから入力を取得
-            moveInput = inputActions.Player.Move.ReadValue<Vector2>();
+            moveInput = playerInput.actions.FindAction("Move").ReadValue<Vector2>();
             float horiMove = moveInput.x;   // 横方向（A/Dキー、左スティック左右）
             float verMove = moveInput.y;    // 縦方向（W/Sキー、左スティック上下）
 

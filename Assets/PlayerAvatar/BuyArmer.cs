@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static WeaponManager;
+using Mirror;
 
-public class BuyArmer : MonoBehaviour, IPointerClickHandler
+public class BuyArmer : NetworkBehaviour, IPointerClickHandler
 {
     public float armer;
     public int cost;
@@ -15,7 +16,7 @@ public class BuyArmer : MonoBehaviour, IPointerClickHandler
 
     private void Start()
     {
-        image = GetComponentInChildren<UIGradient>();
+        image = transform.parent.GetComponentInChildren<UIGradient>();
         image.bottomColor = Color.black;
     }
 
@@ -51,7 +52,7 @@ public class BuyArmer : MonoBehaviour, IPointerClickHandler
             if (roundManager.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, CreditManager.PurchaseSlot.Armor))
             {
                 roundManager.GetMyPlayer().GetComponent<CreditManager>().CmdBuy(cost, CreditManager.PurchaseSlot.Armor);
-                roundManager.GetMyPlayer().GetComponent<HpMaster>().armer = armer;
+                CmdBuy(roundManager.GetMyPlayer());
             }
         }
         if (roundManager.Mode == "Practice")
@@ -64,6 +65,12 @@ public class BuyArmer : MonoBehaviour, IPointerClickHandler
             }
 
         }
+    }
+        
+    [Command(requiresAuthority = false)]
+    public void CmdBuy(GameObject player)
+    {
+        player.GetComponent<HpMaster>().armer = armer;
     }
 
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class BotSetting : NetworkBehaviour
+public class BotSetting : NetworkBehaviour, IPointerClickHandler
 {
 
     private UIGradient image;

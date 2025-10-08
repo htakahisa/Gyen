@@ -64,7 +64,17 @@ public class BuyPanel : NetworkBehaviour
             LockCursor();
         }
 
-        Vector2 input = inputActions.Player.Move.ReadValue<Vector2>();
+        Vector2 input = inputActions.Player.Look.ReadValue<Vector2>();
+
+        if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().currentControlScheme == "Keyboard&Mouse")
+        {
+            cursorSpeed = 100f;
+        }
+        else if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().currentControlScheme == "Gamepad")
+        {
+            cursorSpeed = 1000f;
+        }
+
 
         // 位置更新
         cursorPos += input * cursorSpeed * Time.deltaTime;
@@ -132,7 +142,7 @@ public class BuyPanel : NetworkBehaviour
         Color inverted = new Color(1f - original.r, 1f - original.g, 1f - original.b, original.a);
         cursorUI.GetComponent<Image>().color = inverted;
         
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
 
         original = cursorUI.GetComponent<Image>().color;
         inverted = new Color(1f - original.r, 1f - original.g, 1f - original.b, original.a);
@@ -161,20 +171,15 @@ public class BuyPanel : NetworkBehaviour
     void LockCursor()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
         isCursorLocked = true;
         cursorUI.gameObject.SetActive(false);
     }
 
     void UnlockCursor()
     {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
         isCursorLocked = false;
-        if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().currentControlScheme == "Gamepad")
-        {
-            cursorUI.gameObject.SetActive(true);
-        }
+        cursorUI.gameObject.SetActive(true);
+        
     }
 
     // シーン切り替え時などにカーソル状態がリセットされないようにする

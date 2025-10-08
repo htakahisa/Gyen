@@ -51,7 +51,7 @@ public class ServerCheckShoot : NetworkBehaviour
     // レイヤーごとの減衰率設定（1mあたりの減衰率）
     private Dictionary<int, float> layerAttenuation = new Dictionary<int, float>()
 {
-    { 3, 0.5f },  // Ground: 1mごとに exp(-0.2*thickness) 減衰
+    { 3, 0.3f },  // Ground: 1mごとに exp(0.3*thickness) 減衰
     { 9, 999f },  // PhaseWall: 通過不可（ほぼ即死）
     { 10, 0.1f }, // Smoke: ほぼ影響なし（厚さ依存で微減衰）
 };

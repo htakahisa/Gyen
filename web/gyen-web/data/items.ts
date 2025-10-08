@@ -41,12 +41,13 @@ export const weapons: Item[] = [
   
    {
     name: "Leo",
-        rank: "2",
+        rank: "3",
     description: "値段に対してハイスペックなマシンピストル",
     history: [
       { version: "1.0.2", change: "胴体ダメージを35から30に低下", type: "debuff" as const },
       { version: "1.0.2", change: "頭ダメージを60から70に増加", type: "buff" as const },
       { version: "1.0.2", change: "リロード時間を1sから1.2sに増加", type: "debuff" as const },
+      { version: "1.0.5", change: "射撃レートを1/0.11sから1/0.1sに向上", type: "buff" as const },
     ],
         type: "マシンピストル",
     difficulty: "簡単",
@@ -88,7 +89,7 @@ export const weapons: Item[] = [
   },
      {
     name: "Kafka",
-        rank: "2",
+        rank: "3",
     description: "スタンダードなサブマシンガン",
     history: [
       { version: "1.0.2", change: "射撃レートを1/0.07sから1/0.065sに向上", type: "buff" as const },
@@ -137,6 +138,7 @@ export const weapons: Item[] = [
     description: "ライフル界のビショップ",
     history: [
       { version: "1.0.1", change: "胴体ダメージを50から60へ増加" , type: "buff" as const },
+      { version: "1.0.5", change: "横リコイルを0.1から0.2に増加" , type: "debuff" as const },
     ],
     type: "アサルトライフル",
     difficulty: "普通",
@@ -162,7 +164,7 @@ export const weapons: Item[] = [
   },
     {
     name: "RapetPuppet",
-        rank: "3",
+        rank: "4",
     description: "高速ライトマシンガン",
     history: [
       { version: "1.0.2", change: "連射レートを1/0.07sから1/0.05sに向上" , type: "buff" as const },
