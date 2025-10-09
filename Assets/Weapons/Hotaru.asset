@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fe551f6c63e700449543cf46d06cac1, type: 3}
   m_Name: Hotaru
   m_EditorClassIdentifier: 
-  gunType: Pistol
+  gunType: Rifle
   weaponName: Hotaru
   description: "\u30D7\u30E9\u30AF\u30C6\u30A3\u30B9\u30E2\u30FC\u30C9\u9650\u5B9A\u306E\u6B66\u5668\u3002"
   cost: 0

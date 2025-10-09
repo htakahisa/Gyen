@@ -35,6 +35,8 @@ public class RoundManager : NetworkBehaviour
 
     public PlayerManager playerManager;
 
+    public float timeInRound;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -79,6 +81,14 @@ public class RoundManager : NetworkBehaviour
                     
                 }
             }
+
+        }
+        if (CurrentPhase == Phase.BATTLE)
+        {
+            timeInRound += Time.deltaTime;
+        }
+        if (Input.GetKeyDown(KeyCode.P)){
+            StartCoroutine(StartGetPlayers());
         }
     }
 
@@ -121,9 +131,17 @@ public class RoundManager : NetworkBehaviour
         }
         else
         {
-            result = "win";
+            if (timeInRound <= 15)
+            {
+                result = "speedrun";
+            }
+            else
+            {
+                result = "win";
+            }
         }
         StartCoroutine(TextManager.textManager.ResultCoroutine(result));
+        timeInRound = 0;
     }
 
     [ClientRpc]
@@ -207,10 +225,11 @@ public class RoundManager : NetworkBehaviour
             otherPlayer = playerManager.GetOtherPlayer();
             players.Add(otherPlayer);
 
-
+            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
             otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         }
 
+        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
         myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
 
         players.Add(myPlayer);
@@ -222,6 +241,7 @@ public class RoundManager : NetworkBehaviour
         }
         else
         {
+            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
             otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         }
         hasLoaded = true;
@@ -256,7 +276,7 @@ public class RoundManager : NetworkBehaviour
     {
         winner.GetComponent<CreditManager>().ResetCurrentPaying();
         loser.GetComponent<CreditManager>().ResetCurrentPaying();
-        winner.GetComponent<CreditManager>().AddCredit(1000 + Round * 300);
+        winner.GetComponent<CreditManager>().AddCredit(1500 + Round * 300);
         loser.GetComponent<CreditManager>().AddCredit(1000 + Round * 100);
 
     }

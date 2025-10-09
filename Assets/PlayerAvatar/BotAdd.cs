@@ -6,6 +6,7 @@ public class BotAdd : MonoBehaviour, IPointerClickHandler
 {
     UIGradient image;
     BotBuy botBuy;
+    public bool AddOrDelete; 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -25,7 +26,14 @@ public class BotAdd : MonoBehaviour, IPointerClickHandler
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             StartCoroutine(PressedColor());
-            botBuy.AddBot();
+            if (AddOrDelete)
+            {
+                botBuy.AddBot();
+            }
+            else
+            {
+                botBuy.DeleteBot();
+            }
         }
     }
 

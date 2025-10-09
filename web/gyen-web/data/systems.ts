@@ -49,6 +49,7 @@ export const systems: System[] = [
     description: "一般的に言うUI。",
     history: [
       { version: "1.0.5", change: "購入画面と、ラウンド表示パネルのUIを変更しました。", type: "buff" as const },
+      { version: "1.0.6", change: "購入画面と、ラウンド表示パネルのUIを変更しました。", type: "buff" as const },
     ],
   },
 ];

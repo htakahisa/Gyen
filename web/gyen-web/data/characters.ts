@@ -60,6 +60,7 @@ export const characters: Character[] = [
       { version: "1.0.3", change: "エリヤ参戦！" , type: "neutral" as const },
       { version: "1.0.4", change: "Horusが検知する条件として、壁によって射線が遮られていないことを追加。" , type: "debuff" as const },
       { version: "1.0.4", change: "Horusが検知する範囲を、10mから30mに拡大。" , type: "buff" as const },
+      { version: "1.0.6", change: "Horusを設置する際のプレイヤーからの最大距離が3mから5mに増加。" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : Terra", description: "空中であっても、自由な位置に土元素由来のスモークを生成する。" },
@@ -98,6 +99,7 @@ export const characters: Character[] = [
     description: "アメリカ合衆国から来たオーバードーズは、科学が武力に勝ること、100%が存在すること証明する。",
     history: [
       { version: "1.0.4", change: "オーバードーズ参戦！" , type: "neutral" as const },
+      { version: "1.0.6", change: "ITweaksを設置する際のプレイヤーからの最大距離が3mから5mに増加。" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : ITweaks", description: "半透明のナノセンサーで、相手を検知しX線を発射する。それには弱い目眩の効果もある。" },

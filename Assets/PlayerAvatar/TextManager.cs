@@ -17,6 +17,8 @@ public class TextManager : MonoBehaviour
     public TextMeshProUGUI headShotRate;
 
     public GameObject winText;
+    public GameObject speedrunText;
+
     public GameObject loseText;
 
     public static TextManager textManager;
@@ -64,6 +66,11 @@ public class TextManager : MonoBehaviour
         if (result == "lose")
         {
             resultText = loseText;
+        }
+
+        if (result == "speedrun")
+        {
+            resultText = speedrunText;
         }
 
         resultText.SetActive(true);

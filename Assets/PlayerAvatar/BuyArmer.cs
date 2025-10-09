@@ -11,13 +11,13 @@ public class BuyArmer : NetworkBehaviour, IPointerClickHandler
     public float armer;
     public int cost;
 
-    private UIGradient image;
+    private Image image;
 
 
     private void Start()
     {
-        image = transform.parent.GetComponentInChildren<UIGradient>();
-        image.bottomColor = Color.black;
+        image = transform.parent.GetChild(1).GetComponent<Image>();
+        image.color = Color.gray;
     }
 
 
@@ -26,11 +26,11 @@ public class BuyArmer : NetworkBehaviour, IPointerClickHandler
     {
         if (armer == RoundManager.rm.GetMyPlayer().GetComponent<HpMaster>().armer)
         {
-            image.bottomColor = Color.blue;
+            image.color = Color.white;
         }
         else
         {
-            image.bottomColor = Color.black;
+            image.color = Color.gray;
         }
     }
 

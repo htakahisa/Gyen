@@ -972,13 +972,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1064951022047188695}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.30870858, y: 0.63734716, z: -0.703327, w: -0.0617961}
-  m_LocalPosition: {x: 0.0263, y: -0.1396, z: -0.0699}
+  m_LocalRotation: {x: -0.38701746, y: 0.57754546, z: -0.7073034, w: -0.12798682}
+  m_LocalPosition: {x: 0.026300011, y: -0.13959989, z: -0.06990013}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4940844313148860072}
-  m_LocalEulerAnglesHint: {x: 69.177, y: -269.512, z: -120.41}
+  m_LocalEulerAnglesHint: {x: 66.358, y: -274.766, z: -138.45}
 --- !u!1 &1158049255860812194
 GameObject:
   m_ObjectHideFlags: 0
@@ -2132,7 +2132,7 @@ MonoBehaviour:
   terra: {fileID: 3539715179979286606, guid: bd31141f5512fd54cb6f630b21bbcc0d, type: 3}
   terraPreInstance: {fileID: 0}
   isTerra: 0
-  horusMaxDistance: 3
+  horusMaxDistance: 5
   horusSurfaceOffset: 1
   horusUpOffset: 1
   dustPuff: {fileID: 5610010966355794069, guid: 803ecf87f61d9fb4f84ba6319ba95c9c,

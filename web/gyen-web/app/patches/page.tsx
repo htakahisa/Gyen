@@ -78,6 +78,9 @@ const renderHistoryBlock = (
   const linkBase = "/item"; // ← ここを修正！
 
   return (
+
+    
+
     <div
       key={name}
       style={{
@@ -101,6 +104,7 @@ const renderHistoryBlock = (
         <h3 style={{ margin: 0 }}>
           {isOpen ? "▼" : "▶"} {name}
         </h3>
+        
       </div>
       <div
         style={{
