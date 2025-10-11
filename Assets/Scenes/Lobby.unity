@@ -1973,6 +1973,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcd97c4867aa46c4f94bff981fdd9fed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputActions: {fileID: -944628639613478452, guid: 67a207dd0b01404418c9737b41a5d682,
+    type: 3}
   slots:
   - {fileID: 648956156}
   - {fileID: 2145053618}
