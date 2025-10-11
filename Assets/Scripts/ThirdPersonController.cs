@@ -94,7 +94,7 @@ namespace StarterAssets
         private int _animDance;
         private int _animCrouching;
         private int _animReloading;
-        private int _animZooming;
+        private int _animPraying;
 
         public Transform middleBrow;
 
@@ -156,6 +156,14 @@ namespace StarterAssets
 
         private float currentPitch = 0f;    // カメラの上下角度
         private PlayerInput playerInput;
+
+        [SyncVar]
+        public bool canMove = true;
+        public PlayerActionLockManager lockManager;
+        public void SetMovementEnabled(bool enabled)
+        {
+            canMove = enabled;
+        }
 
         public override void OnStartAuthority()
         {
@@ -382,11 +390,21 @@ namespace StarterAssets
             _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
             _hasAnimator = TryGetComponent(out _animator);
 
-            if (GetComponentInParent<PlayerManager>().canMove)
+            JumpAndGravity();
+            if (canMove)
             {
-                JumpAndGravity();
 
                 Move();
+            }            
+            else
+            {
+                // **アニメーター更新**
+                if (_hasAnimator)
+                {
+                    _animator.SetFloat(_animIDSpeed, _animationBlend);
+                    _animator.SetFloat(_animIDMotionSpeed, _speed);
+                    _animator.SetBool(_animCrouching, isCrouching);
+                }
             }
 
             if (canGetOrb)
@@ -394,18 +412,27 @@ namespace StarterAssets
                 GetOrb();
             }
 
-            //if(Input.GetKeyDown(KeyCode.P))
-            //{
-            //    if (_animator.GetInteger(_animDance) == 0)
-            //    {
-            //        CmdCallDance();
-            //    }
-            //    else
-            //    {
-            //        CmdCallEndDance();
-            //    }
-            //}
-
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                if (_animator.GetInteger(_animDance) == 0)
+                {
+                    CmdCallDance();
+                }
+                else
+                {
+                    CmdCallEndDance();
+                }
+            }
+            AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+            bool pray = stateInfo.IsName("Pray");
+            if (pray)
+            {
+                CmdDefusing();
+            }
+            else
+            {
+                CmdEndDefusing();
+            }
 
         }
 
@@ -559,7 +586,7 @@ namespace StarterAssets
             _animDance = Animator.StringToHash("Dance");
             _animCrouching = Animator.StringToHash("Crouching");
             _animReloading = Animator.StringToHash("Reloading");
-            _animZooming = Animator.StringToHash("Zooming");
+            _animPraying = Animator.StringToHash("Praying");
         }
 
         private void GroundedCheck()
@@ -612,10 +639,11 @@ namespace StarterAssets
                 _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
                     // --- 身体の左右回転 (Yaw) ---
-                    transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
-                    parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                    transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
-                
+                transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
+                parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                transformNetwork.CmdRotateCamera(_mainCamera.transform.localRotation);
+
             }
 
         }
@@ -626,6 +654,7 @@ namespace StarterAssets
 
             // 体のYawと合成
             _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0, 0f);
+            transformNetwork.CmdRotateCamera(_mainCamera.transform.localRotation);
         }
 
 
@@ -776,11 +805,15 @@ namespace StarterAssets
 
             //Debug.Log("p" + moveDirection);
             // **CharacterControllerで移動**
-            controller.Move(moveDirection * Time.deltaTime);
-            if (isLocalPlayer)
+            if (controller.enabled == true)
             {
-                transformNetwork.CmdPos(transform.position);
+                controller.Move(moveDirection * Time.deltaTime);
+                if (isLocalPlayer)
+                {
+                    transformNetwork.CmdPos(transform.position);
+                }
             }
+         
 
             // **アニメーター更新**
             if (_hasAnimator)
@@ -907,10 +940,25 @@ namespace StarterAssets
             {
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
+
+            // **移動ベクトルを計算（空中では最後の移動方向を維持）**
+            Vector3 moveDirection = _lastMoveDirection * _speed;
+            moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
+
+            if (controller.enabled == true)
+            {
+                controller.Move(moveDirection * Time.deltaTime);
+                if (isLocalPlayer)
+                {
+                    transformNetwork.CmdPos(transform.position);
+                }
+            }
+
         }
         private void OnJump(InputAction.CallbackContext context)
         {
             if (!Grounded) return;
+            if (!canMove) return;
 
             // ジャンプ開始
             jump = true;
@@ -920,12 +968,46 @@ namespace StarterAssets
         public void Reloading() 
         {
             if (!isLocalPlayer) return;
+            if (!_shootManager.canShoot) return;
             _animator.SetBool(_animReloading, true);
         }
         public void EndReloading()
         {
             if (!isLocalPlayer) return;
             _animator.SetBool(_animReloading, false);
+        }
+
+        [ClientRpc]
+        public void RpcPraying()
+        {
+            if (!isLocalPlayer) return;
+            if (!_hasAnimator) return;
+            _animator.SetBool(_animPraying, true);
+        }
+
+        [ClientRpc]
+        public void RpcEndPraying()
+        {
+            if (!isLocalPlayer) return;
+            if (!_hasAnimator) return;
+            _animator.SetBool(_animPraying, false);
+        }
+
+
+        [Command]
+        public void CmdDefusing()
+        {
+            lockManager.AddLock(PlayerAction.Move, "Defuse");
+            lockManager.AddLock(PlayerAction.Shoot, "Defuse");
+            lockManager.AddLock(PlayerAction.Ability, "Defuse");
+        }
+
+        [Command]
+        public void CmdEndDefusing()
+        {
+            lockManager.RemoveLock(PlayerAction.Move, "Defuse");
+            lockManager.RemoveLock(PlayerAction.Shoot, "Defuse");
+            lockManager.RemoveLock(PlayerAction.Ability, "Defuse");
         }
 
         [Command (requiresAuthority = false)]
@@ -1195,6 +1277,29 @@ namespace StarterAssets
             
         }
 
+        [ClientRpc]
+        public void RpcResetAllParameters()
+        {
+            if (!_hasAnimator) return;
+            foreach (var param in _animator.parameters)
+            {
+                switch (param.type)
+                {
+                    case AnimatorControllerParameterType.Bool:
+                        _animator.SetBool(param.name, param.defaultBool);
+                        break;
+                    case AnimatorControllerParameterType.Float:
+                        _animator.SetFloat(param.name, param.defaultFloat);
+                        break;
+                    case AnimatorControllerParameterType.Int:
+                        _animator.SetInteger(param.name, param.defaultInt);
+                        break;
+                    case AnimatorControllerParameterType.Trigger:
+                        _animator.ResetTrigger(param.name);
+                        break;
+                }
+            }
+        }
         public GameObject GetCamera()
         {
             return _mainCamera;
@@ -1215,7 +1320,7 @@ namespace StarterAssets
         [Server]
         public void ResetPos(Vector3 pos)
         {
-            
+
             ServerUpdateAllPositions(pos);
             
         }
@@ -1223,10 +1328,10 @@ namespace StarterAssets
         [ClientRpc]
         public void RpcDance()
         {
-            GetComponentInParent<PlayerManager>().canMove = false;
-            GetComponentInParent<PlayerManager>().canAbility = false;
+            lockManager.AddLock(PlayerAction.Move, "Dance");
+            lockManager.AddLock(PlayerAction.Ability, "Dance");
             canGetOrb = false;
-            _shootManager.canShoot = false;
+            lockManager.AddLock(PlayerAction.Shoot, "Dance");
             _hpMaster.isInvincible = true;
 
 
@@ -1237,10 +1342,10 @@ namespace StarterAssets
         [ClientRpc]
         public void RpcEndDance()
         {
-            GetComponentInParent<PlayerManager>().canMove = true;
-            GetComponentInParent<PlayerManager>().canAbility = true;
+            lockManager.RemoveLock(PlayerAction.Move, "Dance");
+            lockManager.RemoveLock(PlayerAction.Ability, "Dance");
             canGetOrb = true;
-            _shootManager.canShoot = true;
+            lockManager.RemoveLock(PlayerAction.Shoot, "Dance");
             _hpMaster.isInvincible = false;
 
 
@@ -1251,10 +1356,10 @@ namespace StarterAssets
         [TargetRpc]
         public void TargetDance()
         {
-            GetComponentInParent<PlayerManager>().canMove = false;
-            GetComponentInParent<PlayerManager>().canAbility = false;
+            lockManager.AddLock(PlayerAction.Move, "Dance");
+            lockManager.AddLock(PlayerAction.Ability, "Dance");
             canGetOrb = false;
-            _shootManager.canShoot = false;
+            lockManager.AddLock(PlayerAction.Shoot, "Dance");
             _hpMaster.CmdInvincible(true);
 
 
@@ -1265,10 +1370,10 @@ namespace StarterAssets
         [TargetRpc]
         public void TargetEndDance()
         {
-            GetComponentInParent<PlayerManager>().canMove = true;
-            GetComponentInParent<PlayerManager>().canAbility = true;
+            lockManager.RemoveLock(PlayerAction.Move, "Dance");
+            lockManager.RemoveLock(PlayerAction.Ability, "Dance");
             canGetOrb = true;
-            _shootManager.canShoot = true;
+            lockManager.RemoveLock(PlayerAction.Shoot, "Dance");
             _hpMaster.CmdInvincible(false);
 
 
@@ -1280,25 +1385,41 @@ namespace StarterAssets
         [Server]
         public void ServerUpdateAllPositions(Vector3 newPos)
         {
+            StartCoroutine(StopMove(newPos));
+        }
+
+        public IEnumerator StopMove(Vector3 newPos)
+        {
             NetworkIdentity identity = parentOfPlayer.GetComponent<NetworkIdentity>();
             NetworkConnection conn = identity.connectionToClient;
+            lockManager.AddLock(PlayerAction.Move, "StopSynchronized");
+            lockManager.AddLock(PlayerAction.Shoot, "StopSynchronized");
 
-            controller.enabled = false;
+            yield return new WaitUntil(() => canMove == false);
+
+            
             parentOfPlayer.transform.position = newPos;
-            controller.enabled = true;
+            yield return new WaitForSeconds(0.2f);
             GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
-            parentOfPlayer.GetComponent<CharacterTransfromNetwork>().TargetRequestPos(conn, newPos);
+            parentOfPlayer.GetComponent<CharacterTransfromNetwork>().CmdPos(newPos);
+
+
             StartCoroutine(StartToMove());
 
         }
 
         public IEnumerator StartToMove()
         {
-            yield return new WaitForSeconds(0.5f);
-            GetComponentInParent<PlayerManager>().canMove = true;
-            GetComponentInParent<ShootManager>().canShoot = true;
+            yield return new WaitForSeconds(3f);
+            lockManager.RemoveLock(PlayerAction.Move, "StopSynchronized");
+            lockManager.RemoveLock(PlayerAction.Shoot, "StopSynchronized");
+            RpcEnabledController(true);
         }
 
+        public void RpcEnabledController(bool enabled)
+        {
+            controller.enabled = enabled;
+        }
 
         public void RequestDestroy(uint sceneObjNetId)
         {

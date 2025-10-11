@@ -37,6 +37,7 @@ public class BuyPanel : NetworkBehaviour
         inputActions.Player.Enable();
         inputActions.Player.Menu.performed += _ => OpenPanel();
         inputActions.Player.Select.performed += _ => OnClick();
+        inputActions.Player.Deselect.performed += _ => OnRightClick();
     }
 
     
@@ -126,6 +127,23 @@ public class BuyPanel : NetworkBehaviour
 
         StartCoroutine(InvertColor());
         PointerEventData pointerData = new PointerEventData(EventSystem.current);
+        pointerData.button = PointerEventData.InputButton.Left;
+        pointerData.position = cursorPos;
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        foreach (var hit in results)
+        {
+            ExecuteEvents.Execute(hit.gameObject, pointerData, ExecuteEvents.pointerClickHandler);
+        }
+    }
+
+    private void OnRightClick()
+    {
+
+        StartCoroutine(InvertColor());
+        PointerEventData pointerData = new PointerEventData(EventSystem.current);
+        pointerData.button = PointerEventData.InputButton.Right;
         pointerData.position = cursorPos;
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(pointerData, results);

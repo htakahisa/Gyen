@@ -58,9 +58,9 @@ export const characters: Character[] = [
     description: "エジプトから導かれるままにエリヤは、古代の超技術を使い空中に土を舞い上げ、レーザー付きナノマシンを操る。",
     history: [
       { version: "1.0.3", change: "エリヤ参戦！" , type: "neutral" as const },
-      { version: "1.0.4", change: "Horusが検知する条件として、壁によって射線が遮られていないことを追加。" , type: "debuff" as const },
-      { version: "1.0.4", change: "Horusが検知する範囲を、10mから30mに拡大。" , type: "buff" as const },
-      { version: "1.0.6", change: "Horusを設置する際のプレイヤーからの最大距離が3mから5mに増加。" , type: "buff" as const },
+      { version: "1.0.4", change: "Horusが検知する条件として、壁によって射線が遮られていないことを追加" , type: "debuff" as const },
+      { version: "1.0.4", change: "Horusが検知する範囲を、10mから30mに拡大" , type: "buff" as const },
+      { version: "1.0.6", change: "Horusを設置する際のプレイヤーからの最大距離が3mから5mに増加" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : Terra", description: "空中であっても、自由な位置に土元素由来のスモークを生成する。" },
@@ -83,7 +83,7 @@ export const characters: Character[] = [
     ],
     skills: [
       { name: "Ability : Rebelliousness", description: "ルシファー専用のリボルバー（のような武器。炎をまとっているためよく分からない）" },
-      { name: "Ability : LighhtLoad", description: "ダークオーブを回収し、敵の位置が1秒間透視できる。" },
+      { name: "Ability : LighhtLoad", description: "ダークオーブを回収し、敵の位置を1秒間透視できる。" },
       { name: "Passive : Darkness", description: "相手に与えたダメージに応じてダークオーブが生成される。それを射撃で破壊すると与えたダメージに応じて回復する。" },  
     ],
            type: "Barbarian",
@@ -99,7 +99,8 @@ export const characters: Character[] = [
     description: "アメリカ合衆国から来たオーバードーズは、科学が武力に勝ること、100%が存在すること証明する。",
     history: [
       { version: "1.0.4", change: "オーバードーズ参戦！" , type: "neutral" as const },
-      { version: "1.0.6", change: "ITweaksを設置する際のプレイヤーからの最大距離が3mから5mに増加。" , type: "buff" as const },
+      { version: "1.0.6", change: "ITweaksを設置する際のプレイヤーからの最大距離が3mから5mに増加" , type: "buff" as const },
+      { version: "1.0.6", change: "IMirrorをクライアントが発動したときに発射する向きが正しくない場合があった不具合を修正" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : ITweaks", description: "半透明のナノセンサーで、相手を検知しX線を発射する。それには弱い目眩の効果もある。" },

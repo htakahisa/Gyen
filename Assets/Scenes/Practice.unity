@@ -10136,6 +10136,7 @@ MonoBehaviour:
   respawns: []
   playerManager: {fileID: 0}
   timeInRound: 0
+  hasRoundEnded: 0
 --- !u!224 &966734464
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10184,6 +10185,7 @@ MonoBehaviour:
   StarFinisher: {fileID: 8300000, guid: b49124fcad5260847adf62273a7f4f5f, type: 3}
   IceFinisher: {fileID: 8300000, guid: 1793f50d33876684cbfb47f6c01ed995, type: 3}
   MeteorFinisher: {fileID: 8300000, guid: ef67f668ad8fd7643ba8682bd17bb395, type: 3}
+  Defuse: {fileID: 0}
   soundBlockLayer:
     serializedVersion: 2
     m_Bits: 512

@@ -9,10 +9,13 @@ public class PlayerManager : NetworkBehaviour
 
     public bool hasLoaded = false;
 
-    [SyncVar]
-    public bool canMove = true;
-    [SyncVar]
-    public bool canAbility = true;
+
+
+
+
+
+
+
 
     public void Update()
     {
@@ -49,10 +52,6 @@ public class PlayerManager : NetworkBehaviour
 
 
     }
-
-
-    
-    
 
     public override void OnStopClient()
     {

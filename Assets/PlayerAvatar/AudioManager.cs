@@ -21,6 +21,7 @@ public class AudioManager : NetworkBehaviour
     public AudioClip StarFinisher;
     public AudioClip IceFinisher;
     public AudioClip MeteorFinisher;
+    public AudioClip Defuse;
 
     public LayerMask soundBlockLayer;
 
@@ -47,6 +48,7 @@ public class AudioManager : NetworkBehaviour
         STARFINISHER,
         ICEFINISHER,
         METEORFINISHER,
+        DEFUSE,
     }
 
     // Update is called once per frame
@@ -82,8 +84,11 @@ public class AudioManager : NetworkBehaviour
     [ClientRpc]
     private void RpcPlaySoundAtPoint(Sounds name, Vector3 position, float volume)
     {
+        if (!RoundManager.rm.hasLoaded)
+        {
+            return;
+        }
         Debug.Log("SoundIsPlayed");
-
         Vector3 dir = position - RoundManager.rm.GetMyPlayer().transform.position;
 
         if (Physics.Raycast(RoundManager.rm.GetMyPlayer().transform.position, dir, out RaycastHit hit, dir.magnitude, soundBlockLayer))
@@ -148,6 +153,10 @@ public class AudioManager : NetworkBehaviour
                 soundClip = StarFinisher;
                 break;
 
+            case Sounds.DEFUSE:
+                soundClip = Defuse;
+                break;
+
             default:
                 switch (name)
                 {
@@ -166,7 +175,15 @@ public class AudioManager : NetworkBehaviour
                 return;
 
         }
-        AudioSource.PlayClipAtPoint(soundClip, position, volume);
+        // í èÌÇÃPlayClipAtPointÇÃÇÊÇ§Ç…égÇ¶ÇÈ
+        AudioSourceUtility.PlayClipAtPointCustom(
+            soundClip,
+            position,
+            volume,
+            minDistance: 3f,
+            maxDistance: 15f,
+            rolloffMode: AudioRolloffMode.Linear
+        );
 
  
         

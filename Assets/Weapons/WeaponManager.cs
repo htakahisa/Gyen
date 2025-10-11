@@ -135,32 +135,12 @@ public class WeaponManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdBuyWeapon(WeaponType type)
     {
-        var slot = weapons.Find(w => w.weaponType == type);
-        if (slot == null) return;
-
-        var gunType = slot.dataBase.gunType;
-        if (gunType == "Rifle")
-        {
-            mainWeaponType = type;
-        }
-        else if (gunType == "Pistol")
-        {
-            subWeaponType = type;
-        }
-        else if (gunType == "Ability")
-        {
-            abilityWeaponType = type;
-        }
-
-            // ★ 弾数初期化
-            slot.currentAmmo = slot.dataBase.magazineSize;
-
-        StartCoroutine(BuyWeaponAndSetMagazine(type));
+        RpcBuyWeapon(type);
     }
 
     // 売却処理（メイン／サブ判定は前回実装のまま）
-    [Command(requiresAuthority = false)]
-    public void CmdSellWeapon(WeaponType type)
+    [ClientRpc]
+    public void RpcSellWeapon(WeaponType type)
     {
         var slot = weapons.Find(w => w.weaponType == type);
         if (slot == null) return;
@@ -169,7 +149,7 @@ public class WeaponManager : NetworkBehaviour
         if (gunType == "Rifle")
         {
             mainWeaponType = WeaponType.Hotaru;
-            CmdSwitchWeapon(subWeaponType);
+            CmdSwitchWeapon(mainWeaponType);
         }
         else if (gunType == "Pistol")
         {
@@ -181,6 +161,12 @@ public class WeaponManager : NetworkBehaviour
         slot.currentAmmo = slot.dataBase.magazineSize;
 
         StartCoroutine(BuyWeaponAndSetMagazine(type));
+    }
+
+    [Command(requiresAuthority = false)]
+    public void CmdSellWeapon(WeaponType type)
+    {
+        RpcSellWeapon(type);
     }
 
     private IEnumerator BuyWeaponAndSetMagazine(WeaponType type)
@@ -230,7 +216,7 @@ public class WeaponManager : NetworkBehaviour
         slot.currentAmmo = magazine;   // ★ 武器データにも反映
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdSwitchWeapon(WeaponType type)
     {
         if (mainWeaponType.Equals(default) || subWeaponType.Equals(default) || abilityWeaponType.Equals(default))

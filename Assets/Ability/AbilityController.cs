@@ -17,22 +17,24 @@ public class AbilityController : NetworkBehaviour
     private CharacterController _controller;
     public ShootManager shootManager;
     public SkillManager skillManager;
+    public PlayerActionLockManager lockManager;
 
-
+    [SyncVar]
+    public bool canUse = true;
 
     [SyncVar]
     public PlayerForm currentForm = PlayerForm.Human;
 
     public LayerMask ground;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public void Awake()
+    public void SetAbilityEnabled(bool enabled)
     {
+        canUse = enabled;
+    }
 
-        if (GetComponent<NetworkIdentity>() == null)
-        {
-            return;
-        }
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public override void OnStartAuthority()
+    {
         if (!isLocalPlayer)
         {
             return;
@@ -51,7 +53,7 @@ public class AbilityController : NetworkBehaviour
         {
             return;
         }
-        if (GetComponentInParent<PlayerManager>().canAbility)
+        if (canUse)
         {
             Ability();
         }
@@ -166,11 +168,11 @@ public class AbilityController : NetworkBehaviour
         Ray ray = new Ray(pos + Vector3.up * 1f, Vector3.down);
         if (Physics.Raycast(ray, out RaycastHit hit, 5f, ground))
         {
-            GetComponent<PlayerManager>().canMove = false;
+            lockManager.AddLock(PlayerAction.Move, "CorrectPos");
             GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
             GetComponent<CharacterController>().enabled = false;
 
-            pos.y += 1f; // 少し上にオフセットして埋まり防止
+            pos.y += 1.5f; // 少し上にオフセットして埋まり防止
             Debug.Log(GetComponent<CharacterController>().enabled +""+ GetComponent<CharacterTransfromNetwork>().isSynchronize);
             character.transform.position = pos;
             GetComponent<CharacterTransfromNetwork>().isSynchronize = true;
@@ -178,7 +180,7 @@ public class AbilityController : NetworkBehaviour
 
             yield return new WaitForSeconds(0.1f);
             GetComponent<CharacterController>().enabled = true;
-            GetComponent<PlayerManager>().canMove = true;
+            lockManager.RemoveLock(PlayerAction.Move, "CorrectPos");
 
         }
 

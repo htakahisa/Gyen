@@ -148,6 +148,16 @@ public class HpMaster : NetworkBehaviour
             AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IMIRRORDESTROYED, transform.position, 1f);
             NetworkServer.Destroy(gameObject);
         }
+        if (onDeath == EventOnDeath.PLAYERDEAD)
+        {
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
+            RoundManager.rm.Finisher(gameObject);
+            if(RoundManager.rm.defender == gameObject)
+            {
+                RoundManager.rm.RoundEnd(gameObject);
+            }
+        }
     }
 
     public enum EventOnDeath
@@ -160,6 +170,7 @@ public class HpMaster : NetworkBehaviour
         LIGHTLOAD,
         ITWEAKSDESTROY,
         IMIRRORDESTROY,
+        PLAYERDEAD,
     }
 
 

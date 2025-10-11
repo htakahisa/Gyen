@@ -15,6 +15,23 @@ export interface System {
 
 
 export const systems: System[] = [
+      {
+    name: "System_Map",
+    rank: "S", 
+    description: "試合に使うマップ自体や、それについての処理について。",
+    history: [
+      { version: "1.0.6", change: "マップ「Close」を追加しました", type: "buff" as const },
+    ],
+  },
+     {
+    name: "System_GameRule",
+    rank: "S", 
+    description: "勝敗判定や、基本的かつ全般的な試合中のシステムについて。",
+    history: [
+      { version: "1.0.6", change: "”スパイク”を追加しました。ラウンド開始から一定の時間で爆発し、爆発すればアタッカー、解除すればディフェンダーの勝利です", type: "buff" as const },
+      { version: "1.0.6", change: "購入画面で、左クリックで購入に対して、右クリックで売却という対応を追加しました", type: "buff" as const },
+    ],
+  },
     {
     name: "System_CharacterControl",
     rank: "S", 
@@ -29,7 +46,7 @@ export const systems: System[] = [
     rank: "S",
     description: "入力デバイスからのインプット自体またはそれの処理について。",
     history: [
-      { version: "1.0.5", change: "コントローラーの入力の対応を可能にしました。", type: "buff" as const },
+      { version: "1.0.5", change: "コントローラーの入力の対応を可能にしました", type: "buff" as const },
       { version: "1.0.5", change: "入力デバイスがコントローラーのときのみ、エイムアシストが入るよう仕様を追加しました", type: "buff" as const },
       { version: "1.0.5", change: "購入画面を開いたとき、入力デバイスにかかわらず専用のカーソルが表示されるように仕様を変更しました", type: "neutral" as const },
       { version: "1.0.6", change: "ロビーでキーコンフィグを変更できるようにしました", type: "neutral" as const },
@@ -40,7 +57,7 @@ export const systems: System[] = [
     rank: "B",
     description: "ゲームプレイに直接的に関係なく、UIでもないオブジェクト。エフェクトも含む。",
     history: [
-      { version: "1.0.5", change: "武器を持っているとき、右手部分に武器を持っている見た目を追加しました。", type: "buff" as const },
+      { version: "1.0.5", change: "武器を持っているとき、右手部分に武器を持っている見た目を追加しました", type: "buff" as const },
     ],
   },
        {
@@ -48,8 +65,8 @@ export const systems: System[] = [
     rank: "S",
     description: "一般的に言うUI。",
     history: [
-      { version: "1.0.5", change: "購入画面と、ラウンド表示パネルのUIを変更しました。", type: "buff" as const },
-      { version: "1.0.6", change: "購入画面と、ラウンド表示パネルのUIを変更しました。", type: "buff" as const },
+      { version: "1.0.5", change: "購入画面と、ラウンド表示パネルのUIを変更しました", type: "buff" as const },
+      { version: "1.0.6", change: "購入画面と、ラウンド表示パネルのUIを変更しました", type: "buff" as const },
     ],
   },
 ];

@@ -11,6 +11,7 @@ public class YellowManager : NetworkBehaviour
     public Camera birdCamera;
 
     private Coroutine removeCoroutine;
+    public GameObject bodyRenderer;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnStartAuthority()
@@ -20,6 +21,10 @@ public class YellowManager : NetworkBehaviour
 
     private void Update()
     {
+        if (isLocalPlayer)
+        {
+            bodyRenderer.layer = 7;
+        }
         if (removeCoroutine != null && abilityController.currentForm != AbilityController.PlayerForm.Bird)
         {
             StopCoroutine(removeCoroutine);

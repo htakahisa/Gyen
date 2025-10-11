@@ -51,11 +51,21 @@ namespace StarterAssets
         private bool currentFireState;
         private bool lastFireState = false;
 
-        // Start is called before the first frame update
+        private Animator _animator;
+
 
         private void Start()
         {
-            
+            _animator = GetComponentInParent<Animator>();
+        }
+
+
+
+        // Start is called before the first frame update
+
+        public void SetShootingEnabled(bool enabled)
+        {
+            canShoot = enabled;
         }
 
         public override void OnStartAuthority()

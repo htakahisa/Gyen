@@ -51,6 +51,7 @@ public class YellowController : NetworkBehaviour
 
     private void LateUpdate()
     {
+
         if (isLocalPlayer)
         {
             if (abilityController.currentForm != AbilityController.PlayerForm.Bird) return;

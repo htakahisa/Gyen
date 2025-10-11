@@ -856,6 +856,8 @@ MonoBehaviour:
   transformNetwork: {fileID: -4732923928998472460}
   currentControlScheme: Keyboard&Mouse
   enemies: []
+  canMove: 1
+  lockManager: {fileID: 728472207448528687}
 --- !u!114 &8334744245603090709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1120,7 +1122,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  geometry: {fileID: 182922647172477195}
+  geometry: {fileID: 193232095189581084}
   camera: {fileID: 5846571374343232750}
 --- !u!114 &248169359381331807
 MonoBehaviour:
@@ -1140,6 +1142,7 @@ MonoBehaviour:
   time: 5
   abilityController: {fileID: 3159636760548436729}
   birdCamera: {fileID: 8164833727617922735}
+  bodyRenderer: {fileID: 182922647172477195}
 --- !u!1 &1158049255860812194
 GameObject:
   m_ObjectHideFlags: 0
@@ -2525,6 +2528,8 @@ GameObject:
   - component: {fileID: 7131634090093216591}
   - component: {fileID: 1112727817626628774}
   - component: {fileID: -6638382101669115610}
+  - component: {fileID: 6758390799210106777}
+  - component: {fileID: 728472207448528687}
   m_Layer: 0
   m_Name: Trident
   m_TagString: Untagged
@@ -2658,6 +2663,8 @@ MonoBehaviour:
   nowCamera: {fileID: 0}
   shootManager: {fileID: 8334744245603090709}
   skillManager: {fileID: 6792009286812342892}
+  lockManager: {fileID: 728472207448528687}
+  canUse: 1
   currentForm: 0
   ground:
     serializedVersion: 2
@@ -2681,7 +2688,7 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
-  onDeath: 0
+  onDeath: 8
   lightLoadEffect: {fileID: 0}
 --- !u!114 &7767665597172722380
 MonoBehaviour:
@@ -2699,8 +2706,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   hasLoaded: 0
-  canMove: 1
-  canAbility: 1
 --- !u!114 &7131634090093216591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2777,6 +2782,37 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &6758390799210106777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9251bdce096dc948a7e482df430143d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  lockManager: {fileID: 728472207448528687}
+--- !u!114 &728472207448528687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f389686fb03a84ea430cfe6dede986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
 --- !u!1 &3561717742706190703
 GameObject:
   m_ObjectHideFlags: 0
@@ -3950,7 +3986,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5846571374343232750}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}

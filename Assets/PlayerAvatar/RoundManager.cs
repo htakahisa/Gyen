@@ -36,6 +36,7 @@ public class RoundManager : NetworkBehaviour
     public PlayerManager playerManager;
 
     public float timeInRound;
+    public bool hasRoundEnded;
 
     // Start is called before the first frame update
     void Awake()
@@ -87,18 +88,20 @@ public class RoundManager : NetworkBehaviour
         {
             timeInRound += Time.deltaTime;
         }
-        if (Input.GetKeyDown(KeyCode.P)){
-            StartCoroutine(StartGetPlayers());
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            StartCoroutine(ResetPlayers());
         }
+
     }
 
     public void RoundEnd(GameObject loser)
     {
+        if (hasRoundEnded) return;
+        hasRoundEnded = true;
         Round++;
 
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
-
-        FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
         StartCoroutine(ResetRound());
         GiveCredits(winner, loser);
         GiveRound(winner);
@@ -106,6 +109,12 @@ public class RoundManager : NetworkBehaviour
         RpcSwitchBuyPhase();
         RpcResultText(loser);
         Invoke("RpcSwitchBattlePhase", 20f);
+    }
+
+    public void Finisher(GameObject loser)
+    {
+        GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
+        FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
     }
 
     [ClientRpc]
@@ -118,6 +127,7 @@ public class RoundManager : NetworkBehaviour
     {
         yield return new WaitForSeconds(5f);
         CurrentPhase = Phase.BUY;
+        hasRoundEnded = false;
     }
 
     [ClientRpc]
@@ -154,11 +164,13 @@ public class RoundManager : NetworkBehaviour
 
     public IEnumerator ResetRound()
     {
+        
         StartCoroutine(ResetPlayers());
 
         yield return new WaitForSeconds(5f);
+        ResetStatus();
 
-        ResetWeapons();
+
         ServerResetAllObjects();
         AudioManager.Instance.CmdStopBGM();
     }
@@ -178,6 +190,12 @@ public class RoundManager : NetworkBehaviour
             ServerSpawn(respawns);
         }
 
+        if (Mode == "1VS1")
+        {
+            var bombs = FindObjectsOfType<BombManager>();
+            bombs[0].ArmBomb();
+        }
+
     }
 
     [Server]
@@ -190,18 +208,14 @@ public class RoundManager : NetworkBehaviour
 
     public IEnumerator ResetPlayers()
     {
-        playerManager.canMove = false;
         myPlayer.GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
-        myPlayer.GetComponentInChildren<ShootManager>().canShoot = false;
 
         if (otherPlayer != null)
         {
-            otherPlayer.GetComponent<PlayerManager>().canMove = false;
             otherPlayer.GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
-            otherPlayer.GetComponentInChildren<ShootManager>().canShoot = false;
         }
 
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(4f);
 
     
 
@@ -224,26 +238,23 @@ public class RoundManager : NetworkBehaviour
             // ëäéËÇÃÉvÉåÉCÉÑÅ[ÇéÊìæ
             otherPlayer = playerManager.GetOtherPlayer();
             players.Add(otherPlayer);
-
-            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
-            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         }
-
-        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
-        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
 
         players.Add(myPlayer);
 
-        if (Mode == "Practice")
+        if (isServer)
         {
-            myPlayer.GetComponentInChildren<CreditManager>().credit = 0;
-            myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999);
+            if (Mode == "Practice")
+            {
+                myPlayer.GetComponentInChildren<CreditManager>().credit = 0;
+                myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999);
+            }
+
+
+            ResetStatus();
+            ServerResetAllObjects();
         }
-        else
-        {
-            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
-            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
-        }
+        
         hasLoaded = true;
     }
 
@@ -252,10 +263,18 @@ public class RoundManager : NetworkBehaviour
     {
         if (attacker != null)
         {
+            attacker.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
+            attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
+            attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
+            attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
             attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(attackSpawnPos);
         }
         if (defender != null)
         {
+            defender.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
+            defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
+            defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
+            defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
             defender.GetComponentInChildren<ThirdPersonController>().ResetPos(defenceSpawnPos);
         }
     }
@@ -290,18 +309,30 @@ public class RoundManager : NetworkBehaviour
     }
 
     [Server]
-    public void ResetWeapons()
+    public void ResetStatus()
     {
         myPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
         myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
-        myPlayer.GetComponentInChildren<WeaponManager>().RpcBuyWeapon(WeaponStatus.WeaponType.Lover);
+        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
         myPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
-        otherPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
-        otherPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
-        otherPlayer.GetComponentInChildren<WeaponManager>().RpcBuyWeapon(WeaponStatus.WeaponType.Lover);
-        otherPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
-        otherPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
+        myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
+        myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
+        myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);       
+        myPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
+
+        if (Mode == "1VS1")
+        {
+            otherPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
+            otherPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
+            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+            otherPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
+            otherPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
+            otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
+            otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
+            otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
+            otherPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
+        }
     }
 
 

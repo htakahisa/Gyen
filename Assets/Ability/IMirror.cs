@@ -15,6 +15,8 @@ public class IMirror : NetworkBehaviour
 
     void Start()
     {
+
+        if (!isServer) return;
         ground = LayerMask.GetMask("Ground");
         // サーバーが動かすので、サーバー
 

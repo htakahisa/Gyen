@@ -29,7 +29,9 @@ public class CharacterTransfromNetwork : NetworkBehaviour
         {
             t += Time.deltaTime * 10f; // 補間速度
             transform.position = Vector3.Lerp(lastPosition, targetPosition, t);
+
         }
+
 
     }
 
@@ -40,16 +42,11 @@ public class CharacterTransfromNetwork : NetworkBehaviour
         t = 0f;
     }
 
-    [TargetRpc]
-    public void TargetRequestPos(NetworkConnection conn, Vector3 position)
-    {
-        Debug.Log("a");
-        CmdPos(position);
-    }
 
-    [Command]
+    [Command (requiresAuthority = false)]
     public void CmdPos(Vector3 position)
     {
+        if (!isSynchronize) return;
         controller.enabled = false;
         transform.position = position;
         controller.enabled = true;
@@ -69,8 +66,15 @@ public class CharacterTransfromNetwork : NetworkBehaviour
     [Command]
     public void CmdRotate(Quaternion rotation)
     {
-        transform.transform.rotation = rotation;
+        transform.rotation = rotation;
         RpcRotationNetwork(rotation);
+    }
+
+    [Command]
+    public void CmdRotateCamera(Quaternion rotation)
+    {
+        GetComponentInChildren<Camera>().transform.localRotation = rotation;
+        RpcRotationCameraNetwork(rotation);
     }
 
     [Server]
@@ -91,7 +95,7 @@ public class CharacterTransfromNetwork : NetworkBehaviour
     [ClientRpc]
     public void RpcPositionNetwork(Vector3 position)
     {
-        if (!isSynchronize) return;
+        
 
         if (!isLocalPlayer)
         {
@@ -116,10 +120,7 @@ public class CharacterTransfromNetwork : NetworkBehaviour
     {
         if (!isLocalPlayer)
         {
-            // 他プレイヤーはサーバーの位置に補正
-            controller.enabled = false;
-            transform.transform.rotation = rotation;
-            controller.enabled = true;
+            transform.rotation = rotation;
         }
         else
         {
@@ -128,6 +129,30 @@ public class CharacterTransfromNetwork : NetworkBehaviour
             if (angleDiff > 2f) // ある程度ズレが大きいときだけ補正
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, rotation, 0.5f);
+            }
+        }
+    }
+
+    [ClientRpc]
+    public void RpcRotationCameraNetwork(Quaternion rotation)
+    {
+
+        if (GetComponentInChildren<Camera>() == null)
+        {
+            return;
+        }
+
+        if (!isLocalPlayer)
+        {
+            GetComponentInChildren<Camera>().transform.localRotation = rotation;
+        }
+        else
+        {
+
+            float angleDiff = Quaternion.Angle(GetComponentInChildren<Camera>().transform.localRotation, rotation);
+            if (angleDiff > 2f) // ある程度ズレが大きいときだけ補正
+            {
+                GetComponentInChildren<Camera>().transform.rotation = Quaternion.Slerp(GetComponentInChildren<Camera>().transform.localRotation, rotation, 0.5f);
             }
         }
     }
