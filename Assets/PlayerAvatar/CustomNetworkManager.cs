@@ -191,12 +191,10 @@ public class CustomNetworkManager : NetworkManager
             if (isAttacker)
             {
                 RoundManager.rm.attacker = player;
-                RoundManager.rm.attackSpawnPos = spawnPos;
             }
             else
             {
                 RoundManager.rm.defender = player;
-                RoundManager.rm.defenceSpawnPos = spawnPos;
             }
         }
 

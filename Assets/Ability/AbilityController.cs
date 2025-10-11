@@ -40,7 +40,11 @@ public class AbilityController : NetworkBehaviour
             return;
         }
         _controller = GetComponent<CharacterController>();
-        SwitchForm(PlayerForm.Human);
+
+        if (currentForm != PlayerForm.Human)
+        {
+            SwitchForm(PlayerForm.Human);
+        }
 
 
     }

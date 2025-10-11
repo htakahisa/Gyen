@@ -157,6 +157,8 @@ namespace StarterAssets
         private float currentPitch = 0f;    // カメラの上下角度
         private PlayerInput playerInput;
 
+        private bool controllerEnabled;
+
         [SyncVar]
         public bool canMove = true;
         public PlayerActionLockManager lockManager;
@@ -1397,7 +1399,8 @@ namespace StarterAssets
 
             yield return new WaitUntil(() => canMove == false);
 
-            
+            RpcControllerEnabled(false);
+            yield return new WaitUntil(() => controllerEnabled == false);
             parentOfPlayer.transform.position = newPos;
             yield return new WaitForSeconds(0.2f);
             GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
@@ -1413,14 +1416,32 @@ namespace StarterAssets
             yield return new WaitForSeconds(3f);
             lockManager.RemoveLock(PlayerAction.Move, "StopSynchronized");
             lockManager.RemoveLock(PlayerAction.Shoot, "StopSynchronized");
-            RpcEnabledController(true);
+            RpcControllerEnabled(true);
         }
 
-        public void RpcEnabledController(bool enabled)
+        [ClientRpc]
+        public void RpcControllerEnabled(bool enabled)
         {
             controller.enabled = enabled;
+            controllerEnabled = enabled;
+
+            NetworkIdentity identity = parentOfPlayer.GetComponent<NetworkIdentity>();
+            NetworkConnection conn = identity.connectionToClient;
+            TargetRequestControllerEnabled(conn);
         }
 
+        [TargetRpc]
+        public void TargetRequestControllerEnabled(NetworkConnection conn)
+        {
+            CmdControllerEnabled(controller.enabled);
+        }
+
+        [Command]
+        public void CmdControllerEnabled(bool enabled)
+        {
+            controllerEnabled = enabled;
+        }
+    
         public void RequestDestroy(uint sceneObjNetId)
         {
             if (isLocalPlayer)

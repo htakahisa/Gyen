@@ -13911,6 +13911,11 @@ PrefabInstance:
       propertyPath: sceneId
       value: 3283604276
       objectReference: {fileID: 0}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: defenceSpawnPos.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4641763803197208681, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
       propertyPath: m_LocalPosition.x
