@@ -10,4 +10,5 @@ public class CharacterStats : ScriptableObject
     public float defaultAssistRange = 30;
     public float defaultMaxAssistAngle = 6;
     public float defaultAssistStrength = 10;
+    public float defaultFootStepTime = 0.4f;
 }

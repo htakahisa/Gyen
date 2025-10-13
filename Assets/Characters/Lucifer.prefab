@@ -1517,7 +1517,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 64
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -2199,7 +2199,7 @@ MonoBehaviour:
   syncDirection: 1
   syncMode: 0
   syncInterval: 0
-  hasClientSpawned: 0
+  allClientsReady: 0
 --- !u!114 &5565122492130353490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2244,9 +2244,9 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  positionLerpSpeed: 10
-  rotationLerpSpeed: 10
-  pitchLerpSpeed: 10
+  positionLerpFactor: 0.2
+  rotationLerpFactor: 0.2
+  pitchLerpFactor: 0.2
   controller: {fileID: 1112727817626628774}
   cameraRoot: {fileID: 0}
   isSynchronize: 1
@@ -5083,7 +5083,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6868605143741002680}
   - component: {fileID: 8899690605015266389}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Armature_Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

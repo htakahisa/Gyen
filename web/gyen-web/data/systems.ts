@@ -21,6 +21,7 @@ export const systems: System[] = [
     description: "効果音や、BGMについて。",
     history: [
       { version: "1.0.6", change: "効果音が聞こえる最大範囲を30?から15へ狭めました", type: "buff" as const },
+      { version: "1.0.6", change: "足音の鳴るインターバルを0.4sから1sに変更しました", type: "neutral" as const },
     ],
   },
     {

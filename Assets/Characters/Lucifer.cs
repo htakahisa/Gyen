@@ -56,6 +56,7 @@ public class Lucifer : CharacterSkills
         }
     }
 
+    [Command]
     public void CmdCollectOrb()
     {
         GetComponentInChildren<ServerCheckShoot>().GetDarkOrb().GetComponent<Darkness>().Collected();

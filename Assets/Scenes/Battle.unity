@@ -3075,7 +3075,7 @@ GameObject:
   - component: {fileID: 378878565}
   - component: {fileID: 378878564}
   - component: {fileID: 378878563}
-  m_Layer: 9
+  m_Layer: 3
   m_Name: PhaseWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5551,7 +5551,7 @@ GameObject:
   m_Component:
   - component: {fileID: 753728428}
   - component: {fileID: 753728429}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PhaseWallManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6627,6 +6627,16 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: a342e950783167a4997b0c93e13219c7, type: 2}
+    - target: {fileID: 3855890781455403357, guid: 5a86559c1c0067c4da918d81c0136930,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -91.850006
+      objectReference: {fileID: 0}
+    - target: {fileID: 3855890781455403357, guid: 5a86559c1c0067c4da918d81c0136930,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 21.42
+      objectReference: {fileID: 0}
     - target: {fileID: 4228201835590048176, guid: 5a86559c1c0067c4da918d81c0136930,
         type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -6647,6 +6657,11 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: a342e950783167a4997b0c93e13219c7, type: 2}
+    - target: {fileID: 4960285400081135750, guid: 5a86559c1c0067c4da918d81c0136930,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 37.94
+      objectReference: {fileID: 0}
     - target: {fileID: 4990530871526230533, guid: 5a86559c1c0067c4da918d81c0136930,
         type: 3}
       propertyPath: m_Name
@@ -6657,11 +6672,36 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 78238f0f3b585dd48bcea06b9a87a014, type: 2}
+    - target: {fileID: 5220610139411597603, guid: 5a86559c1c0067c4da918d81c0136930,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -91.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 5220610139411597603, guid: 5a86559c1c0067c4da918d81c0136930,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 21.42
+      objectReference: {fileID: 0}
     - target: {fileID: 5446522166740838635, guid: 5a86559c1c0067c4da918d81c0136930,
         type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: a342e950783167a4997b0c93e13219c7, type: 2}
+    - target: {fileID: 5623375041430376639, guid: 5a86559c1c0067c4da918d81c0136930,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5623375041430376639, guid: 5a86559c1c0067c4da918d81c0136930,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5623375041430376639, guid: 5a86559c1c0067c4da918d81c0136930,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 5623375041430376639, guid: 5a86559c1c0067c4da918d81c0136930,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -6745,7 +6785,7 @@ PrefabInstance:
     - target: {fileID: 7149267178069200978, guid: 5a86559c1c0067c4da918d81c0136930,
         type: 3}
       propertyPath: m_Layer
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7312530488460606071, guid: 5a86559c1c0067c4da918d81c0136930,
         type: 3}
@@ -8127,7 +8167,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1166253943}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PhaseWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9931,7 +9971,7 @@ GameObject:
   - component: {fileID: 1462753303}
   - component: {fileID: 1462753305}
   - component: {fileID: 1462753304}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12270,7 +12310,7 @@ GameObject:
   - component: {fileID: 1889625293}
   - component: {fileID: 1889625292}
   - component: {fileID: 1889625291}
-  m_Layer: 9
+  m_Layer: 3
   m_Name: PhaseWall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13660,7 +13700,7 @@ GameObject:
   - component: {fileID: 2131939979}
   - component: {fileID: 2131939978}
   - component: {fileID: 2131939977}
-  m_Layer: 9
+  m_Layer: 3
   m_Name: PhaseWall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

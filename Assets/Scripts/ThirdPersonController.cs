@@ -161,6 +161,9 @@ namespace StarterAssets
         [SyncVar]
         public bool canMove = true;
         public PlayerActionLockManager lockManager;
+
+        public float footStepTime;
+
         public void SetMovementEnabled(bool enabled)
         {
             canMove = enabled;
@@ -279,7 +282,7 @@ namespace StarterAssets
             assistRange = characterStats.defaultAssistRange;
             maxAssistAngle = characterStats.defaultMaxAssistAngle;
             assistStrength = characterStats.defaultAssistStrength;
-
+            footStepTime = characterStats.defaultFootStepTime;
         }
         private IEnumerator InitializeControlScheme()
         {
@@ -801,10 +804,10 @@ namespace StarterAssets
                 if (_dashSound <= 0 && !isWalking)
                 {
                     OnFootstep();
-                    _dashSound = 0.4f;
+                    _dashSound = footStepTime;
                 }
             }
-            else if (_dashSound <= 0.4f)
+            else if (_dashSound <= footStepTime)
             {
                 _dashSound += Time.deltaTime;
             }
@@ -1091,10 +1094,10 @@ namespace StarterAssets
                 if (_dashSound <= 0)
                 {
                     OnFootstep();
-                    _dashSound = 0.4f;
+                    _dashSound = footStepTime;
                 }
             }
-            else if (_dashSound <= 0.4f)
+            else if (_dashSound <= footStepTime)
             {
                 _dashSound += Time.deltaTime;
             }

@@ -80,6 +80,7 @@ export const characters: Character[] = [
     description: "地獄から現れたルシファーは、敵の血を何よりも欲し、相手が傷ついた分だけ強くなる。",
     history: [
       { version: "1.0.4", change: "ルシファー参戦！" , type: "neutral" as const },
+      { version: "1.0.6", change: "Rebelliousnessを構えた時に発生する炎のエフェクトと効果音を抑えるよう変更" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : Rebelliousness", description: "ルシファー専用のリボルバー（のような武器。炎をまとっているためよく分からない）" },

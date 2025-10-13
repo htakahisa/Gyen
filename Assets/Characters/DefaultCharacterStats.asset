@@ -19,3 +19,4 @@ MonoBehaviour:
   defaultAssistRange: 30
   defaultMaxAssistAngle: 6
   defaultAssistStrength: 10
+  defaultFootStepTime: 1

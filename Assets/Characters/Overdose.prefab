@@ -2015,7 +2015,7 @@ MonoBehaviour:
   syncDirection: 1
   syncMode: 0
   syncInterval: 0
-  hasClientSpawned: 0
+  allClientsReady: 0
 --- !u!114 &3150830042479688977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2072,9 +2072,9 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  positionLerpSpeed: 10
-  rotationLerpSpeed: 10
-  pitchLerpSpeed: 10
+  positionLerpFactor: 0.2
+  rotationLerpFactor: 0.2
+  pitchLerpFactor: 0.2
   controller: {fileID: 1112727817626628774}
   cameraRoot: {fileID: 0}
   isSynchronize: 1
@@ -4699,7 +4699,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6868605143741002680}
   - component: {fileID: 8899690605015266389}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Armature_Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

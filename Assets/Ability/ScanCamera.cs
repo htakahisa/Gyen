@@ -36,13 +36,13 @@ public class ScanCamera : NetworkBehaviour
         CmdCameraOff();
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdCameraOn()
     {
         RpcCameraOn();
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdCameraOff()
     {
         RpcCameraOff();
