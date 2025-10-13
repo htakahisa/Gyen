@@ -67,11 +67,11 @@ public class BuyPanel : NetworkBehaviour
 
         Vector2 input = inputActions.Player.Look.ReadValue<Vector2>();
 
-        if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().currentControlScheme == "Keyboard&Mouse")
+        if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>()?.currentControlScheme == "Keyboard&Mouse")
         {
             cursorSpeed = 100f;
         }
-        else if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().currentControlScheme == "Gamepad")
+        else if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>()?.currentControlScheme == "Gamepad")
         {
             cursorSpeed = 1000f;
         }

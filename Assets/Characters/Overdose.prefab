@@ -661,7 +661,6 @@ MonoBehaviour:
   OrbMask:
     serializedVersion: 2
     m_Bits: 2568
-  _speed: 0
   middleBrow: {fileID: 4549604650611393894}
   controller: {fileID: 1112727817626628774}
   xRotation: 0
@@ -1964,6 +1963,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3051506110441234160}
+  - component: {fileID: 3415856408482599885}
   - component: {fileID: 3150830042479688977}
   - component: {fileID: -4732923928998472460}
   - component: {fileID: 8825841003792857049}
@@ -2000,6 +2000,22 @@ Transform:
   - {fileID: 4963900213377686015}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3415856408482599885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cea6ac54fa43ff1498f9eea60eb6d54c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  hasClientSpawned: 0
 --- !u!114 &3150830042479688977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2056,9 +2072,13 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  yaw: 0
+  positionLerpSpeed: 10
+  rotationLerpSpeed: 10
+  pitchLerpSpeed: 10
   controller: {fileID: 1112727817626628774}
+  cameraRoot: {fileID: 0}
   isSynchronize: 1
+  yaw: 0
 --- !u!114 &8825841003792857049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2136,6 +2156,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   hp: 100
+  maxHp: 100
   armer: 1
   isInvincible: 0
   isDead: 0

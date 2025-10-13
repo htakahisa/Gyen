@@ -75,6 +75,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   hp: 50
+  maxHp: 50
   armer: 1
   isInvincible: 0
   isDead: 0

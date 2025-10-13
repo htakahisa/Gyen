@@ -295,7 +295,7 @@ namespace StarterAssets
                     }
 
                     // --- サーバー同期 ---
-                    transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                    //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
 
 
                 }
@@ -412,7 +412,7 @@ namespace StarterAssets
                 transformNetwork.yaw += xRandomRot / (10 - count);
                 GetComponent<ThirdPersonController>().CameraRecoil(targetRecoil.y / (10 - count));
                 parentOfPlayer.transform.rotation = Quaternion.Euler(0, transformNetwork.yaw, 0);
-                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
                 yield return new WaitForSeconds(duration / 9);
             }
         }

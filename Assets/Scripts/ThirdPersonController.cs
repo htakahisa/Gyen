@@ -74,7 +74,6 @@ namespace StarterAssets
         public LayerMask OrbMask;
 
         [SyncVar]
-        [SerializeField]
         private float _speed;
         private float _animationBlend;
         private Quaternion _targetRotation;
@@ -171,16 +170,15 @@ namespace StarterAssets
         {
             StartCoroutine(InitialSetInput());
 
-            if (_mainCamera == null)
-            {
-                _CameraComponent = GetComponentInChildren<Camera>();
-                _mainCamera = _CameraComponent.gameObject;
-                _UiCameraComponent = _mainCamera.transform.GetChild(0).GetComponent<Camera>();
-                _UiCamera = _UiCameraComponent.gameObject;
-                Canvas canvas = GameObject.FindGameObjectWithTag("Canvas")?.GetComponent<Canvas>();
-                _shootManager = GetComponent<ShootManager>();
-                _hpMaster = GetComponentInParent<HpMaster>();
-            }
+
+            _CameraComponent = GetComponentInChildren<Camera>();
+             _mainCamera = _CameraComponent.gameObject;
+            _UiCameraComponent = _mainCamera.transform.GetChild(0).GetComponent<Camera>();
+            _UiCamera = _UiCameraComponent.gameObject;
+            Canvas canvas = GameObject.FindGameObjectWithTag("Canvas")?.GetComponent<Canvas>();
+            _shootManager = GetComponent<ShootManager>();
+            _hpMaster = GetComponentInParent<HpMaster>();
+            
 
             
 
@@ -302,11 +300,18 @@ namespace StarterAssets
 
         private void SwitchScheme(string schemeName, params InputDevice[] devices)
         {
-            if (playerInput.currentControlScheme != schemeName)
+            if (playerInput != null && playerInput.user.valid)
             {
-                playerInput.SwitchCurrentControlScheme(schemeName, devices);
-                currentControlScheme = schemeName;
-                Debug.Log($"Switched to: {schemeName}");
+                if (playerInput.currentControlScheme != schemeName)
+                {
+                    playerInput.SwitchCurrentControlScheme(schemeName, devices);
+                    currentControlScheme = schemeName;
+                    Debug.Log($"Switched to: {schemeName}");
+                }
+            }
+            else
+            {
+                Debug.Log("プレイヤーインプットがまだ準備できてないので、一応気をつけてください。無理やり使うとエラーになります");
             }
         }
 
@@ -567,10 +572,10 @@ namespace StarterAssets
                 // ---- カメラに反映 ----
                 Vector3 euler = finalRot.eulerAngles;
                 currentPitch = euler.x > 180f ? euler.x - 360f : euler.x;
-                transformNetwork.yaw = euler.y;
+                //transformNetwork.yaw = euler.y;
                 CameraParticularRotaion(-currentPitch);
                 parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
             }
         }
 
@@ -643,8 +648,8 @@ namespace StarterAssets
                     // --- 身体の左右回転 (Yaw) ---
                 transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
                 parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
-                transformNetwork.CmdRotateCamera(_mainCamera.transform.localRotation);
+                //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                //transformNetwork.CmdRotateCamera(_mainCamera.transform.localRotation);
 
             }
 
@@ -656,7 +661,7 @@ namespace StarterAssets
 
             // 体のYawと合成
             _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0, 0f);
-            transformNetwork.CmdRotateCamera(_mainCamera.transform.localRotation);
+            //transformNetwork.CmdRotateCamera(_mainCamera.transform.localRotation);
         }
 
 
@@ -697,7 +702,7 @@ namespace StarterAssets
                 // 身体の左右回転 (Yaw)
                 transformNetwork.yaw += random * stunLevel * (_CameraComponent.fieldOfView / 74.03f);
                 parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
 
                 yield return null; // 毎フレーム繰り返す
             }
@@ -812,7 +817,7 @@ namespace StarterAssets
                 controller.Move(moveDirection * Time.deltaTime);
                 if (isLocalPlayer)
                 {
-                    transformNetwork.CmdPos(transform.position);
+                   // transformNetwork.CmdPos(transform.position);
                 }
             }
          
@@ -829,10 +834,6 @@ namespace StarterAssets
 
         }
 
-        public void ResetLastMove()
-        {
-            _lastMoveDirection = new Vector3(0,0,0);
-        }
 
 
         private void GetOrb()
@@ -952,7 +953,7 @@ namespace StarterAssets
                 controller.Move(moveDirection * Time.deltaTime);
                 if (isLocalPlayer)
                 {
-                    transformNetwork.CmdPos(transform.position);
+                    //transformNetwork.CmdPos(transform.position);
                 }
             }
 
@@ -1102,7 +1103,7 @@ namespace StarterAssets
             //Debug.Log("b" + moveDirection);
             // **CharacterControllerで移動**
             controller.Move(moveDirection * Time.deltaTime);
-            transformNetwork.ServerPos(parentOfPlayer.transform.position);
+            //transformNetwork.ServerPos(parentOfPlayer.transform.position);
 
             // **アニメーター更新**
             if (_hasAnimator)
@@ -1187,7 +1188,7 @@ namespace StarterAssets
                         // プレイヤー身体に左右回転を適用
                         transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
                         parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                        transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+                        //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
                     }
                     else
                     {
@@ -1318,6 +1319,14 @@ namespace StarterAssets
             return _speed;  // 呼び出したクライアント上で最後に受信した値（SyncVar）
         }
 
+        [ClientRpc]
+        public void RpcResetSpeed()
+        {
+            _speed = 0f;
+            _animationBlend = 0f;
+            _verticalVelocity = 0f;
+            _lastMoveDirection = Vector3.zero;
+        }
 
         [Server]
         public void ResetPos(Vector3 pos)
@@ -1394,19 +1403,12 @@ namespace StarterAssets
         {
             NetworkIdentity identity = parentOfPlayer.GetComponent<NetworkIdentity>();
             NetworkConnection conn = identity.connectionToClient;
-            lockManager.AddLock(PlayerAction.Move, "StopSynchronized");
-            lockManager.AddLock(PlayerAction.Shoot, "StopSynchronized");
-
-            yield return new WaitUntil(() => canMove == false);
 
             RpcControllerEnabled(false);
-            yield return new WaitUntil(() => controllerEnabled == false);
-            parentOfPlayer.transform.position = newPos;
-            yield return new WaitForSeconds(0.2f);
-            GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
-            parentOfPlayer.GetComponent<CharacterTransfromNetwork>().CmdPos(newPos);
+            yield return new WaitWhile(() => controllerEnabled == true);
 
-
+            identity.GetComponent<CharacterTransfromNetwork>().ResetPosition(newPos, Quaternion.identity);
+           
             StartCoroutine(StartToMove());
 
         }
@@ -1416,7 +1418,11 @@ namespace StarterAssets
             yield return new WaitForSeconds(3f);
             lockManager.RemoveLock(PlayerAction.Move, "StopSynchronized");
             lockManager.RemoveLock(PlayerAction.Shoot, "StopSynchronized");
+
+            yield return new WaitWhile(() => GetComponentInParent<ThirdPersonController>() == null);
             RpcControllerEnabled(true);
+
+            RoundManager.rm.CmdHasReset();
         }
 
         [ClientRpc]

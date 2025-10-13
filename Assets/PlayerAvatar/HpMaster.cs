@@ -8,6 +8,8 @@ public class HpMaster : NetworkBehaviour
     [SyncVar(hook = nameof(OnHpChanged))]
     public int hp = 100; // 各プレイヤーのHP
 
+    public int maxHp = 100;
+
     [SyncVar]
     public float armer = 1; // 各プレイヤーのHP
 
@@ -25,6 +27,17 @@ public class HpMaster : NetworkBehaviour
     {
         Debug.Log($"{netId} のHPが {oldValue} → {newValue} に変更");
     }
+
+    private void Awake()
+    {
+        if (isServer)
+        {
+            ResetHp();
+
+        }
+    }
+
+
     private void Update()
     {
         if (transform.position.y <= -30)
@@ -64,7 +77,7 @@ public class HpMaster : NetworkBehaviour
     public void ResetHp()
     {
         isDead = false;
-        hp = 100;
+        hp = maxHp;
 
     }
 
@@ -113,6 +126,7 @@ public class HpMaster : NetworkBehaviour
         if (onDeath == EventOnDeath.FORMTOHUMAN)
         {
             GetComponentInParent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
+            ResetHp();
         }
         if (onDeath == EventOnDeath.LIGHTLOAD)
         {
@@ -152,6 +166,7 @@ public class HpMaster : NetworkBehaviour
         {
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
+            GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
             RoundManager.rm.Finisher(gameObject);
             if(RoundManager.rm.defender == gameObject)
             {

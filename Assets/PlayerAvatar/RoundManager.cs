@@ -38,6 +38,8 @@ public class RoundManager : NetworkBehaviour
     public float timeInRound;
     public bool hasRoundEnded;
 
+    public bool hasReset;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -167,7 +169,8 @@ public class RoundManager : NetworkBehaviour
         
         StartCoroutine(ResetPlayers());
 
-        yield return new WaitForSeconds(5f);
+        yield return new WaitWhile(() => !hasReset);
+        hasReset = false;
         ResetStatus();
 
 
@@ -208,19 +211,12 @@ public class RoundManager : NetworkBehaviour
 
     public IEnumerator ResetPlayers()
     {
-        myPlayer.GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
-
-        if (otherPlayer != null)
-        {
-            otherPlayer.GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
-        }
 
         yield return new WaitForSeconds(4f);
 
-    
 
-        SetPosition();
-        SetHp();
+
+        SetConditions();
 
     }
 
@@ -259,10 +255,19 @@ public class RoundManager : NetworkBehaviour
     }
 
     [Server]
-    public void SetPosition()
+    public void SetConditions()
+    {
+        StartCoroutine(SetConditionsCoroutine());
+    }
+
+    public IEnumerator SetConditionsCoroutine()
     {
         if (attacker != null)
         {
+            attacker.GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
+
+            yield return new WaitWhile(() => attacker.GetComponent<AbilityController>().currentForm != AbilityController.PlayerForm.Human);
+
             attacker.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
             attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
             attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
@@ -271,12 +276,18 @@ public class RoundManager : NetworkBehaviour
         }
         if (defender != null)
         {
+            defender.GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
+
+            yield return new WaitWhile(() => defender.GetComponent<AbilityController>().currentForm != AbilityController.PlayerForm.Human);
+
             defender.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
             defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
             defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
             defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
             defender.GetComponentInChildren<ThirdPersonController>().ResetPos(defenceSpawnPos);
         }
+
+        
     }
 
 
@@ -284,10 +295,7 @@ public class RoundManager : NetworkBehaviour
     public void SetHp()
     {
 
-        attacker.GetComponent<HpMaster>().ResetHp();
-        defender.GetComponent<HpMaster>().ResetHp();
-        attacker.GetComponent<HpMaster>().armer = 1;
-        defender.GetComponent<HpMaster>().armer = 1;
+
     }
 
     [Server]
@@ -313,6 +321,7 @@ public class RoundManager : NetworkBehaviour
     {
         myPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
         myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
+        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
         myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
         myPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
@@ -320,11 +329,14 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
         myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);       
         myPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
+        myPlayer.GetComponent<HpMaster>().ResetHp();
+        myPlayer.GetComponent<HpMaster>().armer = 1;
 
         if (Mode == "1VS1")
         {
             otherPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
             otherPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
+            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
             otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
             otherPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
             otherPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
@@ -332,9 +344,16 @@ public class RoundManager : NetworkBehaviour
             otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
             otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
             otherPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
+            otherPlayer.GetComponent<HpMaster>().ResetHp();
+            otherPlayer.GetComponent<HpMaster>().armer = 1;
         }
     }
 
+    [Command (requiresAuthority = false)]
+    public void CmdHasReset()
+    {
+        hasReset = true;
+    }
 
     public GameObject GetMyPlayer()
     {

@@ -41,10 +41,8 @@ public class AbilityController : NetworkBehaviour
         }
         _controller = GetComponent<CharacterController>();
 
-        if (currentForm != PlayerForm.Human)
-        {
-            SwitchForm(PlayerForm.Human);
-        }
+        SwitchForm(PlayerForm.Human);
+        
 
 
     }
@@ -109,7 +107,7 @@ public class AbilityController : NetworkBehaviour
         
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdSwitchForm(int newFormInt)
     {
         RpcSwitchForm(newFormInt);
@@ -124,18 +122,21 @@ public class AbilityController : NetworkBehaviour
         shootManager.ResetZoom();
         PlayerForm newForm = (PlayerForm)newFormInt;
 
+        if(currentForm != newForm)
+        {
+            StartCoroutine(CorrectCharacterPosition(gameObject));
+        }
         currentForm = newForm;
 
         if (newForm == PlayerForm.Human)
         {
 
-            StartCoroutine(CorrectCharacterPosition(gameObject));
             GetComponent<HpMaster>().isInvincible = false;
             nowControlled = objectList.FirstOrDefault(obj => obj.name == "PlayerObject");
 
             if (isLocalPlayer)
             {
-                _controller.radius = 0.3f;
+                _controller.radius = 0.35f;
                 _controller.height = 2.1f;
                 _controller.center = new Vector3(0, 1.1f, 0);
 
@@ -146,7 +147,7 @@ public class AbilityController : NetworkBehaviour
         }
         else if (newForm == PlayerForm.Bird)
         {
-            GetComponentInChildren<ThirdPersonController>().ResetLastMove();
+            GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
             GetComponent<HpMaster>().isInvincible = true;
             nowControlled = objectList.FirstOrDefault(obj => obj.name == "YellowObject");
             if (isLocalPlayer)
@@ -160,19 +161,20 @@ public class AbilityController : NetworkBehaviour
         }
         nowGeometry = nowControlled.GetComponent<FormManager>().geometry;
         nowCamera = nowControlled.GetComponent<FormManager>().camera;
-        DisableNowControlled();
+
+        StartCoroutine(DisableNowControlled());
     }
 
     private IEnumerator CorrectCharacterPosition(GameObject character)
     {
 
-
+        lockManager.AddLock(PlayerAction.Move, "CorrectPos");
         // Raycastで地面の高さを取得
         Vector3 pos = character.transform.position;
-        Ray ray = new Ray(pos + Vector3.up * 1f, Vector3.down);
-        if (Physics.Raycast(ray, out RaycastHit hit, 5f, ground))
+        Ray ray = new Ray(pos + Vector3.up * 2f, Vector3.down);
+        if (Physics.Raycast(ray, out RaycastHit hit, 2f, ground))
         {
-            lockManager.AddLock(PlayerAction.Move, "CorrectPos");
+            
             GetComponent<CharacterTransfromNetwork>().isSynchronize = false;
             GetComponent<CharacterController>().enabled = false;
 
@@ -180,25 +182,31 @@ public class AbilityController : NetworkBehaviour
             Debug.Log(GetComponent<CharacterController>().enabled +""+ GetComponent<CharacterTransfromNetwork>().isSynchronize);
             character.transform.position = pos;
             GetComponent<CharacterTransfromNetwork>().isSynchronize = true;
-            GetComponent<CharacterTransfromNetwork>().CmdPos(transform.position);
+            //GetComponent<CharacterTransfromNetwork>().CmdPos(transform.position);
 
-            yield return new WaitForSeconds(0.1f);
-            GetComponent<CharacterController>().enabled = true;
-            lockManager.RemoveLock(PlayerAction.Move, "CorrectPos");
+            
+            
 
         }
 
-        DisableNowControlled();
+        yield return new WaitForSeconds(0.1f);
+
+        GetComponent<CharacterController>().enabled = true;
+
+        lockManager.RemoveLock(PlayerAction.Move, "CorrectPos");
+
 
 
 
     }
 
 
-    public void DisableNowControlled()
+    public IEnumerator DisableNowControlled()
     {
-
-        Debug.Log(transform.position.y);
+        if (!lockManager.GetLocks()[PlayerAction.Move].Contains("CorrectPos"))
+        {
+            yield return new WaitWhile(() => !lockManager.GetLocks()[PlayerAction.Move].Contains("CorrectPos"));
+        }
 
         foreach (var obj in objectList)
         {

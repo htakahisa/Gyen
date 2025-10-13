@@ -179,29 +179,23 @@ public class CustomNetworkManager : NetworkManager
             RoundManager.rm.defenceSpawnPos;
 
         // プレイヤー生成
-        GameObject player = Instantiate(
-            playerPrefabs[index],
-            spawnPos,
-            Quaternion.identity
-        );
+        GameObject player = Instantiate(playerPrefabs[index], spawnPos, Quaternion.identity);
 
-        // RoundManagerに参照を登録
-        if (RoundManager.rm != null)
-        {
-            if (isAttacker)
-            {
-                RoundManager.rm.attacker = player;
-            }
-            else
-            {
-                RoundManager.rm.defender = player;
-            }
-        }
-
-        // ネットワーク登録
+        // 置き換え（この時点でクライアントに権限が付く）
         NetworkServer.ReplacePlayerForConnection(conn, player, true);
+
+        // クライアント側の準備完了を待つ
+        SpawnTracker tracker = player.GetComponent<SpawnTracker>();
+        yield return new WaitUntil(() => tracker.allClientsReady);
+
+        // RpcRelay に登録
+        RpcRelay relay = FindObjectOfType<RpcRelay>();
+        relay.RpcSetPlayersRole(isAttacker, player);
+
         Debug.Log($"Spawned player for connection {conn.connectionId} at {spawnPos}");
     }
+
+
     public override void OnClientConnect()
     {
         base.OnClientConnect();

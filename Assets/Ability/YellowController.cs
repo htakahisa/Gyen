@@ -94,7 +94,7 @@ public class YellowController : NetworkBehaviour
     // プレイヤー本体を回転
     transformNetwork.yaw += currentValue;
     parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-    transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+    //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
 
     // --- 上下回転(Pitch) ---
     xRotation -= mouseY * _sensitivity;
@@ -106,18 +106,19 @@ public class YellowController : NetworkBehaviour
 
     public void CharacterMove()
     {
+        if (characterController == null) return;
         characterController.Move(transform.forward * MoveSpeed * Time.deltaTime);
-        transformNetwork.CmdPos(parentOfPlayer.transform.position);
+        //transformNetwork.CmdPos(parentOfPlayer.transform.position);
 
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space))
         {
             characterController.Move(transform.up * UpSpeed * Time.deltaTime);
-            transformNetwork.CmdPos(parentOfPlayer.transform.position);
+            //transformNetwork.CmdPos(parentOfPlayer.transform.position);
         }
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.LeftShift))
         {
             characterController.Move(-transform.up * UpSpeed * Time.deltaTime);
-            transformNetwork.CmdPos(parentOfPlayer.transform.position);
+            //transformNetwork.CmdPos(parentOfPlayer.transform.position);
         }
 
         audioTimer += Time.deltaTime;

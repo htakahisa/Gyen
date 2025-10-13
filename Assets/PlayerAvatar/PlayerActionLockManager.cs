@@ -31,8 +31,6 @@ public class PlayerActionLockManager : NetworkBehaviour
     // --- 公開API（サーバーから呼ぶ） ---
     public void AddLock(PlayerAction action, string reason)
     {
-        if (!lockReasons[action].Add(reason))
-            return;
 
         if (!isServer)
         {
@@ -40,7 +38,8 @@ public class PlayerActionLockManager : NetworkBehaviour
             return;
         }
 
-        UpdateState(action);
+        if (lockReasons[action].Add(reason))
+            UpdateState(action);
     }
 
     [Command (requiresAuthority = false)]
@@ -53,16 +52,15 @@ public class PlayerActionLockManager : NetworkBehaviour
     public void RemoveLock(PlayerAction action, string reason)
     {
 
-        if (!lockReasons[action].Remove(reason))
-            return;
 
         if (!isServer) 
         {
             CmdRemoveLock(action, reason);
             return;
         }
-        
-        UpdateState(action);
+
+        if (lockReasons[action].Remove(reason))
+            UpdateState(action);
     }
 
 
@@ -90,12 +88,20 @@ public class PlayerActionLockManager : NetworkBehaviour
         {
             case PlayerAction.Move:
                 canMove = canDo;
+                if (isClient && isServer)
+                    OnMoveLockChanged(!canMove, canMove);
                 break;
+
             case PlayerAction.Shoot:
                 canShoot = canDo;
+                if (isClient && isServer)
+                    OnShootLockChanged(!canShoot, canShoot);
                 break;
+
             case PlayerAction.Ability:
                 canUseAbility = canDo;
+                if (isClient && isServer)
+                    OnAbilityLockChanged(!canUseAbility, canUseAbility);
                 break;
         }
     }
@@ -124,4 +130,10 @@ public class PlayerActionLockManager : NetworkBehaviour
             GetComponent<AbilityController>().SetAbilityEnabled(newValue);
         }
     }
+
+    public Dictionary<PlayerAction, HashSet<string>> GetLocks()
+    {
+        return lockReasons;
+    }
+
 }

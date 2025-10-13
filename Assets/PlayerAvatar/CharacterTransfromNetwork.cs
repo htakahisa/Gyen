@@ -3,157 +3,153 @@ using UnityEngine;
 
 public class CharacterTransfromNetwork : NetworkBehaviour
 {
-    private Vector3 lastPosition;
-    private Vector3 targetPosition;
+    [Header("Interpolation Settings")]
+    [SerializeField, Range(0.01f, 1f)] private float positionLerpFactor = 0.2f;
+    [SerializeField, Range(0.01f, 1f)] private float rotationLerpFactor = 0.2f;
+    [SerializeField, Range(0.01f, 1f)] private float pitchLerpFactor = 0.2f;
 
-    private Quaternion lastRotation;
-
-    public float yaw;   // 左右回転（身体）
-    private float t;
-
+    [Header("References")]
     public CharacterController controller;
-    [SyncVar]
-    public bool isSynchronize = true;
+    public Transform cameraRoot; // FPSのカメラ親 (pitch制御用)
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SyncVar] public bool isSynchronize = true;
+
+    private Vector3 targetPosition;
+    private Quaternion targetRotation;
+    private float targetPitch;
+
+    private Vector3 lastSentPosition;
+    private Quaternion lastSentRotation;
+    private float lastSentPitch;
+
+    private const float positionSendThreshold = 0.02f;
+    private const float rotationSendThreshold = 0.5f;
+    private const float pitchSendThreshold = 0.5f;
+
+    public float yaw;
+
+    private void Start()
     {
-        lastPosition = transform.position;
-        lastRotation = transform.rotation;
+        targetPosition = transform.position;
+        targetRotation = transform.rotation;
+        if (cameraRoot != null)
+            targetPitch = cameraRoot.localEulerAngles.x;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (!isLocalPlayer)
+        // ローカルプレイヤーが自分の変化を送信
+        if (isLocalPlayer && isSynchronize)
         {
-            t += Time.deltaTime * 10f; // 補間速度
-            transform.position = Vector3.Lerp(lastPosition, targetPosition, t);
-
-        }
-
-
-    }
-
-    public void SetTarget(Vector3 newPos)
-    {
-        lastPosition = transform.position;
-        targetPosition = newPos;
-        t = 0f;
-    }
-
-
-    [Command (requiresAuthority = false)]
-    public void CmdPos(Vector3 position)
-    {
-        if (!isSynchronize) return;
-        controller.enabled = false;
-        transform.position = position;
-        controller.enabled = true;
-
-        RpcPositionNetwork(position);
-    }
-    [Server]
-    public void ServerPos(Vector3 position)
-    {
-        controller.enabled = false;
-        transform.position = position;
-        controller.enabled = true;
-
-        RpcPositionNetwork(position);
-    }
-
-    [Command]
-    public void CmdRotate(Quaternion rotation)
-    {
-        transform.rotation = rotation;
-        RpcRotationNetwork(rotation);
-    }
-
-    [Command]
-    public void CmdRotateCamera(Quaternion rotation)
-    {
-        GetComponentInChildren<Camera>().transform.localRotation = rotation;
-        RpcRotationCameraNetwork(rotation);
-    }
-
-    [Server]
-    public void ServerPositionNetwork(Vector3 position)
-    {
-        RpcPositionNetwork(position);
-        lastPosition = transform.position;
-    }
-
-    [Server]
-    public void ServerRotationNetwork(Quaternion rotation)
-    {
-        RpcRotationNetwork(rotation);
-        lastRotation = transform.rotation;
-    }
-
-
-    [ClientRpc]
-    public void RpcPositionNetwork(Vector3 position)
-    {
-        
-
-        if (!isLocalPlayer)
-        {
-            SetTarget(position);
-            // 他プレイヤーは補間で自然に追従
-            transform.position = Vector3.Lerp(transform.position, position, 0.5f);
-        }
-        else
-        {
-            // 自分はサーバーとの差分が大きい場合のみ補正
-            float dist = Vector3.Distance(transform.position, position);
-            if (dist > 0.3f) // 適切な閾値
-            {
-                transform.position = position;
-            }
-        }
-    }
-
-
-    [ClientRpc]
-    public void RpcRotationNetwork(Quaternion rotation)
-    {
-        if (!isLocalPlayer)
-        {
-            transform.rotation = rotation;
-        }
-        else
-        {
-
-            float angleDiff = Quaternion.Angle(transform.rotation, rotation);
-            if (angleDiff > 2f) // ある程度ズレが大きいときだけ補正
-            {
-                transform.rotation = Quaternion.Slerp(transform.rotation, rotation, 0.5f);
-            }
-        }
-    }
-
-    [ClientRpc]
-    public void RpcRotationCameraNetwork(Quaternion rotation)
-    {
-
-        if (GetComponentInChildren<Camera>() == null)
-        {
+            TrySendTransform();
             return;
         }
 
+        // 他クライアント or サーバー上の補間
         if (!isLocalPlayer)
         {
-            GetComponentInChildren<Camera>().transform.localRotation = rotation;
-        }
-        else
-        {
+            // 固定補間率でスムーズに追従（Editorでも安定）
+            transform.position = Vector3.Lerp(transform.position, targetPosition, positionLerpFactor);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationLerpFactor);
 
-            float angleDiff = Quaternion.Angle(GetComponentInChildren<Camera>().transform.localRotation, rotation);
-            if (angleDiff > 2f) // ある程度ズレが大きいときだけ補正
+            if (cameraRoot != null)
             {
-                GetComponentInChildren<Camera>().transform.rotation = Quaternion.Slerp(GetComponentInChildren<Camera>().transform.localRotation, rotation, 0.5f);
+                Vector3 euler = cameraRoot.localEulerAngles;
+                euler.x = Mathf.LerpAngle(euler.x, targetPitch, pitchLerpFactor);
+                cameraRoot.localEulerAngles = euler;
             }
         }
+    }
+
+    /// <summary>
+    /// プレイヤーの位置や角度が変わったらサーバーへ送信
+    /// </summary>
+    private void TrySendTransform()
+    {
+        Vector3 pos = transform.position;
+        Quaternion rot = transform.rotation;
+        float pitch = cameraRoot != null ? cameraRoot.localEulerAngles.x : 0f;
+
+        if (Vector3.Distance(pos, lastSentPosition) > positionSendThreshold ||
+            Quaternion.Angle(rot, lastSentRotation) > rotationSendThreshold ||
+            Mathf.Abs(Mathf.DeltaAngle(pitch, lastSentPitch)) > pitchSendThreshold)
+        {
+            lastSentPosition = pos;
+            lastSentRotation = rot;
+            lastSentPitch = pitch;
+
+            CmdSendTransform(pos, rot, pitch);
+        }
+    }
+
+    [Command(requiresAuthority = false)]
+    private void CmdSendTransform(Vector3 position, Quaternion rotation, float pitch)
+    {
+        if (!isSynchronize) return;
+
+        // Move()を使わずに強制ワープ
+        transform.position = position;
+        transform.rotation = rotation;
+
+        if (cameraRoot != null)
+        {
+            Vector3 euler = cameraRoot.localEulerAngles;
+            euler.x = pitch;
+            cameraRoot.localEulerAngles = euler;
+        }
+
+        // 所有者以外にのみ通知（自分は補正不要）
+        RpcSyncTransform(position, rotation, pitch);
+    }
+
+    [ClientRpc(includeOwner = false)]
+    private void RpcSyncTransform(Vector3 position, Quaternion rotation, float pitch)
+    {
+        // 差分補間：いきなり更新せず、滑らかに追従
+        targetPosition = Vector3.Lerp(targetPosition, position, 0.5f);
+        targetRotation = Quaternion.Slerp(targetRotation, rotation, 0.5f);
+        targetPitch = Mathf.LerpAngle(targetPitch, pitch, 0.5f);
+    }
+
+    /// <summary>
+    /// サーバー側からの位置リセット（ワープ）
+    /// </summary>
+    [Server]
+    public void ResetPosition(Vector3 newPosition, Quaternion newRotation, float newPitch = 0f)
+    {
+        transform.position = newPosition;
+        transform.rotation = newRotation;
+
+        if (cameraRoot != null)
+        {
+            Vector3 euler = cameraRoot.localEulerAngles;
+            euler.x = newPitch;
+            cameraRoot.localEulerAngles = euler;
+        }
+
+        RpcForceSetTransform(newPosition, newRotation, newPitch);
+
+        // クライアント送信基準を更新（反応遅延防止）
+        lastSentPosition = newPosition;
+        lastSentRotation = newRotation;
+        lastSentPitch = newPitch;
+    }
+
+    [ClientRpc]
+    private void RpcForceSetTransform(Vector3 position, Quaternion rotation, float pitch)
+    {
+        transform.position = position;
+        transform.rotation = rotation;
+
+        if (cameraRoot != null)
+        {
+            Vector3 euler = cameraRoot.localEulerAngles;
+            euler.x = pitch;
+            cameraRoot.localEulerAngles = euler;
+        }
+
+        targetPosition = position;
+        targetRotation = rotation;
+        targetPitch = pitch;
     }
 }
