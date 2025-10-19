@@ -63,7 +63,7 @@ public class WeaponManager : NetworkBehaviour
         return slot != null ? slot.dataBase : null;
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdEquipWeapon(WeaponType type)
     {
         RpcEquipWeapon(type);
@@ -174,7 +174,7 @@ public class WeaponManager : NetworkBehaviour
         var slot = weapons.Find(w => w.weaponType == type);
         if (slot != null)
         {
-            RpcEquipWeapon(type);
+            CmdEquipWeapon(type);
             yield return new WaitWhile(() => GetCurrentWeaponType() != type);
             StartCoroutine(SetMagazineMax(0f));
         }

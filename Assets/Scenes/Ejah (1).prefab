@@ -2367,6 +2367,8 @@ MonoBehaviour:
   nowCamera: {fileID: 0}
   shootManager: {fileID: 8649088207265595569}
   skillManager: {fileID: 4496737049996792721}
+  lockManager: {fileID: 0}
+  canUse: 1
   currentForm: 0
   ground:
     serializedVersion: 2
@@ -2387,6 +2389,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   hp: 100
+  maxHp: 100
   armer: 1
   isInvincible: 0
   isDead: 0
@@ -2408,8 +2411,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   hasLoaded: 0
-  canMove: 1
-  canAbility: 1
 --- !u!114 &2319818094903134132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2938,7 +2939,6 @@ MonoBehaviour:
   OrbMask:
     serializedVersion: 2
     m_Bits: 2568
-  _speed: 0
   middleBrow: {fileID: 4782095706782471328}
   controller: {fileID: 8880491932214468542}
   xRotation: 0
@@ -2950,6 +2950,9 @@ MonoBehaviour:
   transformNetwork: {fileID: 0}
   currentControlScheme: Keyboard&Mouse
   enemies: []
+  canMove: 1
+  lockManager: {fileID: 0}
+  footStepTime: 0
 --- !u!114 &8649088207265595569
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -72,7 +72,7 @@ public class IMirror : NetworkBehaviour
         instance.GetComponent<DestroyTimer>().enabled = false;
         yield return new WaitForSeconds(0.2f);
 
-        AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IMIRRORDESTROYED, transform.position, 1);
+        AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IMIRRORDESTROYED, transform.position, 1, 30);
         NetworkServer.Destroy(gameObject);
     }
 

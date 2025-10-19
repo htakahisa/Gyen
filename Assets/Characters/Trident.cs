@@ -131,11 +131,11 @@ public class Trident : CharacterSkills
     {
         if (hpMaster.hp + 10 > 100)
         {
-            hpMaster.TakeDamage(hpMaster.hp - 100);
+            hpMaster.TakeDamage(hpMaster.hp - 100, false);
         }
         else
         {
-            hpMaster.TakeDamage(-10);
+            hpMaster.TakeDamage(-10, false);
         }
     }
 

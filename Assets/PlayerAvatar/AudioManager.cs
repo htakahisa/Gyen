@@ -22,6 +22,7 @@ public class AudioManager : NetworkBehaviour
     public AudioClip IceFinisher;
     public AudioClip MeteorFinisher;
     public AudioClip Defuse;
+    public AudioClip SpikeCountdown;
 
     public LayerMask soundBlockLayer;
 
@@ -49,6 +50,7 @@ public class AudioManager : NetworkBehaviour
         ICEFINISHER,
         METEORFINISHER,
         DEFUSE,
+        SPIKECOUNTDOWN,
     }
 
     // Update is called once per frame
@@ -60,10 +62,10 @@ public class AudioManager : NetworkBehaviour
 
 
     [Command(requiresAuthority = false)]
-    public void CmdPlaySoundAtPoint(Sounds name, Vector3 position, float volume)
+    public void CmdPlaySoundAtPoint(Sounds name, Vector3 position, float volume, float maxDistance)
     {
 
-        RpcPlaySoundAtPoint(name, position, volume);
+        RpcPlaySoundAtPoint(name, position, volume, maxDistance);
     }
 
 
@@ -82,7 +84,7 @@ public class AudioManager : NetworkBehaviour
 
 
     [ClientRpc]
-    private void RpcPlaySoundAtPoint(Sounds name, Vector3 position, float volume)
+    private void RpcPlaySoundAtPoint(Sounds name, Vector3 position, float volume, float maxDistance)
     {
         if (!RoundManager.rm.hasLoaded)
         {
@@ -157,6 +159,10 @@ public class AudioManager : NetworkBehaviour
                 soundClip = Defuse;
                 break;
 
+            case Sounds.SPIKECOUNTDOWN:
+                soundClip = SpikeCountdown;
+                break;
+
             default:
                 switch (name)
                 {
@@ -181,7 +187,7 @@ public class AudioManager : NetworkBehaviour
             position,
             volume,
             minDistance: 3f,
-            maxDistance: 15f,
+            maxDistance,
             rolloffMode: AudioRolloffMode.Linear
         );
 

@@ -42,16 +42,16 @@ public class HpMaster : NetworkBehaviour
     {
         if (transform.position.y <= -30)
         {
-            TakeDamage(10);
+            TakeDamage(10, false);
         }
 
     }
     
 
     [Server]
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, bool headshot)
     {
-        if (isDead || isInvincible)
+        if (isDead || isInvincible || (RoundManager.rm.Mode == "1VS1" && RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY))
         {
             return;
         }
@@ -69,7 +69,7 @@ public class HpMaster : NetworkBehaviour
             isDead = true;
             hp = 0;
             Debug.Log($"{netId} のオブジェクトが壊された");
-            OnDeath();
+            OnDeath(headshot);
         }
     }
 
@@ -102,7 +102,7 @@ public class HpMaster : NetworkBehaviour
 
     }
 
-    public void OnDeath()
+    public void OnDeath(bool headshot)
     {
         if (onDeath == EventOnDeath.LOSEROUND)
         {
@@ -112,7 +112,7 @@ public class HpMaster : NetworkBehaviour
         {
             ResetHp();
             GetComponent<BotManager>().ResetPos();
-            FinisherManager.instance.PlayPlayerFinisher(RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), gameObject);
+            FinisherManager.instance.PlayPlayerFinisher(RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), gameObject, headshot);
         }
         if (onDeath == EventOnDeath.DESTROY)
         {
@@ -120,7 +120,7 @@ public class HpMaster : NetworkBehaviour
         }
         if (onDeath == EventOnDeath.HORUSDESTROY)
         {
-            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HORUSDESTROYED, transform.position, 1f);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HORUSDESTROYED, transform.position, 1f, 30);
             NetworkServer.Destroy(gameObject);
         }
         if (onDeath == EventOnDeath.FORMTOHUMAN)
@@ -149,17 +149,17 @@ public class HpMaster : NetworkBehaviour
             GameObject instance = Instantiate(lightLoadEffect, pos, owner.transform.rotation);
             NetworkServer.Spawn(instance);
             
-            owner.GetComponent<HpMaster>().TakeDamage(-healHp);
+            owner.GetComponent<HpMaster>().TakeDamage(-healHp, false);
             owner.GetComponentInChildren<ServerCheckShoot>().DestroyOrb(gameObject);
         }
         if (onDeath == EventOnDeath.ITWEAKSDESTROY)
         {
-            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.ITWEAKSDESTROYED, transform.position, 1f);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.ITWEAKSDESTROYED, transform.position, 1f, 30);
             NetworkServer.Destroy(gameObject);
         }
         if (onDeath == EventOnDeath.IMIRRORDESTROY)
         {
-            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IMIRRORDESTROYED, transform.position, 1f);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IMIRRORDESTROYED, transform.position, 1f, 30);
             NetworkServer.Destroy(gameObject);
         }
         if (onDeath == EventOnDeath.PLAYERDEAD)
@@ -167,7 +167,7 @@ public class HpMaster : NetworkBehaviour
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
             GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
-            RoundManager.rm.Finisher(gameObject);
+            RoundManager.rm.Finisher(gameObject, headshot);
             if(RoundManager.rm.defender == gameObject)
             {
                 RoundManager.rm.RoundEnd(gameObject);

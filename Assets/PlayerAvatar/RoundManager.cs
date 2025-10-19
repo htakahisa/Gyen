@@ -113,10 +113,10 @@ public class RoundManager : NetworkBehaviour
         Invoke("RpcSwitchBattlePhase", 20f);
     }
 
-    public void Finisher(GameObject loser)
+    public void Finisher(GameObject loser, bool headshot)
     {
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
-        FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
+        FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser, headshot);
     }
 
     [ClientRpc]
@@ -195,11 +195,25 @@ public class RoundManager : NetworkBehaviour
 
         if (Mode == "1VS1")
         {
-            var bombs = FindObjectsOfType<BombManager>();
-            bombs[0].ArmBomb();
+            StartCoroutine(BombArmCoroutine());
         }
 
     }
+
+    public IEnumerator BombArmCoroutine()
+    {
+        if (CurrentPhase == Phase.BUY)
+        {
+            yield return new WaitWhile(() => CurrentPhase == Phase.BUY);
+        }
+        var bombs = FindObjectsOfType<BombManager>();
+
+        if (bombs == null) {
+            yield return new WaitWhile(() => bombs == null); 
+        }
+        bombs[0].ArmBomb();
+    }
+
 
     [Server]
     public void ServerSpawn(GameObject prefab)
@@ -291,12 +305,6 @@ public class RoundManager : NetworkBehaviour
     }
 
 
-    [Server]
-    public void SetHp()
-    {
-
-
-    }
 
     [Server]
     public void GiveCredits(GameObject winner, GameObject loser)
@@ -329,6 +337,7 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
         myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);       
         myPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
+        myPlayer.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
         myPlayer.GetComponent<HpMaster>().ResetHp();
         myPlayer.GetComponent<HpMaster>().armer = 1;
 
@@ -344,6 +353,7 @@ public class RoundManager : NetworkBehaviour
             otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
             otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
             otherPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
+            otherPlayer.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
             otherPlayer.GetComponent<HpMaster>().ResetHp();
             otherPlayer.GetComponent<HpMaster>().armer = 1;
         }

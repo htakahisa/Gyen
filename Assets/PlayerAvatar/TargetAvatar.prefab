@@ -460,12 +460,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1759466502556637812}
-  - component: {fileID: 3879268398666100576}
   - component: {fileID: 6143808281815225490}
   - component: {fileID: -2900896035119755407}
   - component: {fileID: 1498373660023880406}
   - component: {fileID: 1378437777043357892}
   - component: {fileID: 4778909579915623695}
+  - component: {fileID: -358068864170359753}
+  - component: {fileID: 2546292581729999390}
   m_Layer: 0
   m_Name: TargetAvatar
   m_TagString: Untagged
@@ -489,24 +490,6 @@ Transform:
   - {fileID: 7797096511609069165}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3879268398666100576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1378437777043357902}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94073a5fbae94624b8afeb8f2fbd1cf8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  yaw: 0
-  controller: {fileID: 1378437777043357892}
-  isSynchronize: 1
 --- !u!114 &6143808281815225490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -540,6 +523,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   hp: 100
+  maxHp: 100
   armer: 1
   isInvincible: 0
   isDead: 0
@@ -561,8 +545,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   hasLoaded: 0
-  canMove: 1
-  canAbility: 1
 --- !u!143 &1378437777043357892
 CharacterController:
   m_ObjectHideFlags: 0
@@ -612,6 +594,43 @@ MonoBehaviour:
   jumpDuration: 0
   crouchTime: 0
   crouchDuration: 0
+--- !u!114 &-358068864170359753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378437777043357902}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94073a5fbae94624b8afeb8f2fbd1cf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  positionLerpFactor: 0.2
+  rotationLerpFactor: 0.2
+  pitchLerpFactor: 0.2
+  controller: {fileID: 1378437777043357892}
+  cameraRoot: {fileID: 0}
+  isSynchronize: 1
+  yaw: 0
+--- !u!114 &2546292581729999390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378437777043357902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f389686fb03a84ea430cfe6dede986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
 --- !u!1 &1482437206847472307
 GameObject:
   m_ObjectHideFlags: 0
@@ -1327,7 +1346,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1.2, y: 1.3, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1729391697800681205}
@@ -1501,7 +1520,6 @@ MonoBehaviour:
   OrbMask:
     serializedVersion: 2
     m_Bits: 2568
-  _speed: 0
   middleBrow: {fileID: 3929690982290694602}
   controller: {fileID: 1378437777043357892}
   xRotation: 0
@@ -1510,9 +1528,12 @@ MonoBehaviour:
   Aiscream: {fileID: 3549720354301209160, guid: d5e0e2b6b05dc444dac6a9fd7a7f3c73,
     type: 3}
   parentOfPlayer: {fileID: 1378437777043357902}
-  transformNetwork: {fileID: 3879268398666100576}
+  transformNetwork: {fileID: -358068864170359753}
   currentControlScheme: Keyboard&Mouse
   enemies: []
+  canMove: 1
+  lockManager: {fileID: 2546292581729999390}
+  footStepTime: 0
 --- !u!114 &9153969548150449125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1538,7 +1559,7 @@ MonoBehaviour:
   wallMask:
     serializedVersion: 2
     m_Bits: 1544
-  transformNetwork: {fileID: 3879268398666100576}
+  transformNetwork: {fileID: 0}
   parentOfPlayer: {fileID: 1378437777043357902}
   hazardScope: {fileID: 0}
 --- !u!114 &577424751439312189

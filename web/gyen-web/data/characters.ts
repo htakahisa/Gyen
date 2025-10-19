@@ -39,6 +39,7 @@ export const characters: Character[] = [
       { version: "1.0.3", change: "Yellow中にもダメージを受けるよう変更" , type: "debuff" as const },
       { version: "1.0.4", change: "Yellowには専用のHPがあり、100HP削れると人間アバターに強制的に切り替わる仕様に変更" , type: "neutral" as const },
       { version: "1.0.4", change: "Yellow後解除されたときに、慣性に関わらず必ず真下に落ちる仕様に変更" , type: "neutral" as const },
+      { version: "1.0.6", change: "Yellowの上昇、下降速度を1から3に増加" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : Lime", description: "半透明なオーブを飛ばし、着地地点で爆発してライム色のスモークが生成される。" },

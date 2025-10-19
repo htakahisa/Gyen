@@ -147,7 +147,7 @@ public class AbilityController : NetworkBehaviour
         }
         else if (newForm == PlayerForm.Bird)
         {
-            GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
+            GetComponentInChildren<ThirdPersonController>().CmdResetSpeed();
             GetComponent<HpMaster>().isInvincible = true;
             nowControlled = objectList.FirstOrDefault(obj => obj.name == "YellowObject");
             if (isLocalPlayer)
@@ -203,9 +203,9 @@ public class AbilityController : NetworkBehaviour
 
     public IEnumerator DisableNowControlled()
     {
-        if (!lockManager.GetLocks()[PlayerAction.Move].Contains("CorrectPos"))
+        if (lockManager.GetLocks()[PlayerAction.Move].Contains("CorrectPos"))
         {
-            yield return new WaitWhile(() => !lockManager.GetLocks()[PlayerAction.Move].Contains("CorrectPos"));
+            yield return new WaitWhile(() => lockManager.GetLocks()[PlayerAction.Move].Contains("CorrectPos"));
         }
 
         foreach (var obj in objectList)

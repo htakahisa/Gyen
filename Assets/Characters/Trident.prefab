@@ -335,7 +335,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   MoveSpeed: 5
-  UpSpeed: 1
+  UpSpeed: 3
   TurnSpeed: 0.3
   characterController: {fileID: 1112727817626628774}
   audioManager: {fileID: 0}
@@ -670,7 +670,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1.2, y: 1.3, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7399087043400797327}
@@ -857,6 +857,7 @@ MonoBehaviour:
   enemies: []
   canMove: 1
   lockManager: {fileID: 728472207448528687}
+  footStepTime: 0
 --- !u!114 &8334744245603090709
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -125,19 +125,23 @@ public class ServerCheckShoot : NetworkBehaviour
                         NetworkServer.Spawn(blood);
                         if (!hitList.Contains(hpMaster.gameObject))
                         {
-                            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f);
+                            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f, 15);
                             int finalDamage = (int)((hitpoint.collider.tag == "Head" ? originalHeadDamage : originalDamage) * currentDamageRate);
+
+                            bool headshot = false;
 
                             if (hitpoint.collider.tag == "Head")
                             {
+                                headshot = true;
                                 headShot++;
                             }
                             else
                             {
+                                headshot = false;
                                 bodyShot++;
                             }
 
-                            hpMaster.TakeDamage(finalDamage);
+                            hpMaster.TakeDamage(finalDamage, headshot);
                             hitList.Add(hpMaster.gameObject);
                             Debug.Log($"ヒット: {hitpoint.collider.tag}, ダメージ {finalDamage}");
 

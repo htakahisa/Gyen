@@ -47,7 +47,7 @@ public class Tweaks : NetworkBehaviour
                         HpMaster hp = hit.collider.GetComponentInParent<HpMaster>();
                         if (hp != null)
                         {
-                            hp.TakeDamage(damage);
+                            hp.TakeDamage(damage, false);
                             hp.TakeStun(0.1f, 1);
                         }
                     }

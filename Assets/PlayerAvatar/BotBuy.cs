@@ -21,7 +21,7 @@ public class BotBuy : NetworkBehaviour
     public void AddBot()
     {
         GameObject bot = Instantiate(Bot);
-        NetworkServer.Spawn(bot);
+        NetworkServer.Spawn(bot, RoundManager.rm.GetMyPlayer().GetComponent<NetworkIdentity>().connectionToClient);
         //ƒIƒ“ƒ‰ƒCƒ““¯Šú‚·‚é‚È‚çSpawn‚·‚×‚«
         SetBot(bot);
         RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().RefreshEnemyTargets();

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using Mirror;
 using StarterAssets;
 using UnityEngine;
@@ -27,6 +28,8 @@ public class BombManager : NetworkBehaviour
     [SyncVar]
     private bool isDefusing = false; // 誰かが現在ディフューズ中か
 
+    public List<float> countDownIntervals = new List<float> {1, 0.7f, 0.5f };
+
 
     private void Start()
     {
@@ -48,6 +51,7 @@ public class BombManager : NetworkBehaviour
         timer = startTime; // 0 からカウントアップでも、roundTime - を使ってカウントダウンにしても良い
                            // 本実装はカウントアップで roundTime に達したら爆発
         StartCoroutine(ServerTimerCoroutine());
+        StartCoroutine(CountSoundCoroutine());
     }
 
 
@@ -60,21 +64,53 @@ public class BombManager : NetworkBehaviour
         ServerOnBombDisarmed();
     }
 
-
     [Server]
     IEnumerator ServerTimerCoroutine()
     {
+        timer = 0f;
+        isArmed = true;
+
         while (isArmed)
         {
-            yield return new WaitForSeconds(1f);
-            timer += 1f;
+            timer += Time.deltaTime;
+
             if (timer >= roundTime)
             {
-                // 爆発 — テロリストの勝利
                 isArmed = false;
                 ServerOnBombExploded();
-                // ゲームの勝敗処理は別コンポーネントで行っても良い
                 yield break;
+            }
+
+            yield return null; // フレーム更新
+        }
+    }
+
+    [Server]
+    IEnumerator CountSoundCoroutine()
+    {
+        while (isArmed)
+        {
+            int countStep;
+            if (timer >= 55)
+                countStep = 2;
+            else if (timer >= 30)
+                countStep = 1;
+            else
+                countStep = 0;
+
+            if (countStep >= 0)
+            {
+                AudioManager.Instance.CmdPlaySoundAtPoint(
+                    AudioManager.Sounds.SPIKECOUNTDOWN,
+                    transform.position,
+                    1,
+                    30
+                );
+                yield return new WaitForSeconds(countDownIntervals[countStep]);
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.5f); // 判定再チェックまでの待ち
             }
         }
     }
@@ -84,17 +120,17 @@ public class BombManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdStartDefuse(NetworkIdentity playerIdentity)
     {
-        if (!isArmed) return;
+        if (!isArmed) CmdStopDefuse(playerIdentity);
         if (RoundManager.rm.attacker == playerIdentity.gameObject) return;
 
         var playerObj = playerIdentity.gameObject;
 
-        if (!IsPlayerInRange(playerObj)) return; // 距離チェック
+        if (!IsPlayerInRange(playerObj)) CmdStopDefuse(playerIdentity); // 距離チェック
 
-        AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.DEFUSE, playerObj.transform.position, 1);
+        AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.DEFUSE, playerObj.transform.position, 1, 30);
 
         // 誰かが既にディフューズ中なら無視
-        if (isDefusing && defuseProgress > 0f) return;
+        if (isDefusing && defuseProgress > 0f) CmdStopDefuse(playerIdentity);
         playerObj.GetComponentInChildren<ThirdPersonController>().RpcPraying();
         isDefusing = true;
         // サーバー側でディフューズ進行を開始するコルーチン
@@ -110,8 +146,6 @@ public class BombManager : NetworkBehaviour
         if (RoundManager.rm.attacker == playerIdentity.gameObject) return;
 
         var playerObj = playerIdentity.gameObject;
-
-        if (!IsPlayerInRange(playerObj)) return; // 距離チェック
 
 
         playerObj.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();

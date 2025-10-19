@@ -26,6 +26,9 @@ public class CharacterTransfromNetwork : NetworkBehaviour
     private const float rotationSendThreshold = 0.5f;
     private const float pitchSendThreshold = 0.5f;
 
+    private double lastSentTime;   // クライアントが送信した時刻
+    private double lastRecvTime;   // クライアントが受信した最新の時刻
+
     public float yaw;
 
     private void Start()
@@ -38,17 +41,15 @@ public class CharacterTransfromNetwork : NetworkBehaviour
 
     private void Update()
     {
-        // ローカルプレイヤーが自分の変化を送信
         if (isLocalPlayer && isSynchronize)
         {
             TrySendTransform();
             return;
         }
 
-        // 他クライアント or サーバー上の補間
+        // 他クライアント側：補間
         if (!isLocalPlayer)
         {
-            // 固定補間率でスムーズに追従（Editorでも安定）
             transform.position = Vector3.Lerp(transform.position, targetPosition, positionLerpFactor);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationLerpFactor);
 
@@ -61,9 +62,6 @@ public class CharacterTransfromNetwork : NetworkBehaviour
         }
     }
 
-    /// <summary>
-    /// プレイヤーの位置や角度が変わったらサーバーへ送信
-    /// </summary>
     private void TrySendTransform()
     {
         Vector3 pos = transform.position;
@@ -77,43 +75,36 @@ public class CharacterTransfromNetwork : NetworkBehaviour
             lastSentPosition = pos;
             lastSentRotation = rot;
             lastSentPitch = pitch;
+            lastSentTime = NetworkTime.time; // Mirrorが提供するサーバー同期時間
 
-            CmdSendTransform(pos, rot, pitch);
+            CmdSendTransform(pos, rot, pitch, lastSentTime);
         }
     }
 
     [Command(requiresAuthority = false)]
-    private void CmdSendTransform(Vector3 position, Quaternion rotation, float pitch)
+    private void CmdSendTransform(Vector3 position, Quaternion rotation, float pitch, double timestamp)
     {
         if (!isSynchronize) return;
 
-        // Move()を使わずに強制ワープ
-        transform.position = position;
-        transform.rotation = rotation;
-
-        if (cameraRoot != null)
-        {
-            Vector3 euler = cameraRoot.localEulerAngles;
-            euler.x = pitch;
-            cameraRoot.localEulerAngles = euler;
-        }
-
-        // 所有者以外にのみ通知（自分は補正不要）
-        RpcSyncTransform(position, rotation, pitch);
+        // サーバー側でクライアントからのtimestampをそのまま転送
+        RpcSyncTransform(position, rotation, pitch, timestamp);
     }
 
     [ClientRpc(includeOwner = false)]
-    private void RpcSyncTransform(Vector3 position, Quaternion rotation, float pitch)
+    private void RpcSyncTransform(Vector3 position, Quaternion rotation, float pitch, double timestamp)
     {
-        // 差分補間：いきなり更新せず、滑らかに追従
+        // 古いデータを無視
+        if (timestamp <= lastRecvTime)
+            return;
+
+        lastRecvTime = timestamp;
+
+        // 差分補間（巻き戻らない）
         targetPosition = Vector3.Lerp(targetPosition, position, 0.5f);
         targetRotation = Quaternion.Slerp(targetRotation, rotation, 0.5f);
         targetPitch = Mathf.LerpAngle(targetPitch, pitch, 0.5f);
     }
 
-    /// <summary>
-    /// サーバー側からの位置リセット（ワープ）
-    /// </summary>
     [Server]
     public void ResetPosition(Vector3 newPosition, Quaternion newRotation, float newPitch = 0f)
     {
@@ -127,17 +118,23 @@ public class CharacterTransfromNetwork : NetworkBehaviour
             cameraRoot.localEulerAngles = euler;
         }
 
-        RpcForceSetTransform(newPosition, newRotation, newPitch);
+        double resetTime = NetworkTime.time;
+        RpcForceSetTransform(newPosition, newRotation, newPitch, resetTime);
 
-        // クライアント送信基準を更新（反応遅延防止）
         lastSentPosition = newPosition;
         lastSentRotation = newRotation;
         lastSentPitch = newPitch;
+        lastRecvTime = resetTime;
     }
 
     [ClientRpc]
-    private void RpcForceSetTransform(Vector3 position, Quaternion rotation, float pitch)
+    private void RpcForceSetTransform(Vector3 position, Quaternion rotation, float pitch, double timestamp)
     {
+        if (timestamp <= lastRecvTime)
+            return;
+
+        lastRecvTime = timestamp;
+
         transform.position = position;
         transform.rotation = rotation;
 

@@ -181,17 +181,21 @@ namespace StarterAssets
             Canvas canvas = GameObject.FindGameObjectWithTag("Canvas")?.GetComponent<Canvas>();
             _shootManager = GetComponent<ShootManager>();
             _hpMaster = GetComponentInParent<HpMaster>();
-            
 
-            
 
-            myBody.layer = 7;
-            _CameraComponent.enabled = true;
-            _UiCameraComponent.enabled = true;
+
+            if (isLocalPlayer)
+            {
+                myBody.layer = 7;          
+                _CameraComponent.enabled = true;
+                _UiCameraComponent.enabled = true;
+            }
         }
 
         public IEnumerator InitialSetInput()
         {
+            if (!isLocalPlayer) yield break;
+
             yield return new WaitForSeconds(0.1f);
 
             playerInput = GetComponentInParent<PlayerInput>();
@@ -376,7 +380,7 @@ namespace StarterAssets
             {
                 if (RoundManager.rm != null)
                 {
-                    if (RoundManager.rm.Mode == "Practice" || (RoundManager.rm.Mode == "1VS1" && isLocalPlayer))
+                    if ((RoundManager.rm.Mode == "Practice" && isLocalPlayer)|| (RoundManager.rm.Mode == "1VS1" && isLocalPlayer))
                     {
                         _audioListener.enabled = true;
                     }
@@ -435,7 +439,7 @@ namespace StarterAssets
             }
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
             bool pray = stateInfo.IsName("Pray");
-            if (pray)
+            if (pray || _animator.GetBool(_animPraying))
             {
                 CmdDefusing();
             }
@@ -1048,25 +1052,46 @@ namespace StarterAssets
         public void BotMove(float horiMove, bool isWalk, bool isCrouch)
         {
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0); // 0 = Base Layer
-            bool crouch = stateInfo.IsName("Crouch");
+            bool crouch = isWalk;
             bool isMove = (horiMove != 0);
 
-            _animator.SetBool(_animCrouching, isCrouch);
 
-            // 立ち上がりアニメーション中なら移動禁止
+
             if (!_animator.IsInTransition(0) && !crouch)
             {
-
 
                 // **地上にいる場合のみ移動方向と速度を更新**
                 if (Grounded)
                 {
+                    float targetSpeed = 0f;
+
                     // **目標速度を設定（入力がない場合は即座に0）**
-                    float targetSpeed = isMove ? (isWalk ? MoveSpeed : SprintSpeed) : 0.0f;
+
+                    if (isMove)
+                    {
+
+
+                        if (isWalking)
+                        {
+                            targetSpeed = MoveSpeed;
+                        }
+                        else
+                        {
+                            targetSpeed = SprintSpeed;
+                        }
+
+
+                    }
+                    else
+                    {
+                        targetSpeed = 0f;
+                    }
+
 
                     // **Lerpを使わず、即座に速度を適用**
                     _speed = targetSpeed;
-                    _animationBlend = targetSpeed;
+                    _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+                    if (_animationBlend < 0.01f) _animationBlend = 0f;
 
                     // **移動方向計算（正規化 + 速度適用）**
                     Vector3 newMoveDirection = (transform.right * horiMove).normalized;
@@ -1074,6 +1099,8 @@ namespace StarterAssets
                     {
                         _lastMoveDirection = newMoveDirection;
                     }
+
+
                 }
             }
             else
@@ -1081,17 +1108,21 @@ namespace StarterAssets
                 _speed = 0;
             }
 
-                // **移動ベクトルを計算（空中では最後の移動方向を維持）**
-                Vector3 moveDirection = _lastMoveDirection * _speed;
+            if (isLocalPlayer)
+            {
+                CmdReportSpeed(_speed);
+            }
+
+            // **移動ベクトルを計算（空中では最後の移動方向を維持）**
+            Vector3 moveDirection = _lastMoveDirection * _speed;
             moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
 
-            
 
             // **ダッシュ音の処理**
             if (_speed > 0)
             {
                 _dashSound -= Time.deltaTime;
-                if (_dashSound <= 0)
+                if (_dashSound <= 0 && !isWalking)
                 {
                     OnFootstep();
                     _dashSound = footStepTime;
@@ -1103,16 +1134,24 @@ namespace StarterAssets
             }
 
 
-            //Debug.Log("b" + moveDirection);
+            //Debug.Log("p" + moveDirection);
             // **CharacterControllerで移動**
-            controller.Move(moveDirection * Time.deltaTime);
-            //transformNetwork.ServerPos(parentOfPlayer.transform.position);
+            if (controller.enabled == true)
+            {
+                controller.Move(moveDirection * Time.deltaTime);
+                if (isLocalPlayer)
+                {
+                    // transformNetwork.CmdPos(transform.position);
+                }
+            }
+
 
             // **アニメーター更新**
             if (_hasAnimator)
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
                 _animator.SetFloat(_animIDMotionSpeed, _speed);
+                _animator.SetBool(_animCrouching, isCrouching);
             }
         }
 
@@ -1121,10 +1160,8 @@ namespace StarterAssets
 
             if (Grounded)
             {
-                transform.rotation = Quaternion.identity;
-
-                // 空中に0.7秒以上いた場合にOnLand()を呼び出す
-                if (_airTime >= 0.7f)
+                // 空中に0.5秒以上いた場合にOnLand()を呼び出す
+                if (_airTime >= 0.5f)
                 {
                     OnLand();
                 }
@@ -1143,7 +1180,7 @@ namespace StarterAssets
                 // stop our velocity dropping infinitely when grounded
                 if (_verticalVelocity < 0.0f)
                 {
-                    _verticalVelocity = -2f;
+                    _verticalVelocity = Gravity;
                 }
 
                 // Jump
@@ -1168,43 +1205,11 @@ namespace StarterAssets
             }
             else
             {
-
-                float mouseX = 2;
-                float mouseY = 2;
-
-                xRotation = 0;
-                // 上下方向の回転（カメラの俯仰）
-                xRotation -= mouseY;
-                xRotation = Mathf.Clamp(xRotation, -90f, 90f); // 上下の回転角度を制限
-
-
-                if (mouseX != 0 || mouseY != 0)
-                {
-                    if (_mainCamera != null)
-                    {
-                        // カメラに上下回転を適用
-                        _mainCamera.transform.localRotation *= Quaternion.Euler(xRotation, 0f, 0f);
-
-                    }
-                    if (_CameraComponent != null)
-                    {
-                        // プレイヤー身体に左右回転を適用
-                        transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
-                        parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                        //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
-                    }
-                    else
-                    {
-                        Debug.Log("The mainCamera attached this object is not detected!");
-                    }
-
-                }
-
                 // 空中にいる時間を加算
                 _airTime += Time.deltaTime;
 
                 // reset the jump timeout timer
-                //_jumpTimeoutDelta = JumpTimeout;
+                _jumpTimeoutDelta = JumpTimeout;
 
                 // fall timeout
                 if (_fallTimeoutDelta >= 0.0f)
@@ -1228,6 +1233,19 @@ namespace StarterAssets
             if (_verticalVelocity < _terminalVelocity)
             {
                 _verticalVelocity += Gravity * Time.deltaTime;
+            }
+
+            // **移動ベクトルを計算（空中では最後の移動方向を維持）**
+            Vector3 moveDirection = _lastMoveDirection * _speed;
+            moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
+
+            if (controller.enabled == true)
+            {
+                controller.Move(moveDirection * Time.deltaTime);
+                if (isLocalPlayer)
+                {
+                    //transformNetwork.CmdPos(transform.position);
+                }
             }
         }
 
@@ -1270,7 +1288,7 @@ namespace StarterAssets
             if (Grounded)
             {
                 if (!isLocalPlayer) return;
-                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume);
+                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume, 15);
                     
                 
             }
@@ -1279,7 +1297,7 @@ namespace StarterAssets
         private void OnLand()
         {
             if (!isLocalPlayer) return;
-            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume, 15);
             
         }
 
@@ -1321,6 +1339,13 @@ namespace StarterAssets
         {
             return _speed;  // 呼び出したクライアント上で最後に受信した値（SyncVar）
         }
+
+        [Command(requiresAuthority = false)]
+        public void CmdResetSpeed()
+        {
+            RpcResetSpeed();
+        }
+
 
         [ClientRpc]
         public void RpcResetSpeed()
@@ -1418,14 +1443,41 @@ namespace StarterAssets
 
         public IEnumerator StartToMove()
         {
-            yield return new WaitForSeconds(3f);
             lockManager.RemoveLock(PlayerAction.Move, "StopSynchronized");
             lockManager.RemoveLock(PlayerAction.Shoot, "StopSynchronized");
 
-            yield return new WaitWhile(() => GetComponentInParent<ThirdPersonController>() == null);
-            RpcControllerEnabled(true);
+            ThirdPersonController tpc = RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>();
+            Debug.Log(tpc);
 
-            RoundManager.rm.CmdHasReset();
+            if (RoundManager.rm.Mode == "1VS1") {
+                //GetMyPlayerは常にこれを呼んでいるサーバーにとってなので注意。どうせ両方のプレイヤーの状態を確認するためこれでも通る。
+                if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>() == null)
+                {
+                    yield return new WaitWhile(() => RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>() == null);
+                }
+                if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().controllerEnabled == true)
+                {
+                    yield return new WaitWhile(() => RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().controllerEnabled == true);
+                }
+                if (RoundManager.rm.GetOtherPlayer() != null)
+                {
+                    if (RoundManager.rm.GetOtherPlayer().GetComponentInChildren<ThirdPersonController>() == null)
+                    {
+                        yield return new WaitWhile(() => RoundManager.rm.GetOtherPlayer().GetComponentInChildren<ThirdPersonController>() == null);
+                    }
+                    if (RoundManager.rm.GetOtherPlayer().GetComponentInChildren<ThirdPersonController>().controllerEnabled == true)
+                    {
+                        yield return new WaitWhile(() => RoundManager.rm.GetOtherPlayer().GetComponentInChildren<ThirdPersonController>().controllerEnabled == true);
+                    }
+                }
+
+
+                RoundManager.rm.CmdHasReset();
+            }
+            else
+            {
+                RpcControllerEnabled(true);
+            }
         }
 
         [ClientRpc]
