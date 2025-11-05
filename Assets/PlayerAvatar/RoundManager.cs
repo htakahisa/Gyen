@@ -19,6 +19,8 @@ public class RoundManager : NetworkBehaviour
     public static RoundManager rm;
     public Vector3 attackSpawnPos;
     public Vector3 defenceSpawnPos;
+    public Vector3 spikePos;
+    public GameObject spike;
 
     public int Round = 1;
     public Phase CurrentPhase;
@@ -31,7 +33,21 @@ public class RoundManager : NetworkBehaviour
 
     public static List<GameObject> spawns = new List<GameObject>();
 
-    public List<GameObject> respawns = new List<GameObject>();
+    [System.Serializable]
+    public struct ObjectAndPosition
+    {
+        public GameObject prefab;
+        public Vector3 position;
+
+        public ObjectAndPosition(GameObject prefab, Vector3 position)
+        {
+            this.prefab = prefab;
+            this.position = position;
+        }
+    }
+
+    // Inspectorで設定可能にする
+    public List<ObjectAndPosition> respawns = new List<ObjectAndPosition>();
 
     public PlayerManager playerManager;
 
@@ -39,6 +55,10 @@ public class RoundManager : NetworkBehaviour
     public bool hasRoundEnded;
 
     public bool hasReset;
+
+    public MapDatas mapData;
+
+    public Coroutine startGetting;
 
     // Start is called before the first frame update
     void Awake()
@@ -79,8 +99,11 @@ public class RoundManager : NetworkBehaviour
             {
                 if (NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>().hasLoaded)
                 {
-                    playerManager = NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>();
-                    StartCoroutine(StartGetPlayers());
+                    if (startGetting == null)
+                    {
+                        playerManager = NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>();
+                        startGetting = StartCoroutine(StartGetPlayers());
+                    }
                     
                 }
             }
@@ -104,11 +127,11 @@ public class RoundManager : NetworkBehaviour
         Round++;
 
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
+        RpcSwitchBuyPhase();
         StartCoroutine(ResetRound());
         GiveCredits(winner, loser);
         GiveRound(winner);
 
-        RpcSwitchBuyPhase();
         RpcResultText(loser);
         Invoke("RpcSwitchBattlePhase", 20f);
     }
@@ -188,9 +211,16 @@ public class RoundManager : NetworkBehaviour
         }
 
         // クライアント側でオブジェクトをリセット
-        foreach (var respawns in respawns)
+        foreach (var item in respawns)
         {
-            ServerSpawn(respawns);
+            if (item.prefab != null)
+            {
+                ObjectSpawn(item.prefab, item.position);
+            }
+            else
+            {
+                Debug.LogWarning("Prefabが設定されていません。");
+            }
         }
 
         if (Mode == "1VS1")
@@ -202,10 +232,8 @@ public class RoundManager : NetworkBehaviour
 
     public IEnumerator BombArmCoroutine()
     {
-        if (CurrentPhase == Phase.BUY)
-        {
-            yield return new WaitWhile(() => CurrentPhase == Phase.BUY);
-        }
+        yield return new WaitWhile(() => CurrentPhase == Phase.BUY);
+        
         var bombs = FindObjectsOfType<BombManager>();
 
         if (bombs == null) {
@@ -214,11 +242,15 @@ public class RoundManager : NetworkBehaviour
         bombs[0].ArmBomb();
     }
 
+    public void ObjectSpawn(GameObject prefab, Vector3 pos = default(Vector3))
+    {
+        ServerSpawn(prefab, pos);
+    }
 
     [Server]
-    public void ServerSpawn(GameObject prefab)
+    public void ServerSpawn(GameObject prefab, Vector3 pos)
     {
-        GameObject instance = Instantiate(prefab);
+        GameObject instance = Instantiate(prefab, pos, Quaternion.identity);
         NetworkServer.Spawn(instance);
         spawns.Add(instance);
     }
@@ -239,6 +271,22 @@ public class RoundManager : NetworkBehaviour
     {
 
         yield return new WaitForSeconds(0.1f);
+
+        if (mapData != null)
+        {
+            attackSpawnPos = mapData.attackerPos;
+            defenceSpawnPos = mapData.diffenderPos;
+            spikePos = mapData.spikePos;
+        }
+
+        if (isServer)
+        {
+            if (Mode != "Practice")
+            {
+                respawns.Add(new ObjectAndPosition(mapData.mapPrefab, new Vector3(0, 0, 0)));
+                respawns.Add(new ObjectAndPosition(spike, spikePos));
+            }
+        }
 
         // 自分のプレイヤーを取得
         myPlayer = playerManager.GetLocalPlayer();
@@ -263,6 +311,7 @@ public class RoundManager : NetworkBehaviour
 
             ResetStatus();
             ServerResetAllObjects();
+            SetConditions();
         }
         
         hasLoaded = true;

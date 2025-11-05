@@ -4,8 +4,10 @@ using System.Collections;
 
 public class IMirror : NetworkBehaviour
 {
-    public float speed = 10f; // 移動速度
-    public float radius = 0.5f; // 自分の半径
+    public float speed; // 移動速度
+    public float radius; // 自分の半径
+    public float fuseTime; //投擲から爆発までの時間
+    public float delayTime; //爆発開始から中身が飛び散るまでの時間
     private Vector3 direction; // 移動方向
     private LayerMask ground;
     [SyncVar]
@@ -31,7 +33,7 @@ public class IMirror : NetworkBehaviour
             target = RoundManager.rm.GetOtherPlayer().GetComponentInChildren<Camera>().transform;
         }
         direction = target.forward;
-        Invoke("CmdFlash", 1f);
+        Invoke("CmdFlash", fuseTime);
     }
 
     void Update()
@@ -63,14 +65,15 @@ public class IMirror : NetworkBehaviour
 
     public IEnumerator FlashCoroutine()
     {
-        HideScreenWhenVisible.instance.AddTarget(gameObject, flashDuration);
         GameObject instance = Instantiate(flashEffect, transform.position, transform.rotation);
         NetworkServer.Spawn(instance);
         isMoving = false;
 
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(delayTime);
+        HideScreenWhenVisible.instance.AddTarget(gameObject, flashDuration);
         instance.GetComponent<DestroyTimer>().enabled = false;
-        yield return new WaitForSeconds(0.2f);
+        HideScreenWhenVisible.instance.RemoveTarget(gameObject, flashDuration);
+        yield return new WaitForSeconds(0.1f);
 
         AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IMIRRORDESTROYED, transform.position, 1, 30);
         NetworkServer.Destroy(gameObject);

@@ -56,6 +56,8 @@ MonoBehaviour:
   syncInterval: 0
   speed: 10
   radius: 0.3
+  fuseTime: 0.5
+  delayTime: 0.15
   flashEffect: {fileID: 358637981425055526, guid: 8eb503696b886e04faff8fc0f480d473,
     type: 3}
   flashDuration: 3

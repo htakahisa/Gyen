@@ -103,6 +103,8 @@ export const characters: Character[] = [
       { version: "1.0.4", change: "オーバードーズ参戦！" , type: "neutral" as const },
       { version: "1.0.6", change: "ITweaksを設置する際のプレイヤーからの最大距離が3mから5mに増加" , type: "buff" as const },
       { version: "1.0.6", change: "IMirrorをクライアントが発動したときに発射する向きが正しくない場合があった不具合を修正" , type: "buff" as const },
+      { version: "1.0.7", change: "IMirrorの投擲から爆発までの時間を1秒から0.5秒に短縮" , type: "neutral" as const },
+      { version: "1.0.6", change: "IMirrorの爆発からフラッシュ効果が飛び散るまでの時間を0.2秒から0.15秒に短縮" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : ITweaks", description: "半透明のナノセンサーで、相手を検知しX線を発射する。それには弱い目眩の効果もある。" },
@@ -112,9 +114,9 @@ export const characters: Character[] = [
            type: "Warden",
     difficulty: "やや難しい",
     from: "アメリカ合衆国",
-    features: ["主に", "特筆すべき強みはないが安定感がある"],
+    features: ["撃ち合いとエリアマネージメント両方に優れるバランス型", "ITweaksは見えにくいうえに食らうと厄介", "よけにくいフラッシュ持ち"],
     details:
-      "バランス型の武器で、特に序盤で役立つ。後半になると火力不足が目立ち始める。",
+      "常に有利な状況を少しづつ拡大していくタイプ。なのにカウンターも強いため待ちもできる、えらすぎるキャラクター。",
   },
 
 ];

@@ -97,7 +97,9 @@ public class AutoLaserTurret : NetworkBehaviour
         {
             // 自分自身ならスキップ
             var netIdentity = t.GetComponentInParent<NetworkIdentity>();
-            if (netIdentity != null && CheckAuthority(netIdentity, GetComponent<NetworkIdentity>()))
+
+            //NetworkIdentityがあることを確認、対象のオブジェクトのオーナーが自分だった場合かつ、これがプラクティスで相手がボットであるというわけでもない場合にそれを無効のターゲットとしてやり直す
+            if (netIdentity != null && (CheckAuthority(netIdentity, GetComponent<NetworkIdentity>()) && !(RoundManager.rm.Mode == "Practice" && netIdentity.GetComponent<BotManager>() != null)))
             {
                 continue;
             }

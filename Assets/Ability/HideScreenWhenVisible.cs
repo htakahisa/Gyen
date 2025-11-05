@@ -129,6 +129,21 @@ public class HideScreenWhenVisible : NetworkBehaviour
         }
     }
 
+    public void RemoveTarget(GameObject obj, float duration)
+    {
+        if (obj == null) return;
+
+        NetworkIdentity ni = obj.GetComponent<NetworkIdentity>();
+        if (ni != null)
+        {
+            targets.Remove(new FlashTargetData(ni.netId, duration));
+        }
+        else
+        {
+            Debug.LogWarning("AddTarget: オブジェクトにNetworkIdentityが必要です");
+        }
+    }
+
     private void SetOverlayAlpha(float a)
     {
         if (overlayImage != null)

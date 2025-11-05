@@ -30,7 +30,7 @@ public class Tweaks : NetworkBehaviour
         Collider[] targets = Physics.OverlapSphere(transform.position, attackRange, 1 << bodyLayer);
         if (targets.Length > 0)
         {
-            GameObject target = GetNearestTarget(targets);
+            Transform target = GetNearestTarget(targets);
             if (target != null && Time.time >= nextFireTime)
             {
                 Vector3 dir = (target.transform.position - firePoint.position).normalized;
@@ -57,16 +57,18 @@ public class Tweaks : NetworkBehaviour
     }
 
     // 一番近いプレイヤーを探す
-    GameObject GetNearestTarget(Collider[] targets)
+    Transform GetNearestTarget(Collider[] targets)
     {
-        GameObject nearest = null;
+        Transform nearest = null;
         float minDist = Mathf.Infinity;
 
         foreach (var t in targets)
         {
             // 自分自身ならスキップ
             var netIdentity = t.GetComponentInParent<NetworkIdentity>();
-            if (netIdentity != null && CheckAuthority(netIdentity, GetComponent<NetworkIdentity>()))
+
+            //NetworkIdentityがあることを確認、対象のオブジェクトのオーナーが自分だった場合かつ、これがプラクティスで相手がボットであるというわけでもない場合にそれを無効のターゲットとしてやり直す
+            if (netIdentity != null && (CheckAuthority(netIdentity, GetComponent<NetworkIdentity>()) && !(RoundManager.rm.Mode == "Practice" && netIdentity.GetComponent<BotManager>() != null)))
             {
                 continue;
             }
@@ -75,7 +77,7 @@ public class Tweaks : NetworkBehaviour
             if (dist < minDist)
             {
                 minDist = dist;
-                nearest = t.gameObject;
+                nearest = t.transform;
             }
         }
 

@@ -11,4 +11,8 @@ public class CharacterStats : ScriptableObject
     public float defaultMaxAssistAngle = 6;
     public float defaultAssistStrength = 10;
     public float defaultFootStepTime = 0.4f;
+    public float defaultGroundAcceleration = 14f;
+    public float defaultGroundDeceleration = 18f;
+    public float defaultAirControl = 0.3f;
+    public float defaultMaxAirSpeedMultiplier = 0.9f;
 }

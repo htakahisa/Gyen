@@ -84,6 +84,11 @@ namespace StarterAssets
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
 
+        private float groundAcceleration = 14f;
+        private float groundDeceleration = 18f;
+        private float airControl = 0.3f; // 0〜1。0なら慣性固定
+        private float maxAirSpeedMultiplier = 0.9f;
+
         // animation IDs
         private int _animIDSpeed;
         private int _animIDGrounded;
@@ -121,6 +126,7 @@ namespace StarterAssets
         private float _dashSound = 0.4f;
 
         private Vector3 _lastMoveDirection = Vector3.zero;
+        private Vector3 moveDirection;
 
         private float _sensitivity = 1f;
 
@@ -279,6 +285,7 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+
             MoveSpeed = characterStats.defaultMoveSpeed;
             SprintSpeed = characterStats.defaultSprintSpeed;
             JumpHeight = characterStats.defaultJumpHeight;
@@ -287,7 +294,12 @@ namespace StarterAssets
             maxAssistAngle = characterStats.defaultMaxAssistAngle;
             assistStrength = characterStats.defaultAssistStrength;
             footStepTime = characterStats.defaultFootStepTime;
-        }
+            groundAcceleration = characterStats.defaultGroundAcceleration;
+            groundDeceleration = characterStats.defaultGroundDeceleration;
+            airControl = characterStats.defaultAirControl;
+            maxAirSpeedMultiplier = characterStats.defaultMaxAirSpeedMultiplier;
+
+    }
         private IEnumerator InitializeControlScheme()
         {
 
@@ -738,14 +750,12 @@ namespace StarterAssets
             if (!_animator.IsInTransition(0) && !crouch)
             {
 
-                // **地上にいる場合のみ移動方向と速度を更新**
-                if (Grounded)
-                {
+
                     float targetSpeed = 0f;
 
                     // **目標速度を設定（入力がない場合は即座に0）**
 
-                    if (isMove)
+                    if (isMove || !Grounded)
                     {
 
 
@@ -776,15 +786,10 @@ namespace StarterAssets
                     _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
                     if (_animationBlend < 0.01f) _animationBlend = 0f;
 
-                    // **移動方向計算（正規化 + 速度適用）**
-                    Vector3 newMoveDirection = (transform.right * horiMove + transform.forward * verMove).normalized;
-                    if (newMoveDirection != Vector3.zero)
-                    {
-                        _lastMoveDirection = newMoveDirection;
-                    }
+                  
 
 
-                }
+                
             }
             else
             {
@@ -796,24 +801,51 @@ namespace StarterAssets
                 CmdReportSpeed(_speed);
             }
 
-            // **移動ベクトルを計算（空中では最後の移動方向を維持）**
-            Vector3 moveDirection = _lastMoveDirection * _speed;
-            moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
+            // **移動方向計算（正規化 + 速度適用）**
+            Vector3 inputDir = (transform.right * horiMove + transform.forward * verMove).normalized;
 
+            // 入力がある場合のみ正規化
+            if (inputDir.sqrMagnitude > 0.01f)
+                inputDir.Normalize();
 
-            // **ダッシュ音の処理**
-            if (_speed > 0)
+            if (Grounded)
             {
-                _dashSound -= Time.deltaTime;
-                if (_dashSound <= 0 && !isWalking)
+                // ---- 地上移動 ----
+                if (inputDir.sqrMagnitude > 0.01f)
                 {
-                    OnFootstep();
-                    _dashSound = footStepTime;
+                    // 徐々に加速（急に速くならない）
+                    _lastMoveDirection = Vector3.Lerp(_lastMoveDirection, inputDir, groundAcceleration * Time.deltaTime);
                 }
+                else
+                {
+                    // 徐々に減速（惰性を抑える）
+                    _lastMoveDirection = Vector3.Lerp(_lastMoveDirection, Vector3.zero, groundDeceleration * Time.deltaTime);
+                }
+
+                moveDirection = _lastMoveDirection * _speed;
             }
-            else if (_dashSound <= footStepTime)
+            else
             {
-                _dashSound += Time.deltaTime;
+                // ---- 空中移動 ----
+                if (inputDir.sqrMagnitude > 0.01f)
+                {
+                    // 慣性方向を少しずつ入力方向に寄せる
+                    _lastMoveDirection = Vector3.Lerp(_lastMoveDirection, inputDir, airControl * Time.deltaTime * 10f);
+                }
+
+
+                // 水平速度の上限制限（空中で加速しすぎ防止）
+                Vector3 horizontal = new Vector3(_lastMoveDirection.x, 0, _lastMoveDirection.z);
+                float horizontalMag = horizontal.magnitude;
+                float maxAirSpeed = _speed * maxAirSpeedMultiplier;
+                if (horizontalMag > maxAirSpeed)
+                {
+                    horizontal = horizontal.normalized * maxAirSpeed;
+                    _lastMoveDirection = new Vector3(horizontal.x, _lastMoveDirection.y, horizontal.z);
+                }
+
+                // 慣性を維持した方向に進む
+                moveDirection = _lastMoveDirection * _speed;
             }
 
 
@@ -822,10 +854,6 @@ namespace StarterAssets
             if (controller.enabled == true)
             {
                 controller.Move(moveDirection * Time.deltaTime);
-                if (isLocalPlayer)
-                {
-                   // transformNetwork.CmdPos(transform.position);
-                }
             }
          
 
@@ -833,7 +861,7 @@ namespace StarterAssets
             if (_hasAnimator)
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
-                _animator.SetFloat(_animIDMotionSpeed, _speed);
+                _animator.SetFloat(_animIDMotionSpeed, _speed / SprintSpeed);
                 _animator.SetBool(_animCrouching, isCrouching);
             }
 
@@ -952,16 +980,13 @@ namespace StarterAssets
             }
 
             // **移動ベクトルを計算（空中では最後の移動方向を維持）**
-            Vector3 moveDirection = _lastMoveDirection * _speed;
+            Vector3 moveDirection = new Vector3(0, 0, 0);
             moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
 
             if (controller.enabled == true)
             {
                 controller.Move(moveDirection * Time.deltaTime);
-                if (isLocalPlayer)
-                {
-                    //transformNetwork.CmdPos(transform.position);
-                }
+
             }
 
         }
@@ -1052,56 +1077,52 @@ namespace StarterAssets
         public void BotMove(float horiMove, bool isWalk, bool isCrouch)
         {
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0); // 0 = Base Layer
-            bool crouch = isWalk;
             bool isMove = (horiMove != 0);
 
+            isCrouching = isCrouch;
+            bool crouch = stateInfo.IsName("Crouch");
 
 
             if (!_animator.IsInTransition(0) && !crouch)
             {
 
-                // **地上にいる場合のみ移動方向と速度を更新**
-                if (Grounded)
+
+                float targetSpeed = 0f;
+
+                // **目標速度を設定（入力がない場合は即座に0）**
+
+                if (isMove || !Grounded)
                 {
-                    float targetSpeed = 0f;
 
-                    // **目標速度を設定（入力がない場合は即座に0）**
 
-                    if (isMove)
+                    if (isWalk)
                     {
-
-
-                        if (isWalking)
-                        {
-                            targetSpeed = MoveSpeed;
-                        }
-                        else
-                        {
-                            targetSpeed = SprintSpeed;
-                        }
-
-
+                        targetSpeed = MoveSpeed;
                     }
                     else
                     {
-                        targetSpeed = 0f;
+                        targetSpeed = SprintSpeed;
                     }
 
-
-                    // **Lerpを使わず、即座に速度を適用**
-                    _speed = targetSpeed;
-                    _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
-                    if (_animationBlend < 0.01f) _animationBlend = 0f;
-
-                    // **移動方向計算（正規化 + 速度適用）**
-                    Vector3 newMoveDirection = (transform.right * horiMove).normalized;
-                    if (newMoveDirection != Vector3.zero)
-                    {
-                        _lastMoveDirection = newMoveDirection;
-                    }
+ 
 
 
                 }
+                else
+                {
+                    targetSpeed = 0f;
+                }
+
+
+                // **Lerpを使わず、即座に速度を適用**
+                _speed = targetSpeed;
+                _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+                if (_animationBlend < 0.01f) _animationBlend = 0f;
+
+
+
+
+
             }
             else
             {
@@ -1113,24 +1134,51 @@ namespace StarterAssets
                 CmdReportSpeed(_speed);
             }
 
-            // **移動ベクトルを計算（空中では最後の移動方向を維持）**
-            Vector3 moveDirection = _lastMoveDirection * _speed;
-            moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
+            // **移動方向計算（正規化 + 速度適用）**
+            Vector3 inputDir = (transform.right * horiMove).normalized;
 
+            // 入力がある場合のみ正規化
+            if (inputDir.sqrMagnitude > 0.01f)
+                inputDir.Normalize();
 
-            // **ダッシュ音の処理**
-            if (_speed > 0)
+            if (Grounded)
             {
-                _dashSound -= Time.deltaTime;
-                if (_dashSound <= 0 && !isWalking)
+                // ---- 地上移動 ----
+                if (inputDir.sqrMagnitude > 0.01f)
                 {
-                    OnFootstep();
-                    _dashSound = footStepTime;
+                    // 徐々に加速（急に速くならない）
+                    _lastMoveDirection = Vector3.Lerp(_lastMoveDirection, inputDir, groundAcceleration * Time.deltaTime);
                 }
+                else
+                {
+                    // 徐々に減速（惰性を抑える）
+                    _lastMoveDirection = Vector3.Lerp(_lastMoveDirection, Vector3.zero, groundDeceleration * Time.deltaTime);
+                }
+
+                moveDirection = _lastMoveDirection * _speed;
             }
-            else if (_dashSound <= footStepTime)
+            else
             {
-                _dashSound += Time.deltaTime;
+                // ---- 空中移動 ----
+                if (inputDir.sqrMagnitude > 0.01f)
+                {
+                    // 慣性方向を少しずつ入力方向に寄せる
+                    _lastMoveDirection = Vector3.Lerp(_lastMoveDirection, inputDir, airControl * Time.deltaTime * 10f);
+                }
+
+
+                // 水平速度の上限制限（空中で加速しすぎ防止）
+                Vector3 horizontal = new Vector3(_lastMoveDirection.x, 0, _lastMoveDirection.z);
+                float horizontalMag = horizontal.magnitude;
+                float maxAirSpeed = _speed * maxAirSpeedMultiplier;
+                if (horizontalMag > maxAirSpeed)
+                {
+                    horizontal = horizontal.normalized * maxAirSpeed;
+                    _lastMoveDirection = new Vector3(horizontal.x, _lastMoveDirection.y, horizontal.z);
+                }
+
+                // 慣性を維持した方向に進む
+                moveDirection = _lastMoveDirection * _speed;
             }
 
 
@@ -1139,10 +1187,6 @@ namespace StarterAssets
             if (controller.enabled == true)
             {
                 controller.Move(moveDirection * Time.deltaTime);
-                if (isLocalPlayer)
-                {
-                    // transformNetwork.CmdPos(transform.position);
-                }
             }
 
 
@@ -1150,7 +1194,7 @@ namespace StarterAssets
             if (_hasAnimator)
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
-                _animator.SetFloat(_animIDMotionSpeed, _speed);
+                _animator.SetFloat(_animIDMotionSpeed, _speed / SprintSpeed);
                 _animator.SetBool(_animCrouching, isCrouching);
             }
         }
@@ -1236,16 +1280,13 @@ namespace StarterAssets
             }
 
             // **移動ベクトルを計算（空中では最後の移動方向を維持）**
-            Vector3 moveDirection = _lastMoveDirection * _speed;
+            Vector3 moveDirection = new Vector3(0, 0, 0);
             moveDirection.y = _verticalVelocity; // 重力やジャンプのY軸速度を維持
 
             if (controller.enabled == true)
             {
                 controller.Move(moveDirection * Time.deltaTime);
-                if (isLocalPlayer)
-                {
-                    //transformNetwork.CmdPos(transform.position);
-                }
+
             }
         }
 

@@ -48,6 +48,9 @@ export const systems: System[] = [
     history: [
       { version: "1.0.5", change: "ジャンプ力の低下", type: "debuff" as const },
       { version: "1.0.5", change: "移動速度の上昇", type: "buff" as const },
+      { version: "1.0.7", change: "移動速度の上昇", type: "buff" as const },
+      { version: "1.0.7", change: "滞空時に、ジャンプ時の慣性に直前の入力を考慮して角度を計算するように変更", type: "buff" as const },
+      { version: "1.0.7", change: "しゃがむアニメーション速度を減速", type: "buff" as const },
     ],
   },
     {
@@ -67,6 +70,7 @@ export const systems: System[] = [
     description: "ゲームプレイに直接的に関係なく、UIでもないオブジェクト。エフェクトも含む。",
     history: [
       { version: "1.0.5", change: "武器を持っているとき、右手部分に武器を持っている見た目を追加しました", type: "buff" as const },
+      { version: "1.0.7", change: "一部の武器の右手に持つ見た目を調整しました", type: "buff" as const },
     ],
   },
     {

@@ -79,6 +79,7 @@ export const weapons: Item[] = [
     description: "重たいリボルバー",
     history: [
       { version: "1.0.2", change: "射撃レートを1/0.8sから1/0.7sへ向上", type: "buff" as const },
+      { version: "1.0.7", change: "値段を1200creditから1100creditへ減少", type: "buff" as const },
     ],
     type: "リボルバー",
     difficulty: "とても難しい",
@@ -171,8 +172,9 @@ export const weapons: Item[] = [
       { version: "1.0.2", change: "連射レートを1/0.07sから1/0.05sへ向上" , type: "buff" as const },
       { version: "1.0.2", change: "マガジンサイズを100から70へ減少" , type: "debuff" as const },
       { version: "1.0.3", change: "連射レートを1/0.05sから1/0.07sへ低下" , type: "debuff" as const },
-      { version: "1.0.3", change: "縦リコイルを0.05から0.07へ増加" , type: "debuff" as const },
+      { version: "1.0.3", change: "縦リコイルを0.3から0.4へ増加" , type: "debuff" as const },
       { version: "1.0.6", change: "胴体ダメージを30から55へ増加" , type: "buff" as const },
+      { version: "1.0.7", change: "横リコイルを0.3から0.4へ増加" , type: "debuff" as const },
     ],
     type: "ライトマシンガン",
     difficulty: "かなり難しい",

@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d81442c4d44bbc24fbeb2f9f846255e7, type: 3}
   m_Name: DefaultCharacterStats
   m_EditorClassIdentifier: 
-  defaultMoveSpeed: 1.5
-  defaultSprintSpeed: 2
-  defaultJumpHeight: 0.5
+  defaultMoveSpeed: 3
+  defaultSprintSpeed: 4
+  defaultJumpHeight: 1
   defaultGravity: -10
   defaultAssistRange: 30
   defaultMaxAssistAngle: 6
   defaultAssistStrength: 10
   defaultFootStepTime: 1
+  defaultGroundAcceleration: 14
+  defaultGroundDeceleration: 18
+  defaultAirControl: 0.3
+  defaultMaxAirSpeedMultiplier: 0.9
