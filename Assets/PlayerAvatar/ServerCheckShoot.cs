@@ -50,21 +50,37 @@ public class ServerCheckShoot : NetworkBehaviour
 
     // レイヤーごとの減衰率設定（1mあたりの減衰率）
     private Dictionary<int, float> layerAttenuation = new Dictionary<int, float>()
-{
-    { 3, 0.2f },  // Ground: 1mごとに exp(0.3*thickness) 減衰
-    { 9, 999f },  // PhaseWall: 通過不可（ほぼ即死）
-    { 10, 0.05f }, // Smoke: ほぼ影響なし（厚さ依存で微減衰）
-};
+    {
+        { 3, 0.2f },  // Ground: 1mごとに exp(0.3*thickness) 減衰
+        { 9, 999f },  // PhaseWall: 通過不可（ほぼ即死）
+        { 10, 0.05f }, // Smoke: ほぼ影響なし（厚さ依存で微減衰）
+    };
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdGetShoot(GameObject playerObject, Vector3 position, Vector3 direction, int damage, int headDamage, Vector3 weaponPos)
     {
         Debug.Log("shoot");
 
         ThirdPersonController tpc = playerObject.GetComponentInChildren<ThirdPersonController>();
         Vector3 dir = direction.normalized; // ← 正規化する
-        Ray ray = new Ray(position, dir);
-        DrawBulletLine(weaponPos, direction, playerObject);
+        Ray ray = new Ray(tpc.GetCamera().transform.position, dir);
+        Vector3 targetPoint;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 100, hitMask))
+        {
+            targetPoint = hit.point;
+        }
+        else
+        {
+            // 何にも当たらなかった場合は、射程の先端を目標にする
+            targetPoint = tpc.GetCamera().transform.position + tpc.GetCamera().transform.forward * 100;
+        }
+
+        // 2. 銃口から命中点に向けて弾を撃つ
+        Vector3 shootDir = (targetPoint - weaponPos).normalized;
+        DrawBulletLine(weaponPos, shootDir, playerObject);
 
         if (tpc.GetSpeed() == 0 && tpc.Grounded)
         {
@@ -80,8 +96,8 @@ public class ServerCheckShoot : NetworkBehaviour
             for (int i = 0; i < results.Length; i++)
             {
                 RaycastHit hitpoint = results[i];
-                GameObject hit = hitpoint.collider.gameObject;
-                int hitLayer = hit.layer;
+                GameObject hitObject = hitpoint.collider.gameObject;
+                int hitLayer = hitObject.layer;
 
                 Debug.Log($"HitOrder: [{i}] {hitpoint.collider.name} (Dist: {hitpoint.distance:F3}) Layer:{hitLayer}");
 
@@ -109,7 +125,7 @@ public class ServerCheckShoot : NetworkBehaviour
                         GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
                         NetworkServer.Spawn(fragment);
                         currentDamageRate *= Mathf.Exp(-k * thickness);
-                        Debug.Log($"{hit.gameObject.name} thickness {thickness:F3}m, k={k:F3} => damageRate={currentDamageRate:F4}");
+                        Debug.Log($"{hitObject.gameObject.name} thickness {thickness:F3}m, k={k:F3} => damageRate={currentDamageRate:F4}");
                     }
 
                     continue; // 壁自体にはダメージを与えない
@@ -118,8 +134,8 @@ public class ServerCheckShoot : NetworkBehaviour
                 // ★ 敵へのダメージ処理（既存のロジックを維持）
                 if (hitLayer == 6)
                 {
-                    HpMaster hpMaster = hit.GetComponentInParent<HpMaster>();
-                    if (hpMaster != null && playerObject.GetComponent<NetworkIdentity>().netId != hit.GetComponentInParent<NetworkIdentity>().netId)
+                    HpMaster hpMaster = hitObject.GetComponentInParent<HpMaster>();
+                    if (hpMaster != null && playerObject.GetComponent<NetworkIdentity>().netId != hitObject.GetComponentInParent<NetworkIdentity>().netId)
                     {
                         GameObject blood = Instantiate(Blood, hitpoint.point, Quaternion.identity);
                         NetworkServer.Spawn(blood);

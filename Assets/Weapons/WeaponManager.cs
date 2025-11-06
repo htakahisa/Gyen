@@ -26,6 +26,7 @@ public class WeaponManager : NetworkBehaviour
 
     public override void OnStartAuthority()
     {
+        if (!isLocalPlayer) return;
         inputActions = new PlayerInputActions();
         enabled = true;
         inputActions.Player.Enable();
@@ -39,6 +40,11 @@ public class WeaponManager : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
 
+    }
+
+    public void BotEquipWeapon(WeaponType type)
+    {
+        RpcEquipWeapon(type);
     }
 
     public WeaponType GetCurrentWeaponType()

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc7bf4ca71d3024ca34b08d6a83e238, type: 3}
+  m_Name: TridentDatas
+  m_EditorClassIdentifier: 
+  characterName: Trident
+  Skill1Energy: 2
+  Skill2Energy: 1
+  Skill3Energy: 10
+  abilityController: {fileID: 3159636760548436729, guid: 2243ce3f8ed08b74f8ed85b3fe96e982,
+    type: 3}
+  limePre: {fileID: 3539715179979286606, guid: 284412664aa79544688680eee0955610, type: 3}
+  hpMaster: {fileID: 5264078432467384439, guid: 2243ce3f8ed08b74f8ed85b3fe96e982,
+    type: 3}
+  healEffect: {fileID: 9017484664307500583, guid: 1245b8d2997d5b34fb1637be70a7eb05,
+    type: 3}
+  healEffectInstance: {fileID: 0}
+  singInterval: 0.5

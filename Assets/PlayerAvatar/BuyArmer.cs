@@ -44,21 +44,29 @@ public class BuyArmer : NetworkBehaviour, IPointerClickHandler
 
     public void Buy()
     {
-        RoundManager roundManager = RoundManager.rm;
 
-        if (roundManager.Mode == "1VS1")
+        if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
         {
 
-            if (roundManager.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, CreditManager.PurchaseSlot.Armor))
+            if (RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, CreditManager.PurchaseSlot.Armor))
             {
-                roundManager.GetMyPlayer().GetComponent<CreditManager>().CmdBuy(cost, CreditManager.PurchaseSlot.Armor);
-                CmdBuy(roundManager.GetMyPlayer());
+                RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CmdBuy(cost, CreditManager.PurchaseSlot.Armor);
+                CmdBuy(RoundManager.rm.GetMyPlayer());
             }
         }
-        if (roundManager.Mode == "Practice")
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
-            
-            roundManager.GetMyPlayer().GetComponent<HpMaster>().armer = armer;
+
+            if (RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, CreditManager.PurchaseSlot.Armor))
+            {
+                RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CmdBuy(cost, CreditManager.PurchaseSlot.Armor);
+                CmdBuy(RoundManager.rm.GetMyPlayer());
+            }
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
+        {
+
+            RoundManager.rm.GetMyPlayer().GetComponent<HpMaster>().armer = armer;
             foreach (var gameObject in RoundManager.rm.GetBots())
             {
                 gameObject.GetComponent<HpMaster>().armer = armer;

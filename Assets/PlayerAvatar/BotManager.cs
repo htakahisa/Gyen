@@ -6,6 +6,9 @@ public class BotManager : NetworkBehaviour
 {
     public ThirdPersonController tpc;
     public CharacterController cc;
+    public WeaponManager wm;
+    public ShootManager sm;
+    public HpMaster hm;
     public float moveTime = 0f;
     public float currentMoveDirection;
     public float moveDuration;
@@ -19,12 +22,17 @@ public class BotManager : NetworkBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        wm.RpcBuyWeapon(WeaponStatus.WeaponType.ReiNe);
+        hm.armer = 0.5f;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() == 0 && tpc.Grounded)
+        {
+            sm.BotShoot();
+        }
         if (RoundManager.rm.currentBotMove != RoundManager.BotMove.STOP)
         {
             // ˆÚ“®ŠÔ‚ªI—¹‚µ‚½‚çV‚µ‚¢•ûŒü‚ğŒˆ’è

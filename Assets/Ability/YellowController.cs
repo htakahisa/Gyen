@@ -59,7 +59,7 @@ public class YellowController : NetworkBehaviour
             CharacterRotation();
         }
 
-        if (RoundManager.rm.Mode == "Practice" || (RoundManager.rm.Mode == "1VS1" && isLocalPlayer))
+        if ((RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE) || (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE && isLocalPlayer) || (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND && isLocalPlayer))
         {
             audioListener.enabled = true;
         }
@@ -74,34 +74,34 @@ public class YellowController : NetworkBehaviour
     private void CharacterRotation()
     {
 
-        if (!RoundManager.rm.hasLoaded)
-    {
-        return;
-    }
+        if (!RoundManager.rm.hasLoaded) return;
 
-    // マウス入力
-    float mouseX = Input.GetAxis("Mouse X");
-    float mouseY = Input.GetAxis("Mouse Y");
 
-    // --- 左右回転(Yaw) ---
-    // マウス移動から目標値を計算
-    targetValue = mouseX * _sensitivity;
-    targetValue = Mathf.Clamp(targetValue, -90, 90);
 
-    // 現在値を滑らかに補間
-    currentValue = Mathf.Lerp(currentValue, targetValue, Time.deltaTime * smoothSpeed);
 
-    // プレイヤー本体を回転
-    transformNetwork.yaw += currentValue;
-    parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-    //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+        // マウス入力
+        float mouseX = Input.GetAxis("Mouse X");
+        float mouseY = Input.GetAxis("Mouse Y");
 
-    // --- 上下回転(Pitch) ---
-    xRotation -= mouseY * _sensitivity;
-    xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        // --- 左右回転(Yaw) ---
+        // マウス移動から目標値を計算
+        targetValue = mouseX * _sensitivity;
+        targetValue = Mathf.Clamp(targetValue, -90, 90);
 
-    // カメラに上下回転を適用（ *= ではなく = ）
-    mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        // 現在値を滑らかに補間
+        currentValue = Mathf.Lerp(currentValue, targetValue, Time.deltaTime * smoothSpeed);
+
+        // プレイヤー本体を回転
+        transformNetwork.yaw += currentValue;
+        parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+        //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+
+        // --- 上下回転(Pitch) ---
+        xRotation -= mouseY * _sensitivity;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+        // カメラに上下回転を適用（ *= ではなく = ）
+        mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
 
     public void CharacterMove()

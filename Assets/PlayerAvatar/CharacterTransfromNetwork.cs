@@ -48,7 +48,7 @@ public class CharacterTransfromNetwork : NetworkBehaviour
         }
 
         // 他クライアント側：補間
-        if (!isLocalPlayer)
+        if (!isLocalPlayer && isSynchronize)
         {
             transform.position = Vector3.Lerp(transform.position, targetPosition, positionLerpFactor);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationLerpFactor);

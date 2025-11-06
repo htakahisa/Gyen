@@ -16,6 +16,13 @@ public class PhaseWall : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        phaseWall.SetActive(RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY);
+        if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
+        {
+            phaseWall.SetActive(RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY);
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
+        {
+            phaseWall.SetActive(false);
+        }
     }
 }

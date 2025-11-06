@@ -33,11 +33,15 @@ public class PlayerManager : NetworkBehaviour
 
         int needPlayersCount = 100;
 
-        if(RoundManager.rm.Mode == "1VS1")
+        if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
         {
             needPlayersCount = 2;
         }
-        if (RoundManager.rm.Mode == "Practice")
+        if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
+        {
+            needPlayersCount = 1;
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
             needPlayersCount = 1;
         }

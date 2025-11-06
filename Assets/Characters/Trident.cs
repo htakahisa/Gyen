@@ -4,23 +4,40 @@ using UnityEngine;
 
 public class Trident : CharacterSkills
 {
+
+    public TridentCharacterData tridentData;
+
     public AbilityController abilityController;
-    public GameObject limepre;
-    public CharacterSkills currentCharacter;
-    public ShootManager shootManager;
     public HpMaster hpMaster;
+    public GameObject limePre;
     public GameObject healEffect;
     public GameObject healEffectInstance;
 
+    //because of these will get the values from GetComponent in Awake(), u dont need to get the these values from CharacterData
+    public CharacterSkills currentCharacter;
+    public ShootManager shootManager;
+
+    public float singInterval;
+
     public bool isSinging;
     public float singIntervalTimer;
-    public float singInterval;
+
 
     [TextArea]
     public string memo = "Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing";
 
     private void Awake()
     {
+        default1Energy = tridentData.Skill1Energy;
+        default2Energy = tridentData.Skill2Energy;
+        default3Energy = tridentData.Skill3Energy;
+        limePre = tridentData.limePre;
+        healEffect = tridentData.healEffect;
+        healEffectInstance = tridentData.healEffectInstance;
+        singInterval = tridentData.singInterval;
+
+
+
         Skill1 = Lime;
         Skill2 = Yellow;
         Skill3 = Singing;
@@ -84,7 +101,7 @@ public class Trident : CharacterSkills
     [Command]
     public void CmdLime(Vector3 pos, Vector3 dir)
     {
-        GameObject instance = Instantiate(limepre, pos, Quaternion.LookRotation(dir));
+        GameObject instance = Instantiate(limePre, pos, Quaternion.LookRotation(dir));
         NetworkServer.Spawn(instance);
         RoundManager.spawns.Add(instance);
 

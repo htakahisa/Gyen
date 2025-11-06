@@ -28,12 +28,11 @@ public class HpMaster : NetworkBehaviour
         Debug.Log($"{netId} ÇÃHPÇ™ {oldValue} Å® {newValue} Ç…ïœçX");
     }
 
-    private void Awake()
+    public override void OnStartAuthority()
     {
         if (isServer)
         {
             ResetHp();
-
         }
     }
 
@@ -44,6 +43,18 @@ public class HpMaster : NetworkBehaviour
         {
             TakeDamage(10, false);
         }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE && isLocalPlayer && GetComponent<PlayerManager>() != null)
+        {
+            onDeath = EventOnDeath.PLAYERRESPAWN;
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND && !isLocalPlayer && GetComponent<PlayerManager>() != null)
+        {
+            onDeath = EventOnDeath.DESTROY;
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND && isLocalPlayer && GetComponent<PlayerManager>() != null)
+        {
+            onDeath = EventOnDeath.DUELLANDRETRY;
+        }
 
     }
     
@@ -51,7 +62,7 @@ public class HpMaster : NetworkBehaviour
     [Server]
     public void TakeDamage(int damage, bool headshot)
     {
-        if (isDead || isInvincible || (RoundManager.rm.Mode == "1VS1" && RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY))
+        if (isDead || isInvincible || (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE && RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY))
         {
             return;
         }
@@ -173,6 +184,20 @@ public class HpMaster : NetworkBehaviour
                 RoundManager.rm.RoundEnd(gameObject);
             }
         }
+        if (onDeath == EventOnDeath.PLAYERRESPAWN)
+        {
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
+            GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
+            StartCoroutine(RoundManager.rm.ResetPractice());
+        }
+        if (onDeath == EventOnDeath.DUELLANDRETRY)
+        {
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
+            GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
+            RoundManager.rm.DuelLandRetry();
+        }
     }
 
     public enum EventOnDeath
@@ -186,6 +211,8 @@ public class HpMaster : NetworkBehaviour
         ITWEAKSDESTROY,
         IMIRRORDESTROY,
         PLAYERDEAD,
+        PLAYERRESPAWN,
+        DUELLANDRETRY,
     }
 
 

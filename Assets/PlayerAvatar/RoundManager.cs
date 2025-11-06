@@ -16,6 +16,9 @@ public class RoundManager : NetworkBehaviour
 
     private List<GameObject> players = new List<GameObject>();
 
+    public List<MapDatas> oneVsOneMaps = new List<MapDatas>();
+    public List<DuelLandDatas> duelLandMaps = new List<DuelLandDatas>();
+
     public static RoundManager rm;
     public Vector3 attackSpawnPos;
     public Vector3 defenceSpawnPos;
@@ -25,11 +28,12 @@ public class RoundManager : NetworkBehaviour
     public int Round = 1;
     public Phase CurrentPhase;
 
-    public string Mode = "1VS1";
+    public Mode currentMode;
 
     public bool hasLoaded = false;
 
     public BotMove currentBotMove = BotMove.STOP;
+    public bool doesBotShoot = true;
 
     public static List<GameObject> spawns = new List<GameObject>();
 
@@ -57,28 +61,23 @@ public class RoundManager : NetworkBehaviour
     public bool hasReset;
 
     public MapDatas mapData;
+    public DuelLandDatas duelLandData;
 
     public Coroutine startGetting;
+
+    public enum Mode
+    {
+        ONEVSONE,
+        PRACTICE,
+        DUELLAND,
+    }
+
 
     // Start is called before the first frame update
     void Awake()
     {
         rm = this;
-        CurrentPhase = Phase.BUY;
-        if (SceneManager.GetActiveScene().name == "Battle")
-        {
-            Mode = "1VS1";
-        }
-        if (SceneManager.GetActiveScene().name == "Practice")
-        {
-            Mode = "Practice";
-        }
-        if (Mode == "1VS1")
-        {
-            Invoke("RpcSwitchBattlePhase", 15f);
-        }
-
-
+       
     }
 
     public enum BotMove 
@@ -136,6 +135,16 @@ public class RoundManager : NetworkBehaviour
         Invoke("RpcSwitchBattlePhase", 20f);
     }
 
+    public void DuelLandRetry()
+    {
+        if (hasRoundEnded) return;
+        hasRoundEnded = true;
+        Round++;
+
+        StartCoroutine(ResetRound());
+    }
+
+
     public void Finisher(GameObject loser, bool headshot)
     {
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
@@ -185,11 +194,21 @@ public class RoundManager : NetworkBehaviour
         CurrentPhase = Phase.BATTLE;
     }
 
+    public IEnumerator ResetPractice()
+    {
 
+        yield return new WaitForSeconds(0.1f);
+        SetConditions();
+
+        yield return new WaitWhile(() => !hasReset);
+        hasReset = false;
+        ResetStatus();
+        ServerResetAllObjects();
+        AudioManager.Instance.CmdStopBGM();
+    }
 
     public IEnumerator ResetRound()
     {
-        
         StartCoroutine(ResetPlayers());
 
         yield return new WaitWhile(() => !hasReset);
@@ -199,6 +218,10 @@ public class RoundManager : NetworkBehaviour
 
         ServerResetAllObjects();
         AudioManager.Instance.CmdStopBGM();
+        if (currentMode == Mode.DUELLAND)
+        {
+            hasRoundEnded = false;
+        }
     }
 
     [Server]
@@ -223,7 +246,7 @@ public class RoundManager : NetworkBehaviour
             }
         }
 
-        if (Mode == "1VS1")
+        if (currentMode == Mode.ONEVSONE)
         {
             StartCoroutine(BombArmCoroutine());
         }
@@ -267,31 +290,66 @@ public class RoundManager : NetworkBehaviour
     }
 
 
+
     private IEnumerator StartGetPlayers()
     {
 
         yield return new WaitForSeconds(0.1f);
+
+        CurrentPhase = Phase.BUY;
+        if (currentMode == Mode.DUELLAND)
+        {
+            duelLandData = duelLandMaps[Random.Range(0, duelLandMaps.Count)];
+        }
+        if (currentMode == Mode.ONEVSONE)
+        {
+            mapData = oneVsOneMaps[Random.Range(0, oneVsOneMaps.Count)];
+            Invoke("RpcSwitchBattlePhase", 15f);
+        }
 
         if (mapData != null)
         {
             attackSpawnPos = mapData.attackerPos;
             defenceSpawnPos = mapData.diffenderPos;
             spikePos = mapData.spikePos;
-        }
-
-        if (isServer)
-        {
-            if (Mode != "Practice")
-            {
+            if (isServer)
+            {                
                 respawns.Add(new ObjectAndPosition(mapData.mapPrefab, new Vector3(0, 0, 0)));
-                respawns.Add(new ObjectAndPosition(spike, spikePos));
+                respawns.Add(new ObjectAndPosition(spike, spikePos));                
             }
         }
+
+        if (duelLandData != null)
+        {
+            defenceSpawnPos = duelLandData.diffenderPos;
+            spikePos = duelLandData.spikePos;
+            currentMode = Mode.DUELLAND;
+            foreach (var gimmick in duelLandData.gimmicks)
+            {
+                respawns.Add(new ObjectAndPosition(gimmick.prefab, gimmick.position));
+                if(gimmick.prefab.GetComponent<CharacterTransfromNetwork>() != null)
+                {
+                    gimmick.prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmick.yaw;
+                    gimmick.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, gimmick.yaw, transform.rotation.eulerAngles.z);
+                }
+            }
+            if (isServer)
+            {
+                if (currentMode == Mode.DUELLAND) 
+                { 
+
+                    respawns.Add(new ObjectAndPosition(duelLandData.mapPrefab, new Vector3(0, 0, 0)));
+                    respawns.Add(new ObjectAndPosition(spike, spikePos));
+                }
+            }
+        }
+
+    
 
         // 自分のプレイヤーを取得
         myPlayer = playerManager.GetLocalPlayer();
 
-        if (Mode != "Practice")
+        if (currentMode == Mode.ONEVSONE)
         {
             // 相手のプレイヤーを取得
             otherPlayer = playerManager.GetOtherPlayer();
@@ -302,16 +360,23 @@ public class RoundManager : NetworkBehaviour
 
         if (isServer)
         {
-            if (Mode == "Practice")
+            if (currentMode == Mode.PRACTICE) 
+            { 
+                myPlayer.GetComponentInChildren<CreditManager>().credit = 0;
+                myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999);
+            }
+            if (currentMode == Mode.DUELLAND)
             {
                 myPlayer.GetComponentInChildren<CreditManager>().credit = 0;
                 myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999);
             }
 
-
-            ResetStatus();
-            ServerResetAllObjects();
             SetConditions();
+            ServerResetAllObjects();
+            yield return new WaitWhile(() => !hasReset);
+            hasReset = false;
+            ResetStatus();
+
         }
         
         hasLoaded = true;
@@ -390,7 +455,7 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponent<HpMaster>().ResetHp();
         myPlayer.GetComponent<HpMaster>().armer = 1;
 
-        if (Mode == "1VS1")
+        if (currentMode == Mode.ONEVSONE)
         {
             otherPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
             otherPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();

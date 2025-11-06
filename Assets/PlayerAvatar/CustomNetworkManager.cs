@@ -21,7 +21,17 @@ public class CustomNetworkManager : NetworkManager
 
     private readonly List<NetworkConnectionToClient> pendingConnections = new List<NetworkConnectionToClient>();
 
-    public GameObject[] playerPrefabs;
+    public GameObject characterPrefab;
+
+    public Mode selectedMode = Mode.ONEVSONE;
+
+
+    public enum Mode
+    {
+        ONEVSONE,
+        PRACTICE,
+        DUELLAND,
+    }
 
     #region Initialization
     public override void Awake()
@@ -34,6 +44,13 @@ public class CustomNetworkManager : NetworkManager
 
     #region Server Callbacks
 
+    public enum CharacterType
+    {
+        Trident,
+        Ejah,
+        Lucifer,
+        Overdose,
+    }
 
     public void Connect()
     {
@@ -115,20 +132,42 @@ public class CustomNetworkManager : NetworkManager
     #endregion
 
     #region Game Flow
+
+    public void DuelLandConnect()
+    {
+        requiredPlayers = 1;
+        selectedMode = Mode.DUELLAND;
+        Connect();
+    }
+
+    public void OneVsOneConnect()
+    {
+        requiredPlayers = 2;
+        selectedMode = Mode.ONEVSONE;
+        Connect();
+    }
+
     private void AssignRoles()
     {
-        // ランダムに攻撃側と防御側を決定
-        if (Random.Range(0, 2) == 0)
+        if (pendingConnections.Count > 1)
         {
-            defender = pendingConnections[0];
-            attacker = pendingConnections[1];
+            // ランダムに攻撃側と防御側を決定
+            if (Random.Range(0, 2) == 0)
+            {
+                defender = pendingConnections[0];
+                attacker = pendingConnections[1];
+            }
+            else
+            {
+                defender = pendingConnections[1];
+                attacker = pendingConnections[0];
+            }
         }
         else
         {
-            defender = pendingConnections[1];
-            attacker = pendingConnections[0];
+            defender = pendingConnections[0];
         }
-        Debug.Log($"Roles assigned - Attacker: {attacker.connectionId}, Defender: {defender.connectionId}");
+        Debug.Log($"Roles assigned - Attacker: {attacker?.connectionId}, Defender: {defender.connectionId}");
     }
 
 
@@ -141,23 +180,19 @@ public class CustomNetworkManager : NetworkManager
             // 2. 全プレイヤーをスポーン
             foreach (var conn in pendingConnections)
             {               
-                StartCoroutine(ServerSpawnPlayer(conn));
+                StartCoroutine(ServerSpawnPlayer(conn, sceneName));
             }
         }
         if (sceneName == "Practice")
         {
-            Vector3 spawnPos = RoundManager.rm.defenceSpawnPos;
 
-            // プレイヤー生成
-            GameObject player = Instantiate(
-                playerPrefabs[3],
-                spawnPos,
-                Quaternion.identity
-            );
-            NetworkServer.AddPlayerForConnection(NetworkServer.localConnection, player);
-            
+            // 2. 全プレイヤーをスポーン
+            foreach (var conn in pendingConnections)
+            {
+                StartCoroutine(ServerSpawnPlayer(conn, sceneName));
+            }
         }
-     
+
     }
 
 
@@ -165,21 +200,26 @@ public class CustomNetworkManager : NetworkManager
 
     #region Player Spawning
     [Server]
-    public IEnumerator ServerSpawnPlayer(NetworkConnectionToClient conn)
+    public IEnumerator ServerSpawnPlayer(NetworkConnectionToClient conn, string sceneName)
     {
         yield return new WaitUntil(() => conn.isReady);
 
         var characterManager = conn.identity.GetComponent<CharacterManager>();
         int index = characterManager.selectedCharacter;
 
-        // スポーン位置決定
-        bool isAttacker = (conn == attacker);
+        if (sceneName == "Practice")
+        {
+            index = 0;
+        }
+
+            // スポーン位置決定
+            bool isAttacker = (conn == attacker);
         Vector3 spawnPos = isAttacker ?
             RoundManager.rm.attackSpawnPos :
             RoundManager.rm.defenceSpawnPos;
 
         // プレイヤー生成
-        GameObject player = Instantiate(playerPrefabs[index], spawnPos, Quaternion.identity);
+        GameObject player = Instantiate(characterPrefab, spawnPos, Quaternion.identity);
 
         // 置き換え（この時点でクライアントに権限が付く）
         NetworkServer.ReplacePlayerForConnection(conn, player, true);
@@ -189,8 +229,10 @@ public class CustomNetworkManager : NetworkManager
         yield return new WaitUntil(() => tracker.allClientsReady);
 
         // RpcRelay に登録
-        RpcRelay relay = FindObjectOfType<RpcRelay>();
+        RpcRelay relay = player.GetComponent<RpcRelay>();
         relay.RpcSetPlayersRole(isAttacker, player);
+        relay.RpcSetCharacter(index, player);
+        RoundManager.rm.currentMode = (RoundManager.Mode)(int)selectedMode;
 
         Debug.Log($"Spawned player for connection {conn.connectionId} at {spawnPos}");
     }
@@ -220,6 +262,7 @@ public class CustomNetworkManager : NetworkManager
 
     public void StartPracticeMode()
     {
+        selectedMode = Mode.PRACTICE;
         StartHost();
         if (playersInLobby > 0)
         {

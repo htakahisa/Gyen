@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be18b332618527b49bd741349c53fec2, type: 3}
+  m_Name: Discipline_DuelLand
+  m_EditorClassIdentifier: 
+  gimmicks:
+  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+      type: 3}
+    position: {x: -52.07785, y: 0, z: -3.979511}
+    yaw: 90
+  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+      type: 3}
+    position: {x: -18.757, y: 4.8, z: 26.050322}
+    yaw: 180
+  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+      type: 3}
+    position: {x: -40.00264, y: -3.2, z: 24.485}
+    yaw: 90
+  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+      type: 3}
+    position: {x: -31.44426, y: -3.2000003, z: 22.776}
+    yaw: -90
+  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+      type: 3}
+    position: {x: -42.445, y: -3.1999998, z: 1.9196929}
+    yaw: 0
+  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+      type: 3}
+    position: {x: -52.58171, y: -3.2, z: 27.088}
+    yaw: 90
+  diffenderPos: {x: 0, y: 0, z: 0}
+  spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
+  mapPrefab: {fileID: 4990530871526230533, guid: 5a86559c1c0067c4da918d81c0136930,
+    type: 3}

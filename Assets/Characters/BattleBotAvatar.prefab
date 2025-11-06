@@ -676,7 +676,6 @@ Transform:
   - {fileID: 7399087043400797327}
   - {fileID: 5540877614332467057}
   - {fileID: 863085055213139006}
-  - {fileID: 6961852971312790160}
   m_Father: {fileID: 1701225623898509953}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &3878592368671364376
@@ -855,6 +854,7 @@ MonoBehaviour:
   transformNetwork: {fileID: -4732923928998472460}
   currentControlScheme: Keyboard&Mouse
   enemies: []
+  enemiesForBot: []
   canMove: 1
   lockManager: {fileID: 728472207448528687}
   footStepTime: 0
@@ -1037,11 +1037,11 @@ MonoBehaviour:
   Fragment: {fileID: 6236630861130584601, guid: a87e483792b9d194b8616c7e2be9bdca,
     type: 3}
   isDarkness: 0
-  darkOrb: {fileID: 0}
+  darkOrb: {fileID: 3539715179979286606, guid: aafd3b8ea80e21d439da7d5d77ff0bf3, type: 3}
   darkRadius: 2
   ground:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 520
 --- !u!1 &812295573239222740
 GameObject:
   m_ObjectHideFlags: 0
@@ -2471,11 +2471,11 @@ Transform:
   m_GameObject: {fileID: 3352325458824434371}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.664, z: 0.044}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8727971832061936366}
+  m_Father: {fileID: 650716402390897772}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3454819737735072007
 GameObject:
@@ -2519,7 +2519,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3051506110441234160}
   - component: {fileID: -2750503181273046890}
-  - component: {fileID: 8447630504621839706}
   - component: {fileID: -4732923928998472460}
   - component: {fileID: 8825841003792857049}
   - component: {fileID: 6792009286812342892}
@@ -2528,11 +2527,16 @@ GameObject:
   - component: {fileID: 7767665597172722380}
   - component: {fileID: 7131634090093216591}
   - component: {fileID: 1112727817626628774}
-  - component: {fileID: -6638382101669115610}
   - component: {fileID: 6758390799210106777}
   - component: {fileID: 728472207448528687}
+  - component: {fileID: -285929708950861392}
+  - component: {fileID: -7003257168439074378}
+  - component: {fileID: 8392387640287732223}
+  - component: {fileID: 1641871602304337997}
+  - component: {fileID: 124543901704949302}
+  - component: {fileID: 3706402853851209978}
   m_Layer: 0
-  m_Name: Trident
+  m_Name: BattleBotAvatar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2546,7 +2550,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3543936278411775571}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2572,41 +2576,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   allClientsReady: 0
---- !u!114 &8447630504621839706
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3543936278411775571}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 836da50fa1b3dee45854291038771488, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  skill1Energy: 2
-  skill2Energy: 1
-  skill3Energy: 10
-  default1Energy: 2
-  default2Energy: 1
-  default3Energy: 10
-  ultimateEnergy: 0
-  tridentData: {fileID: 11400000, guid: 589059ededba176498066cb77dc51e90, type: 2}
-  abilityController: {fileID: 3159636760548436729}
-  limePre: {fileID: 0}
-  hpMaster: {fileID: 5264078432467384439}
-  healEffect: {fileID: 9017484664307500583, guid: 1245b8d2997d5b34fb1637be70a7eb05,
-    type: 3}
-  healEffectInstance: {fileID: 0}
-  currentCharacter: {fileID: 8447630504621839706}
-  shootManager: {fileID: 8334744245603090709}
-  singInterval: 0.5
-  isSinging: 0
-  singIntervalTimer: 0
-  memo: Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing
 --- !u!114 &-4732923928998472460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2626,9 +2595,9 @@ MonoBehaviour:
   rotationLerpFactor: 0.2
   pitchLerpFactor: 0.2
   controller: {fileID: 1112727817626628774}
-  cameraRoot: {fileID: 0}
-  isSynchronize: 1
-  yaw: 0
+  cameraRoot: {fileID: 5248671596249763423}
+  isSynchronize: 0
+  yaw: 90
 --- !u!114 &8825841003792857049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2642,7 +2611,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 229889566
+  _assetId: 3194838014
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
@@ -2658,6 +2627,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcccd034ce639a04f9addbdc16fdce5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentCharacter: {fileID: 0}
 --- !u!114 &3159636760548436729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2710,7 +2680,7 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
-  onDeath: 8
+  onDeath: 1
   lightLoadEffect: {fileID: 0}
 --- !u!114 &7767665597172722380
 MonoBehaviour:
@@ -2773,37 +2743,6 @@ CharacterController:
   m_SkinWidth: 0.02
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 1.1, z: 0}
---- !u!114 &-6638382101669115610
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3543936278411775571}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: 67a207dd0b01404418c9737b41a5d682,
-    type: 3}
-  m_NotificationBehavior: 3
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: Keyboard&Mouse
-  m_DefaultActionMap: Player
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
 --- !u!114 &6758390799210106777
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2835,6 +2774,214 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+--- !u!114 &-285929708950861392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 836da50fa1b3dee45854291038771488, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  skill1Energy: 0
+  skill2Energy: 0
+  skill3Energy: 0
+  default1Energy: 0
+  default2Energy: 0
+  default3Energy: 0
+  ultimateEnergy: 0
+  tridentData: {fileID: 11400000, guid: 589059ededba176498066cb77dc51e90, type: 2}
+  abilityController: {fileID: 3159636760548436729}
+  hpMaster: {fileID: 5264078432467384439}
+  limePre: {fileID: 0}
+  healEffect: {fileID: 0}
+  healEffectInstance: {fileID: 0}
+  currentCharacter: {fileID: -285929708950861392}
+  shootManager: {fileID: 8334744245603090709}
+  singInterval: 0
+  isSinging: 0
+  singIntervalTimer: 0
+  memo: Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing
+--- !u!114 &-7003257168439074378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bad83d3a90e266944ae34ba8e7214d20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  skill1Energy: 3
+  skill2Energy: 1
+  skill3Energy: 1
+  default1Energy: 3
+  default2Energy: 1
+  default3Energy: 1
+  ultimateEnergy: 0
+  abilityController: {fileID: 3159636760548436729}
+  currentCharacter: {fileID: -285929708950861392}
+  shootManager: {fileID: 8334744245603090709}
+  hpMaster: {fileID: 5264078432467384439}
+  rotationMode: 0
+  ground:
+    serializedVersion: 2
+    m_Bits: 520
+  terraMaxDistance: 7
+  terraSurfaceOffset: 0.5
+  terraUpOffset: 0.5
+  terraPre: {fileID: 3539715179979286606, guid: 0f2255735fc1ec249bb9d2fe525bdff4,
+    type: 3}
+  terra: {fileID: 3539715179979286606, guid: bd31141f5512fd54cb6f630b21bbcc0d, type: 3}
+  terraPreInstance: {fileID: 0}
+  isTerra: 0
+  horusMaxDistance: 5
+  horusSurfaceOffset: 1
+  horusUpOffset: 1
+  dustPuff: {fileID: 5610010966355794069, guid: 803ecf87f61d9fb4f84ba6319ba95c9c,
+    type: 3}
+  horus: {fileID: 3539715179979286606, guid: f1da8575e7eddbd4999750a4669202b3, type: 3}
+  horusPre: {fileID: 3539715179979286606, guid: 3904ffcfef7f9cc4687f6d2c2201a8b4,
+    type: 3}
+  isHorus: 0
+  horusPreInstance: {fileID: 0}
+  mentumMaxDistance: 5
+  mentumSurfaceOffset: 0
+  mentumUpOffset: 2
+  mentumPre: {fileID: 3539715179979286606, guid: c4363494444805e46a3c140b0f76af90,
+    type: 3}
+  mentum: {fileID: 8571021629717422302, guid: 958972a926b06324b91b5a5c78c52495, type: 3}
+  mentumPreInstance: {fileID: 0}
+  isMentum: 0
+  memo: Skill1 = Terra, Skill2 = Horus, Skill3 = Mentum
+--- !u!114 &8392387640287732223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ba3a1b0f41fc9243bf264b2dabd005c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  skill1Energy: 0
+  skill2Energy: 1
+  skill3Energy: 0
+  default1Energy: 0
+  default2Energy: 1
+  default3Energy: 0
+  ultimateEnergy: 0
+  abilityController: {fileID: 3159636760548436729}
+  currentCharacter: {fileID: 8392387640287732223}
+  shootManager: {fileID: 8334744245603090709}
+  hpMaster: {fileID: 5264078432467384439}
+  weaponManager: {fileID: 1470853562863111889}
+  serverCheckShoot: {fileID: 4248758210931635522}
+  memo: Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing
+--- !u!114 &1641871602304337997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e255032256b9df438b0af3cff9a28d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  skill1Energy: 1
+  skill2Energy: 1
+  skill3Energy: 0
+  default1Energy: 1
+  default2Energy: 1
+  default3Energy: 0
+  ultimateEnergy: 0
+  abilityController: {fileID: 3159636760548436729}
+  currentCharacter: {fileID: -285929708950861392}
+  shootManager: {fileID: 8334744245603090709}
+  hpMaster: {fileID: 5264078432467384439}
+  rotationMode: 0
+  ground:
+    serializedVersion: 2
+    m_Bits: 8
+  tweaks: {fileID: 3539715179979286606, guid: aa368046966557e49892aa3252f4ac9b, type: 3}
+  tweaksPre: {fileID: 3539715179979286606, guid: 2df318927117a0d439c6e184b4d097b8,
+    type: 3}
+  tweaksPreInstance: {fileID: 0}
+  isTweaks: 0
+  tweaksMaxDistance: 5
+  tweaksSurfaceOffset: 0.05
+  tweaksUpOffset: 0.05
+  isMirror: 0
+  mirror: {fileID: 3539715179979286606, guid: 0db30ad600550f947998e40ca4084f5f, type: 3}
+  memo: Skill1 = Tweaks, Skill2 = Horus, Skill3 = Singing
+--- !u!114 &124543901704949302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8af45fb69aff7204989653d409d225a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  characterList:
+  - {fileID: -285929708950861392}
+  - {fileID: -7003257168439074378}
+  - {fileID: 8392387640287732223}
+  - {fileID: 1641871602304337997}
+--- !u!114 &3706402853851209978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 058d3e553ff799d44b2fe143ee8b939e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  tpc: {fileID: 4429394994741996986}
+  cc: {fileID: 1112727817626628774}
+  wm: {fileID: 1470853562863111889}
+  sm: {fileID: 8334744245603090709}
+  hm: {fileID: 5264078432467384439}
+  moveTime: 0
+  currentMoveDirection: 0
+  moveDuration: 0
+  jumpTime: 0
+  jumpDuration: 0
+  crouchTime: 0
+  crouchDuration: 0
 --- !u!1 &3561717742706190703
 GameObject:
   m_ObjectHideFlags: 0
@@ -2877,7 +3024,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7399087043400797327}
   - component: {fileID: 3864067455441857837}
-  - component: {fileID: 6147147982341573975}
   - component: {fileID: 1659738074813640245}
   m_Layer: 0
   m_Name: mainCamera
@@ -2957,14 +3103,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &6147147982341573975
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3587143367143688788}
-  m_Enabled: 0
 --- !u!114 &1659738074813640245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5003,7 +5141,8 @@ Transform:
   m_LocalPosition: {x: 0.026300011, y: -0.13959989, z: -0.06990013}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 6961852971312790160}
   m_Father: {fileID: 4940844313148860072}
   m_LocalEulerAnglesHint: {x: 66.358, y: -274.766, z: -138.45}
 --- !u!1 &7607922495544384897

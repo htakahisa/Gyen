@@ -35,7 +35,7 @@ public class TextManager : MonoBehaviour
         if (RoundManager.rm.GetMyPlayer() != null)
         {
             creditText.text = "Credit : " + RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>()?.credit;
-            if (RoundManager.rm.Mode == "1VS1")
+            if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
             {
                 myRoundText.text = RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>()?.rounds.ToString();
                 enemyRountText.text = RoundManager.rm.GetOtherPlayer().GetComponent<CreditManager>()?.rounds.ToString();
@@ -45,7 +45,7 @@ public class TextManager : MonoBehaviour
                 magazineText.text = RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>()?.magazine.ToString();
                 magazineSizeText.text = "/" + RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>()?.GetCurrentWeaponStats().magazineSize;
 
-                if (RoundManager.rm.Mode == "Practice")
+                if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
                 {
                     headShotRate.text = "HS% : " + RoundManager.rm.GetMyPlayer().GetComponentInChildren<ServerCheckShoot>()?.GetHeadShotRate();
                 }

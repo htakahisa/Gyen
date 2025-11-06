@@ -152,11 +152,16 @@ namespace StarterAssets
 
         [Header("Aim Assist")]
         [Header("エイムアシスト設定")]
-        private float assistRange = 30f;         // 敵を補正対象とする最大距離
+        private float assistRange = 70f;         // 敵を補正対象とする最大距離
         private float maxAssistAngle = 6f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
         private float assistStrength = 10f;      // 補正の強さ（回転スピード）
 
+        private float botAssistRangee = 200f;       // 敵を補正対象とする最大距離
+        private float botMaxAssistAngle = 200f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
+        private float botAssistStrength = 270f;      // 補正の強さ（回転スピード）
+
         public List<Transform> enemies = new List<Transform>();   // 敵のキャッシュリスト
+        public List<Transform> enemiesForBot = new List<Transform>();   // 敵のキャッシュリスト
         private Transform targetEnemy;
 
         private float currentPitch = 0f;    // カメラの上下角度
@@ -169,16 +174,15 @@ namespace StarterAssets
         public PlayerActionLockManager lockManager;
 
         public float footStepTime;
+        private float footStepInTimer;
 
         public void SetMovementEnabled(bool enabled)
         {
             canMove = enabled;
         }
 
-        public override void OnStartAuthority()
+        public void Awake()
         {
-            StartCoroutine(InitialSetInput());
-
 
             _CameraComponent = GetComponentInChildren<Camera>();
              _mainCamera = _CameraComponent.gameObject;
@@ -187,12 +191,14 @@ namespace StarterAssets
             Canvas canvas = GameObject.FindGameObjectWithTag("Canvas")?.GetComponent<Canvas>();
             _shootManager = GetComponent<ShootManager>();
             _hpMaster = GetComponentInParent<HpMaster>();
+        }
 
-
-
-            if (isLocalPlayer)
+        public override void OnStartAuthority()
+        {
+            if (isLocalPlayer && GetComponentInParent<BotManager>() == null)
             {
-                myBody.layer = 7;          
+                StartCoroutine(InitialSetInput());
+                myBody.layer = 7;
                 _CameraComponent.enabled = true;
                 _UiCameraComponent.enabled = true;
             }
@@ -263,6 +269,31 @@ namespace StarterAssets
                     if (child.CompareTag("Body") || child.CompareTag("Head"))
                     {
                         enemies.Add(child);
+                        Debug.Log(child);
+                    }
+                }
+            }
+        }
+        public void BotRefreshEnemyTargets()
+        {
+            enemiesForBot.Clear();
+
+            List<GameObject> targets = new List<GameObject>();
+            targets.Add(RoundManager.rm.GetMyPlayer());
+
+
+
+            foreach (var target in targets)
+            {
+                if (target == null) continue;
+
+                // 子オブジェクトから Body と Head を探す
+                Transform[] children = target.GetComponentsInChildren<Transform>(true);
+                foreach (Transform child in children)
+                {
+                    if (child.CompareTag("Body") || child.CompareTag("Head"))
+                    {
+                        enemiesForBot.Add(child);
                         Debug.Log(child);
                     }
                 }
@@ -392,7 +423,7 @@ namespace StarterAssets
             {
                 if (RoundManager.rm != null)
                 {
-                    if ((RoundManager.rm.Mode == "Practice" && isLocalPlayer)|| (RoundManager.rm.Mode == "1VS1" && isLocalPlayer))
+                    if ((RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE && isLocalPlayer) || (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE && isLocalPlayer) || (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND && isLocalPlayer))
                     {
                         _audioListener.enabled = true;
                     }
@@ -483,8 +514,12 @@ namespace StarterAssets
 
         private void LateUpdate()
         {
-            if (!isLocalPlayer) return;
-            CameraRotation();
+            if (!isLocalPlayer && RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE) return;
+
+            if (isLocalPlayer)
+            {
+                CameraRotation();
+            }
             if (currentControlScheme == "Gamepad")
             {  
 
@@ -495,6 +530,12 @@ namespace StarterAssets
                
                 ApplyAimAssist();
                 
+            }
+            if (GetComponentInParent<BotManager>() != null)
+            {
+                // 補正対象の敵を検索
+                targetEnemy = FindBestEnemyTarget();
+                BotApplyAimAssist();
             }
         }
 
@@ -523,82 +564,140 @@ namespace StarterAssets
 
             return bestTarget;
         }
+        private Transform BotFindBestEnemyTarget()
+        {
+            Transform bestTarget = null;
+            float bestAngle = maxAssistAngle;
+
+            foreach (var enemy in enemiesForBot)
+            {
+                if (enemy == null) continue;
+
+                Vector3 dirToEnemy = (enemy.position - _mainCamera.transform.position).normalized;
+                float distance = Vector3.Distance(_mainCamera.transform.position, enemy.position);
+                if (distance > botAssistRangee) continue;
+
+                float angle = Vector3.Angle(_mainCamera.transform.forward, dirToEnemy);
+
+                if (angle < bestAngle)
+                {
+                    bestAngle = angle;
+                    bestTarget = enemy;
+                }
+            }
+
+            return bestTarget;
+        }
+
 
         private void ApplyAimAssist()
         {
-
             RefreshEnemyTargets();
-            
+
             Vector3 camPos = Camera.main.transform.position;
             Vector3 camFwd = Camera.main.transform.forward;
 
             Transform bestTargetPart = null;
             Vector3 bestTargetPoint = Vector3.zero;
-            float bestAngle = maxAssistAngle;
+            float bestScore = float.MaxValue;
 
-            // ---- 敵のパーツを全部チェック ----
             foreach (var enemy in enemies)
             {
                 if (enemy == null) continue;
 
-                Transform[] parts = enemy.GetComponentsInChildren<Transform>();
-                foreach (var part in parts)
+                foreach (var col in enemy.GetComponentsInChildren<Collider>())
                 {
-                    Vector3 point = part.position;
-                    var col = part.GetComponent<Collider>();
-                    if (col != null) point = col.ClosestPoint(camPos);
-
+                    Vector3 point = col.bounds.center;
                     Vector3 toPart = point - camPos;
-                    float angle = Vector3.Angle(camFwd, toPart);
 
-                    if (angle < bestAngle && !Physics.Linecast(camPos, point, GroundLayers))
+                    if (Physics.Linecast(camPos, point, GroundLayers)) continue;
+
+                    float angle = Vector3.Angle(camFwd, toPart);
+                    float distance = toPart.magnitude;
+                    float score = angle + distance * 0.02f;
+
+                    if (score < bestScore && angle < maxAssistAngle)
                     {
-                        bestAngle = angle;
-                        bestTargetPart = part;
+                        bestScore = score;
+                        bestTargetPart = col.transform;
                         bestTargetPoint = point;
                     }
                 }
             }
 
-            // 入力取得
+            if (bestTargetPart == null) return;
+
             Vector2 lookInput = playerInput.actions.FindAction("Look").ReadValue<Vector2>();
-            float horizontalInput = lookInput.x;
-            float verticalInput = lookInput.y;
-            bool hasVerticalInput = Mathf.Abs(verticalInput) > 0.05f;
-            bool hasHorizontalInput = Mathf.Abs(horizontalInput) > 0.05f;
+            bool hasInput = lookInput.sqrMagnitude > 0.0025f;
 
-            if (bestTargetPart != null)
-            {
-                // ---- 現在カメラ回転 ----
-                Quaternion currentRot = Camera.main.transform.rotation;
+            Quaternion currentRot = Camera.main.transform.rotation;
+            Vector3 toTarget = bestTargetPoint - camPos;
+            Quaternion targetRot = Quaternion.LookRotation(toTarget);
 
-                // ---- ターゲット方向 ----
-                Vector3 toTarget = bestTargetPoint - camPos;
-                Quaternion targetRot = Quaternion.LookRotation(toTarget);
+            float angleDiff = Quaternion.Angle(currentRot, targetRot);
+            float step = assistStrength * Time.deltaTime * angleDiff * (hasInput ? 0.3f : 1f);
+            Quaternion finalRot = Quaternion.RotateTowards(currentRot, targetRot, step);
 
-                // ---- 入力による補正の弱め方 ----
-                float verticalFactor = hasVerticalInput ? 0.2f : 1f;
-                float horizontalFactor = hasHorizontalInput ? 0.4f : 1f;
+            Vector3 euler = finalRot.eulerAngles;
+            currentPitch = euler.x > 180f ? euler.x - 360f : euler.x;
+            transformNetwork.yaw = euler.y;
 
-                // ---- 回転補正 ----
-                float step = assistStrength * Time.deltaTime;
-                Quaternion finalRot = Quaternion.RotateTowards(
-                    currentRot,
-                    targetRot,
-                    step * Mathf.Max(verticalFactor, horizontalFactor)
-                );
-
-                // ---- カメラに反映 ----
-                Vector3 euler = finalRot.eulerAngles;
-                currentPitch = euler.x > 180f ? euler.x - 360f : euler.x;
-                //transformNetwork.yaw = euler.y;
-                CameraParticularRotaion(-currentPitch);
-                parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
-            }
+            CameraParticularRotaion(-currentPitch);
+            parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
         }
 
+        private void BotApplyAimAssist()
+        {
+            BotRefreshEnemyTargets();
 
+            Vector3 camPos = _mainCamera.transform.position;
+            Vector3 camFwd = _mainCamera.transform.forward;
+
+            Transform bestTargetPart = null;
+            Vector3 bestTargetPoint = Vector3.zero;
+            float bestScore = float.MaxValue;
+
+            foreach (var enemy in enemiesForBot)
+            {
+                if (enemy == null) continue;
+
+                foreach (var col in enemy.GetComponentsInChildren<Collider>())
+                {
+                    Vector3 point = col.bounds.center;
+                    Vector3 toPart = point - camPos;
+
+                    if (Physics.Linecast(camPos, point, GroundLayers)) continue;
+
+                    float angle = Vector3.Angle(camFwd, toPart);
+                    float distance = toPart.magnitude;
+                    float score = angle + distance * 0.02f;
+
+                    if (score < bestScore && angle < botMaxAssistAngle)
+                    {
+                        bestScore = score;
+                        bestTargetPart = col.transform;
+                        bestTargetPoint = point;
+                    }
+                }
+            }
+
+            if (bestTargetPart == null) return;
+
+            Quaternion currentRot = _mainCamera.transform.rotation;
+            Vector3 toTarget = bestTargetPoint - camPos;
+            Quaternion targetRot = Quaternion.LookRotation(toTarget);
+
+            float angleDiff = Quaternion.Angle(currentRot, targetRot);
+            float step = botAssistStrength * Time.deltaTime * (angleDiff * 0.1f);
+            Quaternion finalRot = Quaternion.RotateTowards(currentRot, targetRot, step);
+
+            Vector3 euler = finalRot.eulerAngles;
+            currentPitch = euler.x > 180f ? euler.x - 360f : euler.x;
+            transformNetwork.yaw = euler.y;
+
+            CameraParticularRotaion(-currentPitch);
+            parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
+        }
 
 
 
@@ -758,25 +857,38 @@ namespace StarterAssets
                     if (isMove || !Grounded)
                     {
 
+                        if (Grounded)
+                        {
+                            footStepInTimer += Time.deltaTime;
+                        }
 
                         if (isWalking)
                         {
                             targetSpeed = MoveSpeed;
                         }
                         else
-                        {
+                        {                 
                             targetSpeed = SprintSpeed;
+                            if (footStepInTimer >= footStepTime)
+                            {
+                                OnFootstep();
+                                footStepInTimer = 0;
+                            }
                         }
 
                         if (sneak)
                         {
                             targetSpeed *= 0.5f;
                         }
-
+       
 
                     }
                     else
                     {
+                        if (footStepInTimer >= 0)
+                        {
+                            footStepInTimer -= Time.deltaTime;
+                        }
                         targetSpeed = 0f;
                     }
 
@@ -786,10 +898,10 @@ namespace StarterAssets
                     _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
                     if (_animationBlend < 0.01f) _animationBlend = 0f;
 
-                  
 
 
-                
+
+
             }
             else
             {
@@ -1076,7 +1188,10 @@ namespace StarterAssets
 
         public void BotMove(float horiMove, bool isWalk, bool isCrouch)
         {
+            if (!_hasAnimator) return;
+
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0); // 0 = Base Layer
+            
             bool isMove = (horiMove != 0);
 
             isCrouching = isCrouch;
@@ -1490,7 +1605,8 @@ namespace StarterAssets
             ThirdPersonController tpc = RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>();
             Debug.Log(tpc);
 
-            if (RoundManager.rm.Mode == "1VS1") {
+            if  (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE) 
+            {
                 //GetMyPlayerは常にこれを呼んでいるサーバーにとってなので注意。どうせ両方のプレイヤーの状態を確認するためこれでも通る。
                 if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>() == null)
                 {
@@ -1514,9 +1630,21 @@ namespace StarterAssets
 
 
                 RoundManager.rm.CmdHasReset();
+                RpcControllerEnabled(true);
+
             }
             else
             {
+                //GetMyPlayerは常にこれを呼んでいるサーバーにとってなので注意。どうせ両方のプレイヤーの状態を確認するためこれでも通る。
+                if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>() == null)
+                {
+                    yield return new WaitWhile(() => RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>() == null);
+                }
+                if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().controllerEnabled == true)
+                {
+                    yield return new WaitWhile(() => RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>().controllerEnabled == true);
+                }
+                RoundManager.rm.CmdHasReset();
                 RpcControllerEnabled(true);
             }
         }

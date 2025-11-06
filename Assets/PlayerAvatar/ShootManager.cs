@@ -68,26 +68,35 @@ namespace StarterAssets
             canShoot = enabled;
         }
 
-        public override void OnStartAuthority()
+        private void Awake()
         {
-         
-           
+
             if (_mainCamera == null)
             {
                 _CameraComponent = GetComponentInChildren<Camera>();
                 _mainCamera = _CameraComponent.gameObject;
 
             }
-            inputActions = new PlayerInputActions();
-            enabled = true;
-            inputActions.Player.Enable();
+        }
 
-            inputActions.Player.Fire.performed += _ => autoFireInput = true;
-            inputActions.Player.Fire.canceled += _ => autoFireInput = false;
 
-            inputActions.Player.Reload.performed += _ => weaponManager.CmdReload();
+        public override void OnStartAuthority()
+        {
+         
 
-            inputActions.Player.Zoom.performed += _ => TryZoom();
+            if (isLocalPlayer && GetComponentInParent<BotManager>() == null)
+            {
+                inputActions = new PlayerInputActions();
+                enabled = true;
+                inputActions.Player.Enable();
+
+                inputActions.Player.Fire.performed += _ => autoFireInput = true;
+                inputActions.Player.Fire.canceled += _ => autoFireInput = false;
+
+                inputActions.Player.Reload.performed += _ => weaponManager.CmdReload();
+
+                inputActions.Player.Zoom.performed += _ => TryZoom();
+            }
 
         }
 
@@ -102,7 +111,8 @@ namespace StarterAssets
         private void Update()
         {
 
-            if (!isLocalPlayer) return;
+            if (!isLocalPlayer && RoundManager.rm.currentMode != RoundManager.Mode.PRACTICE) return;
+
             if (RoundManager.rm.hasLoaded && GetComponentInParent<PlayerManager>().hasLoaded && !hasLoaded)
             {
                     StartGetTpc();
@@ -112,7 +122,7 @@ namespace StarterAssets
 
 
 
-            if (BuyPanel.buyPanel.isCursorLocked)
+            if (BuyPanel.buyPanel.isCursorLocked && isLocalPlayer)
             {
                 Shoot();
             }
@@ -171,6 +181,29 @@ namespace StarterAssets
                     }
                 }
                 else if (CanShoot(currentWeapon.isAuto))
+                {
+                    ShootWeapon();
+                }
+            }
+
+
+
+        }
+
+        public void BotShoot()
+        {
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
+
+            if (currentWeapon != null && !isBursting)
+            {
+                if (IsZooming && currentWeapon.burst != 0)
+                {
+                    if (BotCanShoot(false))
+                    {
+                        StartCoroutine(BurstFire());
+                    }
+                }
+                else if (BotCanShoot(currentWeapon.isAuto))
                 {
                     ShootWeapon();
                 }
@@ -240,7 +273,7 @@ namespace StarterAssets
 
         private void ShootWeapon()
         {
-            if (weaponManager.magazine >= 1 || RoundManager.rm.Mode == "Practice")
+            if (weaponManager.magazine >= 1 || RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
             {
                 if (recoilBounce != null)
                 {
@@ -294,9 +327,6 @@ namespace StarterAssets
                         parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
                     }
 
-                    // --- ƒT[ƒo[“¯Šú ---
-                    //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
-
 
                 }
 
@@ -309,6 +339,8 @@ namespace StarterAssets
                 WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
                 if (currentWeapon != null)
                 {
+                 
+
                     Vector3 direction = _mainCamera.transform.forward;
                     if (!currentWeapon.isNeedZoom || IsZooming)
                     {
@@ -393,6 +425,28 @@ namespace StarterAssets
 
             return timeSinceLastAttack >= currentWeapon.rate;
             
+        }
+        public bool BotCanShoot(bool Auto)
+        {
+            Vector3 position = RoundManager.rm.GetMyPlayer().transform.position;
+            position.y += 2f;
+
+            if (Physics.Linecast(_mainCamera.transform.position, position, wallMask)) return false;
+            if (!canShoot) return false;
+
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
+
+            if (currentWeapon == null) return false;
+
+
+            if (weaponManager.isReloading) return false;
+
+
+            // Œ»ÝŽž‚ÆÅŒã‚ÌUŒ‚Žž‚ð”äŠr
+            float timeSinceLastAttack = Time.time - lastAttackTime;
+
+            return timeSinceLastAttack >= currentWeapon.rate;
+
         }
 
 

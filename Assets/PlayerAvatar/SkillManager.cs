@@ -4,6 +4,8 @@ public class SkillManager : MonoBehaviour
 {
     public CharacterSkills currentCharacter;
 
+
+
     // ƒXƒLƒ‹1‚ğÀs
     public void UseSkill1()
     {

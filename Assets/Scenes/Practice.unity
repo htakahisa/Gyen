@@ -6286,7 +6286,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  Bot: {fileID: 1378437777043357902, guid: f4efc8a8aeb5a9d4ea8de3e421ee23cc, type: 3}
+  Bot: {fileID: 3543936278411775571, guid: 5ea185c8653eba849a9437a76880dd9a, type: 3}
 --- !u!1 &566486397
 GameObject:
   m_ObjectHideFlags: 0
@@ -10210,6 +10210,7 @@ MonoBehaviour:
   Mode: 1VS1
   hasLoaded: 0
   currentBotMove: 0
+  doesBotShoot: 1
   respawns: []
   playerManager: {fileID: 0}
   timeInRound: 0
