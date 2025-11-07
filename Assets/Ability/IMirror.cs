@@ -1,6 +1,7 @@
 using UnityEngine;
 using Mirror;
 using System.Collections;
+using StarterAssets;
 
 public class IMirror : NetworkBehaviour
 {
@@ -21,18 +22,8 @@ public class IMirror : NetworkBehaviour
         if (!isServer) return;
         ground = LayerMask.GetMask("Ground");
         // サーバーが動かすので、サーバー
-
-        Transform target = null;
-
-        if (GetComponent<SpawnOwner>().IsMine())
-        {
-            target = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
-        }
-        else
-        {
-            target = RoundManager.rm.GetOtherPlayer().GetComponentInChildren<Camera>().transform;
-        }
-        direction = target.forward;
+        
+        direction = transform.forward;
         Invoke("CmdFlash", fuseTime);
     }
 

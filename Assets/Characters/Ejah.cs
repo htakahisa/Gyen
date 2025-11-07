@@ -122,7 +122,6 @@ public class Ejah : CharacterSkills
 
             if (Input.GetMouseButtonDown(0))
             {
-                currentCharacter.skill1Energy--;
                 spawnPos = terraPreInstance.position;
                 CmdTerra(spawnPos);
                 
@@ -167,7 +166,6 @@ public class Ejah : CharacterSkills
                 // 左クリックで確定
                 if (Input.GetMouseButtonDown(0))
                 {
-                    currentCharacter.skill2Energy--;
                     CmdHorus(spawnPos, spawnRot);
                 }
             }
@@ -220,7 +218,6 @@ public class Ejah : CharacterSkills
 
             if (Input.GetMouseButtonDown(0))
             {
-                currentCharacter.skill3Energy--;
                 CmdMentum(spawnPos, spawnRot);
 
 
@@ -289,7 +286,7 @@ public class Ejah : CharacterSkills
     public void CmdTerra(Vector3 spawnPos, NetworkConnectionToClient conn = null)
     {
 
-
+        currentCharacter.skill1Energy--;
         StartCoroutine(TerraSpawn(spawnPos, conn));
 
     }
@@ -387,7 +384,7 @@ public class Ejah : CharacterSkills
     public void CmdHorus(Vector3 spawnPos, Quaternion spawnRot, NetworkConnectionToClient conn = null)
     {
 
-
+        currentCharacter.skill2Energy--;
         HorusSpawn(spawnPos, spawnRot, conn);
 
     }
@@ -472,7 +469,7 @@ public class Ejah : CharacterSkills
     public void CmdMentum(Vector3 spawnPos, Quaternion spawnRot, NetworkConnectionToClient conn = null)
     {
 
-
+        currentCharacter.skill3Energy--;
         MentumSpawn(spawnPos, spawnRot, conn);
 
     }

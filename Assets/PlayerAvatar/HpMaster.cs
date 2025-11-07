@@ -49,7 +49,7 @@ public class HpMaster : NetworkBehaviour
         }
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND && !isLocalPlayer && GetComponent<PlayerManager>() != null)
         {
-            onDeath = EventOnDeath.DESTROY;
+            onDeath = EventOnDeath.DUELLANDKILL;
         }
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND && isLocalPlayer && GetComponent<PlayerManager>() != null)
         {
@@ -109,7 +109,18 @@ public class HpMaster : NetworkBehaviour
 
         if (hp <= 0) return;
 
-        GetComponentInChildren<ThirdPersonController>()?.TargetCameraStun(GetComponent<NetworkIdentity>().connectionToClient, stunLevel, duration);
+
+        var conn = GetComponent<NetworkIdentity>().connectionToClient;
+        if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
+        {
+            conn = RoundManager.rm.GetMyPlayer().GetComponent<NetworkIdentity>().connectionToClient;
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
+        {
+            conn = RoundManager.rm.GetMyPlayer().GetComponent<NetworkIdentity>().connectionToClient;
+        }
+
+        GetComponentInChildren<ThirdPersonController>()?.TargetCameraStun(conn, stunLevel, duration);
 
     }
 
@@ -131,7 +142,7 @@ public class HpMaster : NetworkBehaviour
         }
         if (onDeath == EventOnDeath.HORUSDESTROY)
         {
-            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HORUSDESTROYED, transform.position, 1f, 30);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HORUSDESTROYED, transform.position, 0.5f, 30);
             NetworkServer.Destroy(gameObject);
         }
         if (onDeath == EventOnDeath.FORMTOHUMAN)
@@ -198,6 +209,11 @@ public class HpMaster : NetworkBehaviour
             GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
             RoundManager.rm.DuelLandRetry();
         }
+        if (onDeath == EventOnDeath.DUELLANDKILL)
+        {
+            RoundManager.rm.Finisher(gameObject, headshot);
+            NetworkServer.Destroy(gameObject);
+        }
     }
 
     public enum EventOnDeath
@@ -213,6 +229,7 @@ public class HpMaster : NetworkBehaviour
         PLAYERDEAD,
         PLAYERRESPAWN,
         DUELLANDRETRY,
+        DUELLANDKILL,
     }
 
 

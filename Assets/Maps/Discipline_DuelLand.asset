@@ -13,27 +13,27 @@ MonoBehaviour:
   m_Name: Discipline_DuelLand
   m_EditorClassIdentifier: 
   gimmicks:
-  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -52.07785, y: 0, z: -3.979511}
     yaw: 90
-  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -18.757, y: 4.8, z: 26.050322}
     yaw: 180
-  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -40.00264, y: -3.2, z: 24.485}
     yaw: 90
-  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -31.44426, y: -3.2000003, z: 22.776}
     yaw: -90
-  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -42.445, y: -3.1999998, z: 1.9196929}
     yaw: 0
-  - prefab: {fileID: 3543936278411775571, guid: ef72ce3d37856e940884a4084e262f37,
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -52.58171, y: -3.2, z: 27.088}
     yaw: 90

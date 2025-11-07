@@ -2,6 +2,7 @@ using Mirror;
 using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -147,8 +148,11 @@ public class RoundManager : NetworkBehaviour
 
     public void Finisher(GameObject loser, bool headshot)
     {
-        GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
-        FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser, headshot);
+        //if (currentMode == Mode.ONEVSONE || currentMode == Mode.PRACTICE)
+        {
+            GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
+            FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser, headshot);
+        }
     }
 
     [ClientRpc]
@@ -221,6 +225,7 @@ public class RoundManager : NetworkBehaviour
         if (currentMode == Mode.DUELLAND)
         {
             hasRoundEnded = false;
+            StartCoroutine(BombArmCoroutine());
         }
     }
 
@@ -255,12 +260,20 @@ public class RoundManager : NetworkBehaviour
 
     public IEnumerator BombArmCoroutine()
     {
-        yield return new WaitWhile(() => CurrentPhase == Phase.BUY);
+        if (currentMode == Mode.ONEVSONE)
+        {
+            yield return new WaitWhile(() => CurrentPhase == Phase.BUY); 
+        }
         
         var bombs = FindObjectsOfType<BombManager>();
 
-        if (bombs == null) {
-            yield return new WaitWhile(() => bombs == null); 
+        if (bombs == null || bombs.Length == 0) {
+
+            yield return new WaitWhile(() => FindObjectsOfType<BombManager>() == null);
+
+            bombs = FindObjectsOfType<BombManager>();
+            yield return new WaitWhile(() => bombs == null);
+            yield return new WaitWhile(() => bombs.Length == 0);
         }
         bombs[0].ArmBomb();
     }
@@ -294,12 +307,13 @@ public class RoundManager : NetworkBehaviour
     private IEnumerator StartGetPlayers()
     {
 
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.3f);
 
         CurrentPhase = Phase.BUY;
         if (currentMode == Mode.DUELLAND)
         {
             duelLandData = duelLandMaps[Random.Range(0, duelLandMaps.Count)];
+            StartCoroutine(BombArmCoroutine());
         }
         if (currentMode == Mode.ONEVSONE)
         {
@@ -446,7 +460,7 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
         myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
-        myPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
+        myPlayer.GetComponentsInChildren<CharacterSkills>().FirstOrDefault(c => c.enabled).ResetSkill();
         myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
         myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
         myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);       
@@ -462,7 +476,7 @@ public class RoundManager : NetworkBehaviour
             otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
             otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
             otherPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
-            otherPlayer.GetComponentInChildren<CharacterSkills>().ResetSkill();
+            otherPlayer.GetComponentsInChildren<CharacterSkills>().FirstOrDefault(c => c.enabled).ResetSkill();
             otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
             otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
             otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);

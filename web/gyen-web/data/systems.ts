@@ -15,6 +15,16 @@ export interface System {
 
 
 export const systems: System[] = [
+  {
+    name: "System_GameMode",
+    rank: "A", 
+    description: "ゲームモード自体やそれの処理について。",
+    history: [
+      { version: "1.0.7", change: "新しいゲームモード「デュエルランド」を追加しました。実際の1VS1でのマップを使い、ボットを殲滅するモードです。", type: "buff" as const },
+      { version: "1.0.7", change: "プラクティスモードにて、ボットがプレイヤーに撃ち返してくるようになりました", type: "buff" as const },
+      { version: "1.0.7", change: "デュエルランドモード中にボットをキルした場合に、キルバナーとフィニッシャーが表示されるように仕様を変更", type: "buff" as const },
+    ],
+  },
     {
     name: "System_Sound",
     rank: "B", 
@@ -29,7 +39,8 @@ export const systems: System[] = [
     rank: "A", 
     description: "試合に使うマップ自体や、それについての処理について。",
     history: [
-      { version: "1.0.6", change: "マップ「Close」を追加しました", type: "buff" as const },
+      { version: "1.0.6", change: "マップ「Discipline」を追加しました", type: "buff" as const },
+      { version: "1.0.7", change: "1VS1モードを開始したときに、ランダムなマップが選択されるように変更", type: "buff" as const },
     ],
   },
     {
@@ -51,6 +62,7 @@ export const systems: System[] = [
       { version: "1.0.7", change: "移動速度の上昇", type: "buff" as const },
       { version: "1.0.7", change: "滞空時に、ジャンプ時の慣性に直前の入力を考慮して角度を計算するように変更", type: "buff" as const },
       { version: "1.0.7", change: "しゃがむアニメーション速度を減速", type: "buff" as const },
+      { version: "1.0.7", change: "キャラクターが視点を回転させるとき、頭も一緒に回転して見えるように変更しました", type: "buff" as const },
     ],
   },
     {

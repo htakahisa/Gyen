@@ -234,7 +234,14 @@ public class BombManager : NetworkBehaviour
     void ServerOnBombExploded()
     {
         Debug.Log("Bomb exploded! Terrorists win.");
-        RoundManager.rm.RoundEnd(RoundManager.rm.defender);
+        if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
+        {
+            RoundManager.rm.RoundEnd(RoundManager.rm.defender);
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
+        {
+            RoundManager.rm.DuelLandRetry();
+        }
     }
 
 
@@ -242,7 +249,14 @@ public class BombManager : NetworkBehaviour
     void ServerOnBombDisarmed()
     {
         Debug.Log("Bomb disarmed! Counter-Terrorists win.");
-        RoundManager.rm.RoundEnd(RoundManager.rm.attacker);
+        if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
+        {
+            RoundManager.rm.RoundEnd(RoundManager.rm.attacker);
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
+        {
+            RoundManager.rm.DuelLandRetry();
+        }
     }
 
 

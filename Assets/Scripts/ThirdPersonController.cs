@@ -101,6 +101,7 @@ namespace StarterAssets
         private int _animPraying;
 
         public Transform middleBrow;
+        public Transform head;
 
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 #endif
@@ -157,7 +158,7 @@ namespace StarterAssets
         private float assistStrength = 10f;      // 補正の強さ（回転スピード）
 
         private float botAssistRangee = 200f;       // 敵を補正対象とする最大距離
-        private float botMaxAssistAngle = 200f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
+        private float botMaxAssistAngle = 400f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
         private float botAssistStrength = 270f;      // 補正の強さ（回転スピード）
 
         public List<Transform> enemies = new List<Transform>();   // 敵のキャッシュリスト
@@ -408,10 +409,8 @@ namespace StarterAssets
 
             GroundedCheck();
 
-            if (_mainCamera != null)
-            {
-                _mainCamera.transform.position = middleBrow.position;
-            }
+            head.position = middleBrow.position;
+            
 
             if (_audioListener == null)
             {
@@ -514,22 +513,22 @@ namespace StarterAssets
 
         private void LateUpdate()
         {
-            if (!isLocalPlayer && RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE) return;
 
             if (isLocalPlayer)
             {
                 CameraRotation();
-            }
-            if (currentControlScheme == "Gamepad")
-            {  
 
-                // 補正対象の敵を検索
-                targetEnemy = FindBestEnemyTarget();
+                if (currentControlScheme == "Gamepad")
+                {
 
-                
-               
-                ApplyAimAssist();
-                
+                    // 補正対象の敵を検索
+                    targetEnemy = FindBestEnemyTarget();
+
+
+
+                    ApplyAimAssist();
+
+                }
             }
             if (GetComponentInParent<BotManager>() != null)
             {
@@ -761,7 +760,7 @@ namespace StarterAssets
             if (mouseX != 0 || mouseY != 0)
             {
                 // カメラに上下回転を適用
-                _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+                head.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
                     // --- 身体の左右回転 (Yaw) ---
                 transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
@@ -778,7 +777,7 @@ namespace StarterAssets
             xRotation = Mathf.Clamp(-pitch, -90f, 90f);
 
             // 体のYawと合成
-            _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0, 0f);
+            head.localRotation = Quaternion.Euler(xRotation, 0, 0f);
             //transformNetwork.CmdRotateCamera(_mainCamera.transform.localRotation);
         }
 
@@ -791,7 +790,7 @@ namespace StarterAssets
             xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
             // カメラに上下回転を適用
-            _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            head.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
             
 
@@ -814,13 +813,12 @@ namespace StarterAssets
                 float random = (Random.Range(0, 2) == 0) ? 1f : -1f;
 
                 // カメラの上下回転
-                xRotation -= stunLevel * random;
-                _mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+                xRotation -= stunLevel * random * 0.001f;
+                CameraRecoil(xRotation);
 
                 // 身体の左右回転 (Yaw)
                 transformNetwork.yaw += random * stunLevel * (_CameraComponent.fieldOfView / 74.03f);
                 parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-                //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
 
                 yield return null; // 毎フレーム繰り返す
             }

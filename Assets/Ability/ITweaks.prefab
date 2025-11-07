@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: -673341643335275502}
   m_Layer: 6
   m_Name: ITweaks
-  m_TagString: Untagged
+  m_TagString: Body
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -183,6 +183,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   hp: 10
+  maxHp: 100
   armer: 1
   isInvincible: 0
   isDead: 0

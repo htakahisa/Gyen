@@ -80,7 +80,6 @@ public class Overdose : CharacterSkills
                 // 左クリックで確定
                 if (Input.GetMouseButtonDown(0))
                 {
-                    currentCharacter.skill1Energy--;
                     CmdTweaks(spawnPos, spawnRot);
                 }
             }
@@ -102,8 +101,7 @@ public class Overdose : CharacterSkills
             // 左クリックで確定
             if (Input.GetMouseButtonDown(0))
             {
-                currentCharacter.skill2Energy--;
-                CmdMirror(Camera.main.transform.position, Camera.main.transform.rotation);
+                CmdMirror(Camera.main.transform.position, Camera.main.transform.forward);
             }
         }
 
@@ -160,7 +158,7 @@ public class Overdose : CharacterSkills
     public void CmdTweaks(Vector3 spawnPos, Quaternion spawnRot, NetworkConnectionToClient conn = null)
     {
 
-
+        currentCharacter.skill1Energy--;
         TweaksSpawn(spawnPos, spawnRot, conn);
 
     }
@@ -240,11 +238,11 @@ public class Overdose : CharacterSkills
     }
 
     [Command]
-    public void CmdMirror(Vector3 spawnPos, Quaternion spawnRot, NetworkConnectionToClient conn = null)
+    public void CmdMirror(Vector3 pos, Vector3 dir, NetworkConnectionToClient conn = null)
     {
 
-
-        MirrorSpawn(spawnPos, spawnRot, conn);
+        currentCharacter.skill2Energy--;
+        MirrorSpawn(pos, dir, conn);
 
     }
     public void ChangeMirror()
@@ -264,10 +262,10 @@ public class Overdose : CharacterSkills
         }
     }
 
-    public void MirrorSpawn(Vector3 spawnPos, Quaternion dir, NetworkConnectionToClient conn = null)
+    public void MirrorSpawn(Vector3 pos, Vector3 dir, NetworkConnectionToClient conn = null)
     {
 
-        GameObject mirrorPrefab = Instantiate(mirror, spawnPos, dir);
+        GameObject mirrorPrefab = Instantiate(mirror, pos, Quaternion.LookRotation(dir));
 
         // 誰が生成依頼したかを記録
         var ownerTag = mirrorPrefab.AddComponent<SpawnOwner>();

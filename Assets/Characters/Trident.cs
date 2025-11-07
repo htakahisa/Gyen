@@ -5,8 +5,6 @@ using UnityEngine;
 public class Trident : CharacterSkills
 {
 
-    public TridentCharacterData tridentData;
-
     public AbilityController abilityController;
     public HpMaster hpMaster;
     public GameObject limePre;
@@ -28,15 +26,6 @@ public class Trident : CharacterSkills
 
     private void Awake()
     {
-        default1Energy = tridentData.Skill1Energy;
-        default2Energy = tridentData.Skill2Energy;
-        default3Energy = tridentData.Skill3Energy;
-        limePre = tridentData.limePre;
-        healEffect = tridentData.healEffect;
-        healEffectInstance = tridentData.healEffectInstance;
-        singInterval = tridentData.singInterval;
-
-
 
         Skill1 = Lime;
         Skill2 = Yellow;
@@ -61,7 +50,6 @@ public class Trident : CharacterSkills
             if (singIntervalTimer >= singInterval)
             {
                 CmdSpawnHealEffect();
-                currentCharacter.skill3Energy--;
                 CmdSingHeal();
                 singIntervalTimer = 0;
             }
@@ -89,11 +77,10 @@ public class Trident : CharacterSkills
             return;
         }
 
-        currentCharacter.skill1Energy--;
-        {
-            Transform mainCamera = Camera.main.transform;
-            CmdLime(mainCamera.position + mainCamera.forward, mainCamera.forward);
-        }
+        
+        Transform mainCamera = Camera.main.transform;
+        CmdLime(mainCamera.position + mainCamera.forward, mainCamera.forward);
+        
     }
 
 
@@ -101,6 +88,7 @@ public class Trident : CharacterSkills
     [Command]
     public void CmdLime(Vector3 pos, Vector3 dir)
     {
+        currentCharacter.skill1Energy--;
         GameObject instance = Instantiate(limePre, pos, Quaternion.LookRotation(dir));
         NetworkServer.Spawn(instance);
         RoundManager.spawns.Add(instance);
@@ -116,13 +104,19 @@ public class Trident : CharacterSkills
                 return;
             }
 
-            currentCharacter.skill2Energy--;
+            CmdSkill2Minus();
             abilityController.BeBird();
         }
         else if(abilityController.currentForm == AbilityController.PlayerForm.Bird)
         {
             abilityController.BeHuman();
         }
+    }
+
+    [Command]
+    public void CmdSkill2Minus()
+    {
+        currentCharacter.skill2Energy--;
     }
 
     public void Singing()
@@ -146,6 +140,7 @@ public class Trident : CharacterSkills
     [Command]
     public void CmdSingHeal()
     {
+        currentCharacter.skill3Energy--;
         if (hpMaster.hp + 10 > 100)
         {
             hpMaster.TakeDamage(hpMaster.hp - 100, false);

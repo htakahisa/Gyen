@@ -68,9 +68,14 @@ public class Tweaks : NetworkBehaviour
             var netIdentity = t.GetComponentInParent<NetworkIdentity>();
 
             //NetworkIdentityがあることを確認、対象のオブジェクトのオーナーが自分だった場合かつ、これがプラクティスで相手がボットであるというわけでもない場合にそれを無効のターゲットとしてやり直す
-            if (netIdentity != null && (CheckAuthority(netIdentity, GetComponent<NetworkIdentity>()) && !(RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE) && netIdentity.GetComponent<BotManager>() != null))
+            if (netIdentity == null) continue;             
+            if (t.GetComponentInParent<SpawnOwner>() != null)
             {
-                continue;
+                if (t.GetComponentInParent<SpawnOwner>().WhoseThis() == GetComponentInParent<SpawnOwner>().WhoseThis()) continue;
+            }
+            else
+            {
+                if (CheckAuthority(netIdentity, GetComponentInParent<SpawnOwner>().WhoseThis())) continue;
             }
 
             float dist = Vector3.Distance(transform.position, t.transform.position);
