@@ -23,6 +23,7 @@ export const systems: System[] = [
       { version: "1.0.7", change: "新しいゲームモード「デュエルランド」を追加しました。実際の1VS1でのマップを使い、ボットを殲滅するモードです。", type: "buff" as const },
       { version: "1.0.7", change: "プラクティスモードにて、ボットがプレイヤーに撃ち返してくるようになりました", type: "buff" as const },
       { version: "1.0.7", change: "デュエルランドモード中にボットをキルした場合に、キルバナーとフィニッシャーが表示されるように仕様を変更", type: "buff" as const },
+      { version: "1.0.7", change: "デュエルランドモードに三つの難易度を追加。「Seeker, Elite, TheDual」", type: "buff" as const },
     ],
   },
     {

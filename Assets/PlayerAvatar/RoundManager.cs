@@ -222,14 +222,16 @@ public class RoundManager : NetworkBehaviour
         hasReset = false;
         ResetStatus();
 
-
-        ServerResetAllObjects();
-        AudioManager.Instance.CmdStopBGM();
         if (currentMode == Mode.DUELLAND)
         {
             hasRoundEnded = false;
-            StartCoroutine(BombArmCoroutine());
+
+            duelLandData = duelLandMaps[Random.Range(0, duelLandMaps.Count)];
+            mapName = duelLandData.mapName;
+
         }
+        ServerResetAllObjects();
+        AudioManager.Instance.CmdStopBGM();
     }
 
     [Server]
@@ -276,10 +278,8 @@ public class RoundManager : NetworkBehaviour
             }
         }
 
-        if (currentMode == Mode.ONEVSONE)
-        {
-            StartCoroutine(BombArmCoroutine());
-        }
+        StartCoroutine(BombArmCoroutine());
+        
 
     }
 
@@ -338,7 +338,6 @@ public class RoundManager : NetworkBehaviour
         if (currentMode == Mode.DUELLAND)
         {
             duelLandData = duelLandMaps[Random.Range(0, duelLandMaps.Count)];
-            StartCoroutine(BombArmCoroutine());
         }
         if (currentMode == Mode.ONEVSONE)
         {
@@ -475,8 +474,6 @@ public class RoundManager : NetworkBehaviour
     {
         myPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
         myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
-        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
-        myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
         myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
         myPlayer.GetComponentsInChildren<CharacterSkills>().FirstOrDefault(c => c.enabled).ResetSkill();
         myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
@@ -485,7 +482,16 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
         myPlayer.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
         myPlayer.GetComponent<HpMaster>().ResetHp();
-        myPlayer.GetComponent<HpMaster>().armer = 1;
+        if (currentMode == Mode.ONEVSONE || myPlayer.GetComponentInChildren<WeaponManager>().GetCurrentWeaponSlot() == null)
+        {
+            myPlayer.GetComponent<HpMaster>().armer = 1;
+            myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
+            myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+        }
+        else
+        {
+            StartCoroutine(myPlayer.GetComponentInChildren<WeaponManager>().SetMagazineMax(0f));
+        }
 
         if (currentMode == Mode.ONEVSONE)
         {

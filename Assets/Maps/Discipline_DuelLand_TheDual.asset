@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be18b332618527b49bd741349c53fec2, type: 3}
-  m_Name: Discipline_DuelLand_VeryHard
+  m_Name: Discipline_DuelLand_TheDual
   m_EditorClassIdentifier: 
   gimmicks:
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
@@ -27,7 +27,7 @@ MonoBehaviour:
     rotation: {x: 0, y: 165, z: 0}
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -35.057, y: 5.700728, z: 23.072}
+    position: {x: -34.86093, y: 5.5999994, z: 22.870766}
     rotation: {x: 0, y: 125, z: 0}
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
@@ -41,4 +41,4 @@ MonoBehaviour:
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
   mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
     type: 3}
-  mapName: Discipline_DuelLand_VeryHard
+  mapName: Discipline_TheDual

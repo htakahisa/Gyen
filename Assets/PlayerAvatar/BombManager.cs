@@ -14,7 +14,8 @@ public class BombManager : NetworkBehaviour
 
 
     [SyncVar(hook = nameof(OnTimerChanged))]
-    private float timer;
+    public float timer;
+
 
 
     [SyncVar(hook = nameof(OnArmedChanged))]

@@ -45,7 +45,7 @@ public class TextManager : MonoBehaviour
             if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>() != null)
             {
                 magazineText.text = RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>()?.magazine.ToString();
-                magazineSizeText.text = "/" + RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>()?.GetCurrentWeaponStats().magazineSize;
+                magazineSizeText.text = "/" + RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>()?.GetCurrentWeaponStats()?.magazineSize;
 
                 if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
                 {
