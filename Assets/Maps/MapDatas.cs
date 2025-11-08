@@ -8,4 +8,5 @@ public class MapDatas : ScriptableObject
     public Vector3 diffenderPos;
     public Vector3 spikePos;
     public GameObject mapPrefab;
+    public string mapName;
 }

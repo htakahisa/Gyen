@@ -13,6 +13,7 @@ public class TextManager : MonoBehaviour
     public TextMeshProUGUI enemyRountText;
     public TextMeshProUGUI magazineText;
     public TextMeshProUGUI magazineSizeText;
+    public TextMeshProUGUI mapNameText;
 
     public TextMeshProUGUI headShotRate;
 
@@ -20,6 +21,7 @@ public class TextManager : MonoBehaviour
     public GameObject speedrunText;
 
     public GameObject loseText;
+
 
     public static TextManager textManager;
 
@@ -50,6 +52,7 @@ public class TextManager : MonoBehaviour
                     headShotRate.text = "HS% : " + RoundManager.rm.GetMyPlayer().GetComponentInChildren<ServerCheckShoot>()?.GetHeadShotRate();
                 }
             }
+            mapNameText.text = RoundManager.rm.mapName;
 
         }
     }

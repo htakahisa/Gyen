@@ -17,3 +17,4 @@ MonoBehaviour:
   spikePos: {x: -3.798231, y: 1.020001, z: -11.05397}
   mapPrefab: {fileID: 6541314085219733731, guid: 33ab2611b460a9f429c05c59abb2c5f6,
     type: 3}
+  mapName: Outland

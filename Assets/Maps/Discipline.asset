@@ -15,5 +15,6 @@ MonoBehaviour:
   attackerPos: {x: -43.58754, y: -3.199999, z: 20.18204}
   diffenderPos: {x: 0, y: 0, z: 0}
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
-  mapPrefab: {fileID: 4990530871526230533, guid: 5a86559c1c0067c4da918d81c0136930,
+  mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
     type: 3}
+  mapName: Discipline

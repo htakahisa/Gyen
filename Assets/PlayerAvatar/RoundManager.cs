@@ -35,6 +35,7 @@ public class RoundManager : NetworkBehaviour
 
     public BotMove currentBotMove = BotMove.STOP;
     public bool doesBotShoot = true;
+    public List<int> spawnedIndex = new List<int>();
 
     public static List<GameObject> spawns = new List<GameObject>();
 
@@ -63,6 +64,8 @@ public class RoundManager : NetworkBehaviour
 
     public MapDatas mapData;
     public DuelLandDatas duelLandData;
+
+    public string mapName;
 
     public Coroutine startGetting;
 
@@ -232,10 +235,27 @@ public class RoundManager : NetworkBehaviour
     [Server]
     public void ServerResetAllObjects()
     {
+
         // クライアント側でオブジェクトをリセット
-        foreach(var spawn in spawns)
+        foreach (var spawn in spawns)
         {
             NetworkServer.Destroy(spawn);
+        }
+
+        spawnedIndex.Clear();
+        for (; spawnedIndex.Count < 4;)
+        {
+            int index = Random.Range(0, duelLandData.gimmicks.Count);
+            var gimmickData = duelLandData.gimmicks[index];
+            GameObject gimmick = gimmickData.prefab;
+
+            if (spawnedIndex.Contains(index)) continue;
+
+            GameObject prefab = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
+            prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
+            NetworkServer.Spawn(prefab);
+            spawns.Add(prefab);
+            spawnedIndex.Add(index);
         }
 
         // クライアント側でオブジェクトをリセット
@@ -244,6 +264,11 @@ public class RoundManager : NetworkBehaviour
             if (item.prefab != null)
             {
                 ObjectSpawn(item.prefab, item.position);
+                if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
+                {
+                    item.prefab.GetComponent<CharacterTransfromNetwork>().yaw = item.prefab.GetComponent<CharacterTransfromNetwork>().yaw;
+                    item.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, item.prefab.GetComponent<CharacterTransfromNetwork>().yaw, transform.rotation.eulerAngles.z);
+                }
             }
             else
             {
@@ -326,6 +351,7 @@ public class RoundManager : NetworkBehaviour
             attackSpawnPos = mapData.attackerPos;
             defenceSpawnPos = mapData.diffenderPos;
             spikePos = mapData.spikePos;
+            mapName = mapData.mapName;
             if (isServer)
             {                
                 respawns.Add(new ObjectAndPosition(mapData.mapPrefab, new Vector3(0, 0, 0)));
@@ -338,15 +364,7 @@ public class RoundManager : NetworkBehaviour
             defenceSpawnPos = duelLandData.diffenderPos;
             spikePos = duelLandData.spikePos;
             currentMode = Mode.DUELLAND;
-            foreach (var gimmick in duelLandData.gimmicks)
-            {
-                respawns.Add(new ObjectAndPosition(gimmick.prefab, gimmick.position));
-                if(gimmick.prefab.GetComponent<CharacterTransfromNetwork>() != null)
-                {
-                    gimmick.prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmick.yaw;
-                    gimmick.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, gimmick.yaw, transform.rotation.eulerAngles.z);
-                }
-            }
+            mapName = duelLandData.mapName;
             if (isServer)
             {
                 if (currentMode == Mode.DUELLAND) 

@@ -10,34 +10,35 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be18b332618527b49bd741349c53fec2, type: 3}
-  m_Name: Discipline_DuelLand
+  m_Name: Discipline_DuelLand_Hard
   m_EditorClassIdentifier: 
   gimmicks:
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -52.07785, y: 0, z: -3.979511}
-    yaw: 90
+    position: {x: -32.866467, y: 5.5999994, z: 10.258252}
+    rotation: {x: 0, y: 0, z: 0}
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -18.757, y: 4.8, z: 26.050322}
-    yaw: 180
+    position: {x: -15.936, y: 4.800002, z: 27.094}
+    rotation: {x: 0, y: 180, z: 0}
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -40.00264, y: -3.2, z: 24.485}
-    yaw: 90
+    position: {x: -52.063, y: -3.1999965, z: 23.898}
+    rotation: {x: 0, y: 90, z: 0}
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -31.44426, y: -3.2000003, z: 22.776}
-    yaw: -90
+    position: {x: -30.969, y: -3.199996, z: 22.932537}
+    rotation: {x: 0, y: -90, z: 0}
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -42.445, y: -3.1999998, z: 1.9196929}
-    yaw: 0
+    position: {x: -42.491398, y: -3.1999998, z: 1.913}
+    rotation: {x: 0, y: 0, z: 0}
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -52.58171, y: -3.2, z: 27.088}
-    yaw: 90
+    position: {x: -32.445362, y: 5.6, z: 13.166186}
+    rotation: {x: 0, y: 90, z: 0}
   diffenderPos: {x: 0, y: 0, z: 0}
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
-  mapPrefab: {fileID: 4990530871526230533, guid: 5a86559c1c0067c4da918d81c0136930,
+  mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
     type: 3}
+  mapName: Discipline_DuelLand_Hard

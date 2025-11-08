@@ -4,18 +4,19 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DuelLandDatas", menuName = "MapData/DuelLandDatas")]
 public class DuelLandDatas : ScriptableObject
 {
+
     [System.Serializable]
     public struct ObjectAndPosition
     {
         public GameObject prefab;
         public Vector3 position;
-        public float yaw;
+        public Vector3 rotation;
 
-        public ObjectAndPosition(GameObject prefab, Vector3 position, float yaw = 0)
+        public ObjectAndPosition(GameObject prefab, Vector3 position, Vector3 rotation)
         {
             this.prefab = prefab;
             this.position = position;
-            this.yaw = yaw;
+            this.rotation = rotation;
         }
     }
 
@@ -24,4 +25,5 @@ public class DuelLandDatas : ScriptableObject
     public Vector3 diffenderPos;
     public Vector3 spikePos;
     public GameObject mapPrefab;
+    public string mapName;
 }
