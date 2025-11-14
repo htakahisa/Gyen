@@ -55,7 +55,7 @@ public class FinisherManager : NetworkBehaviour
             GameObject obj = Instantiate(prefab, pos, Quaternion.identity);
             NetworkServer.Spawn(obj);
             RoundManager.spawns.Add(obj);
-            AudioManager.Instance.CmdPlaySoundAtPoint(GetSound(weaponData.weaponName), pos, 1, 30);
+            AudioManager.Instance.CmdPlaySoundAtPoint(GetSound(weaponData.weaponName), pos, 0.3f, 30);
         }
     }
 

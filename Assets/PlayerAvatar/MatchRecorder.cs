@@ -1,450 +1,289 @@
-using UnityEngine;
-using System.Diagnostics;
-using System.IO;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Threading;
-using Unity.Collections;
-using Debug = UnityEngine.Debug;
+ï»¿using UnityEngine;
 using UnityEngine.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using Debug = UnityEngine.Debug;
 
-public class DualCameraRecorder : MonoBehaviour
+public class MatchRecorder : MonoBehaviour
 {
-    // ˜^‰æİ’è
-    public int frameRate = 30;
-    private string outputPath1;
-    private string outputPath2;
+    // =====================================================
+    // â–¼ è‡ªåˆ†ã ã‘æ˜ ã•ãªã„æ©Ÿèƒ½ç”¨ã®æƒ…å ±
+    // =====================================================
+    private Dictionary<Camera, List<GameObject>> hiddenObjects = new Dictionary<Camera, List<GameObject>>();
 
-    // FFmpegƒvƒƒZƒX
-    private Process ffmpegProcess1;
-    private Process ffmpegProcess2;
+    // ã‚«ãƒ¡ãƒ©ã«ã€Œã“ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¯å†™ã•ãªã„ã€ã‚’ç™»éŒ²
+    public void AddHiddenObject(Camera cam, GameObject obj)
+    {
+        if (!hiddenObjects.ContainsKey(cam))
+            hiddenObjects[cam] = new List<GameObject>();
 
-    // ƒŒƒ“ƒ_[ƒeƒNƒXƒ`ƒƒ
-    private RenderTexture renderTexture1;
-    private RenderTexture renderTexture2;
+        if (!hiddenObjects[cam].Contains(obj))
+            hiddenObjects[cam].Add(obj);
+    }
 
-    // ó‘Ôƒtƒ‰ƒO
+    // å®Ÿéš›ã®ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å‰ã«å‘¼ã°ã‚Œã‚‹ï¼ˆURP/HDRP/ãƒ“ãƒ«ãƒˆã‚¤ãƒ³å¯¾å¿œï¼‰
+    void OnBeginCameraRendering(ScriptableRenderContext ctx, Camera cam)
+    {
+        if (!hiddenObjects.ContainsKey(cam)) return;
+
+        List<GameObject> list = hiddenObjects[cam];
+        foreach (var obj in list)
+        {
+            if (obj != null && obj.activeSelf)
+                obj.SetActive(false);   // â˜… è‡ªåˆ†ã ã‘æ¶ˆã™ï¼ˆåŒãƒ¬ã‚¤ãƒ¤ãƒ¼ä»–ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¯æ¶ˆã•ãªã„ï¼‰
+        }
+    }
+
+    // ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å¾Œã«å…ƒã«æˆ»ã™
+    void OnEndCameraRendering(ScriptableRenderContext ctx, Camera cam)
+    {
+        if (!hiddenObjects.ContainsKey(cam)) return;
+
+        List<GameObject> list = hiddenObjects[cam];
+        foreach (var obj in list)
+        {
+            if (obj != null && !obj.activeSelf)
+                obj.SetActive(true);    // â˜… æç”»å¾Œã™ãå…ƒã«æˆ»ã™
+        }
+    }
+
+    // =====================================================
+    // â–¼ ã‚ãªãŸã®å…ƒã® MatchRecorder ã‚³ãƒ¼ãƒ‰ï¼ˆAddCamera ãªã©ä¸€åˆ‡å¤‰æ›´ãªã—ï¼‰
+    // =====================================================
+
+    public class CameraRecord
+    {
+        public Camera camera;
+        public RenderTexture rt;
+        public ConcurrentQueue<byte[]> frameQueue = new ConcurrentQueue<byte[]>();
+        public string filePath;
+        public bool recording = false;
+        public bool writing = false;
+    }
+
+    [Header("Recording Settings")]
+    public int width = 1280;
+    public int height = 720;
+    public int fps = 30;
+
+    private List<CameraRecord> records = new List<CameraRecord>();
     private bool isRecording = false;
-    private bool hasLoaded = false;
+    private float nextFrameTime;
+    private string ffmpegRuntimePath;
 
-    // ƒJƒƒ‰QÆ
-    private Camera targetCamera1;
-    private Camera targetCamera2;
+    private struct PendingCapture { public CameraRecord record; public double captureTime; }
+    private List<PendingCapture> pendingCaptures = new List<PendingCapture>();
 
-    // ’è”
-    const int WIDTH = 1280;
-    const int HEIGHT = 720;
-    const int BYTES_PER_PIXEL = 4; // RGBA
-    const int BUFFER_COUNT = 3; // ƒgƒŠƒvƒ‹ƒoƒbƒtƒ@ƒŠƒ“ƒO
-
-    // ƒoƒbƒtƒ@ƒVƒXƒeƒ€
-    private byte[][] buffers1 = new byte[BUFFER_COUNT][];
-    private byte[][] buffers2 = new byte[BUFFER_COUNT][];
-    private volatile bool[] bufferReady1 = new bool[BUFFER_COUNT];
-    private volatile bool[] bufferReady2 = new bool[BUFFER_COUNT];
-    private int currentBufferIndex = 0;
-
-    // ƒXƒŒƒbƒhƒv[ƒ‹
-    private ConcurrentQueue<Action> threadPoolQueue = new ConcurrentQueue<Action>();
-    private SemaphoreSlim threadPoolSemaphore = new SemaphoreSlim(0);
-    private const int THREAD_POOL_SIZE = 4;
-
-
-
-
-    void Start()
+    void Awake()
     {
-        InitializeBuffers();
-        InitializeRenderTextures();
-        InitializeOutputPaths();
-        StartThreadPool();
+        Application.runInBackground = true;
+        QualitySettings.vSyncCount = 0;
+        PrepareFFmpeg();
+
+        // â–¼ è¨˜éŒ²ç”¨ã‚¤ãƒ™ãƒ³ãƒˆ
+        RenderPipelineManager.endFrameRendering += OnEndFrameRendering;
+
+        // â–¼ è‡ªåˆ†ã ã‘éè¡¨ç¤ºã‚¤ãƒ™ãƒ³ãƒˆ
+        RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
+        RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
     }
 
-    void InitializeBuffers()
+    private void PrepareFFmpeg()
     {
-        for (int i = 0; i < BUFFER_COUNT; i++)
-        {
-            buffers1[i] = new byte[WIDTH * HEIGHT * BYTES_PER_PIXEL];
-            buffers2[i] = new byte[WIDTH * HEIGHT * BYTES_PER_PIXEL];
-            bufferReady1[i] = false;
-            bufferReady2[i] = false;
-        }
-    }
+#if UNITY_STANDALONE_WIN
+        string fileName = "ffmpeg.exe";
+#else
+        string fileName = "ffmpeg";
+#endif
 
-    void InitializeRenderTextures()
-    {
-        renderTexture1 = new RenderTexture(WIDTH, HEIGHT, 24, RenderTextureFormat.ARGB32);
-        renderTexture2 = new RenderTexture(WIDTH, HEIGHT, 24, RenderTextureFormat.ARGB32);
-        renderTexture1.Create();
-        renderTexture2.Create();
-    }
+        string src = Path.Combine(Application.streamingAssetsPath, fileName);
+        string dst = Path.Combine(Application.persistentDataPath, fileName);
+        ffmpegRuntimePath = dst;
 
-    void InitializeOutputPaths()
-    {
-        string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-        outputPath1 = Path.Combine(Application.streamingAssetsPath, $"record1_{timestamp}.mp4");
-        outputPath2 = Path.Combine(Application.streamingAssetsPath, $"record2_{timestamp}.mp4");
-    }
+        if (File.Exists(dst)) return;
 
-    void StartThreadPool()
-    {
-        for (int i = 0; i < THREAD_POOL_SIZE; i++)
-        {
-            new Thread(ThreadPoolWorker)
-            {
-                IsBackground = true,
-                Priority = System.Threading.ThreadPriority.BelowNormal
-            }.Start();
-        }
-    }
+        try { File.Copy(src, dst, true); }
+        catch (Exception e) { Debug.LogError($"ffmpeg copy failed: {e}"); }
 
-    void ThreadPoolWorker()
-    {
-        while (true)
-        {
-            threadPoolSemaphore.Wait();
-            if (threadPoolQueue.TryDequeue(out var action))
-            {
-                try
-                {
-                    action?.Invoke();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"ThreadPool Error: {e.Message}");
-                }
-            }
-
-            if (!isRecording && threadPoolQueue.IsEmpty) break;
-        }
-    }
-
-    public void SetupCameras()
-    {
-        SetupMainCamera();
-        SetupSecondCamera();
-
-        if (targetCamera1 != null && targetCamera2 != null)
-        {
-            StartRecording();
-        }
-        else
-        {
-            Debug.LogError("Failed to setup cameras - one or both cameras are null");
-        }
-    }
-
-    void SetupMainCamera()
-    {
+#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
         try
         {
-            var player1 = RoundManager.rm?.GetMyPlayer();
-            if (player1 == null) return;
-
-            Transform recordCameraTransform = player1.GetComponentInChildren<Camera>()?.transform.Find("RecordCamera");
-            targetCamera1 = recordCameraTransform?.GetComponent<Camera>();
-            if (targetCamera1 != null)
+            var chmod = new Process
             {
-                targetCamera1.targetTexture = renderTexture1;
-                Debug.Log("Main camera setup successfully");
-            }
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/chmod",
+                    Arguments = $"+x \"{dst}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            chmod.Start();
+            chmod.WaitForExit();
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"Main camera setup error: {e.Message}");
-        }
+        catch (Exception e) { Debug.LogError($"chmod failed: {e}"); }
+#endif
     }
 
-    void SetupSecondCamera()
-    {
-        try
-        {
-            var player2 = RoundManager.rm?.GetOtherPlayer();
-            if (player2 == null) return;
+    private string GetFFmpegPath() => ffmpegRuntimePath;
 
-            Transform recordCameraTransform = player2.GetComponentInChildren<Camera>()?.transform.Find("RecordCamera");
-            targetCamera2 = recordCameraTransform?.GetComponent<Camera>();
-            if (targetCamera2 != null)
-            {
-                targetCamera2.targetTexture = renderTexture2;
-                Debug.Log("Second camera setup successfully");
-            }
-        }
-        catch (Exception e)
+    public void AddCamera(Camera cam)
+    {
+        if (cam == null) return;
+        if (records.Exists(r => r.camera == cam)) return;
+
+        var record = new CameraRecord();
+        record.camera = cam;
+
+        record.rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+        record.rt.Create();
+        cam.targetTexture = record.rt;
+
+        string name = cam.gameObject.name.Replace(" ", "_");
+        string date = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
+        record.filePath = Path.Combine(Application.persistentDataPath, $"{name}_{date}_{records.Count}.mp4");
+
+        records.Add(record);
+    }
+
+    public void ClearCamera()
+    {
+        foreach (var r in records)
         {
-            Debug.LogError($"Second camera setup error: {e.Message}");
+            if (r.camera != null)
+                r.camera.targetTexture = null;
+
+            if (r.rt != null)
+                r.rt.Release();
         }
+        records.Clear();
     }
 
     public void StartRecording()
     {
-        try
-        {
-            string ffmpegPath = GetFFmpegPath();
-            if (!File.Exists(ffmpegPath))
-            {
-                Debug.LogError("FFmpeg not found at: " + ffmpegPath);
-                return;
-            }
+        if (isRecording) return;
+        isRecording = true;
 
-            ffmpegProcess1 = StartFFmpeg(ffmpegPath, outputPath1);
-            ffmpegProcess2 = StartFFmpeg(ffmpegPath, outputPath2);
-
-            isRecording = true;
-            StartCoroutine(RecordingCoroutine());
-
-            Debug.Log($"Recording started to:\n{outputPath1}\n{outputPath2}");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"StartRecording error: {e.Message}");
-            StopRecording();
-        }
+        nextFrameTime = Time.unscaledTime;
+        foreach (var r in records) r.recording = true;
     }
 
-    string GetFFmpegPath()
+    public async Task StopRecordingAndWait()
     {
-#if UNITY_EDITOR
-        return Path.Combine(Application.streamingAssetsPath, "ffmpeg.exe");
-#else
-        return Path.Combine(Application.dataPath, "StreamingAssets", "ffmpeg.exe");
-#endif
-    }
+        if (!isRecording) return;
+        isRecording = false;
 
-    Process StartFFmpeg(string ffmpegPath, string outputPath)
-    {
-        string args = $"-y -f rawvideo -pixel_format rgba -video_size {WIDTH}x{HEIGHT} -framerate {frameRate} -i - -vf \"vflip\" " +
-                      $"-c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -vsync passthrough \"{outputPath}\"";
+        foreach (var r in records) r.recording = false;
+        await Task.Delay(50);
 
-        Process process = new Process
+        foreach (var r in records)
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = ffmpegPath,
-                Arguments = args,
-                UseShellExecute = false,
-                RedirectStandardInput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            }
-        };
-
-        process.ErrorDataReceived += (sender, e) =>
-        {
-            if (!string.IsNullOrEmpty(e.Data))
-                Debug.LogWarning($"FFmpeg Error: {e.Data}");
-        };
-
-        process.Start();
-        process.BeginErrorReadLine();
-        return process;
-    }
-
-    IEnumerator RecordingCoroutine()
-    {
-        yield return new WaitForEndOfFrame(); // Å‰‚ÌƒtƒŒ[ƒ€‚ğƒXƒLƒbƒv
-
-        while (isRecording)
-        {
-            yield return new WaitForEndOfFrame();
-
-            int bufferIndex = currentBufferIndex;
-            currentBufferIndex = (currentBufferIndex + 1) % BUFFER_COUNT;
-
-            // ‘O‚Ìƒoƒbƒtƒ@‚ª‚Ü‚¾ˆ—’†‚È‚çƒXƒLƒbƒv
-            if (bufferReady1[bufferIndex] || bufferReady2[bufferIndex])
-            {
-                Debug.LogWarning($"Frame {Time.frameCount} skipped - buffer {bufferIndex} not ready");
-                continue;
-            }
-
-            // ˆêƒŒƒ“ƒ_[ƒeƒNƒXƒ`ƒƒ‚ğì¬
-            RenderTexture tempRT1 = RenderTexture.GetTemporary(WIDTH, HEIGHT, 0, RenderTextureFormat.ARGB32);
-            RenderTexture tempRT2 = RenderTexture.GetTemporary(WIDTH, HEIGHT, 0, RenderTextureFormat.ARGB32);
-
-            // ƒƒCƒ“ƒJƒƒ‰‚©‚çƒRƒs[
-            if (targetCamera1 != null)
-            {
-                Graphics.Blit(renderTexture1, tempRT1);
-            }
-
-            // ƒTƒuƒJƒƒ‰‚©‚çƒRƒs[
-            if (targetCamera2 != null)
-            {
-                Graphics.Blit(renderTexture2, tempRT2);
-            }
-
-            // ”ñ“¯Šú“Ç‚İæ‚èƒŠƒNƒGƒXƒg
-            bool readback1Done = false;
-            bool readback2Done = false;
-
-            if (targetCamera1 != null)
-            {
-                AsyncGPUReadback.Request(tempRT1, 0, TextureFormat.RGBA32, request =>
-                {
-                    if (request.hasError)
-                    {
-                        Debug.LogError("Failed to read GPU texture 1");
-                    }
-                    else if (isRecording)
-                    {
-                        request.GetData<byte>().CopyTo(buffers1[bufferIndex]);
-                        bufferReady1[bufferIndex] = true;
-                    }
-                    readback1Done = true;
-                });
-            }
-            else
-            {
-                readback1Done = true;
-            }
-
-            if (targetCamera2 != null)
-            {
-                AsyncGPUReadback.Request(tempRT2, 0, TextureFormat.RGBA32, request =>
-                {
-                    if (request.hasError)
-                    {
-                        Debug.LogError("Failed to read GPU texture 2");
-                    }
-                    else if (isRecording)
-                    {
-                        request.GetData<byte>().CopyTo(buffers2[bufferIndex]);
-                        bufferReady2[bufferIndex] = true;
-                    }
-                    readback2Done = true;
-                });
-            }
-            else
-            {
-                readback2Done = true;
-            }
-
-            // —¼•û‚ÌReadback‚ªŠ®—¹‚·‚é‚Ü‚Å‘Ò‹@
-            yield return new WaitUntil(() => readback1Done && readback2Done);
-
-            // ˆêƒeƒNƒXƒ`ƒƒ‚ğ‰ğ•ú
-            RenderTexture.ReleaseTemporary(tempRT1);
-            RenderTexture.ReleaseTemporary(tempRT2);
-
-            // ‘O‚Ìƒoƒbƒtƒ@‚ğˆ—
-            int prevBufferIndex = (bufferIndex - 1 + BUFFER_COUNT) % BUFFER_COUNT;
-            ProcessReadyBuffers(prevBufferIndex);
+            if (!r.writing && !r.frameQueue.IsEmpty)
+                await WriteToVideoAsync(r);
         }
     }
 
-    void ProcessReadyBuffers(int index)
-    {
-        if (bufferReady1[index] && bufferReady2[index])
-        {
-            var data1 = buffers1[index];
-            var data2 = buffers2[index];
-
-            threadPoolQueue.Enqueue(() => WriteToFFmpeg(data1, ffmpegProcess1));
-            threadPoolQueue.Enqueue(() => WriteToFFmpeg(data2, ffmpegProcess2));
-
-            bufferReady1[index] = false;
-            bufferReady2[index] = false;
-            threadPoolSemaphore.Release(2);
-        }
-    }
-
-    void WriteToFFmpeg(byte[] data, Process process)
-    {
-        if (data == null || !isRecording || process == null || process.HasExited) return;
-
-        try
-        {
-            process.StandardInput.BaseStream.Write(data, 0, data.Length);
-            process.StandardInput.BaseStream.Flush();
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"FFmpeg Write Error: {e.Message}");
-            StopRecording();
-        }
-    }
-
-    public void StopRecording()
+    void LateUpdate()
     {
         if (!isRecording) return;
 
-        isRecording = false;
-        StopAllCoroutines();
-        StopFFmpegProcesses();
-        Debug.Log("Recording stopped.");
-
-    }
-
-    void StopFFmpegProcesses()
-    {
-        StopProcess(ref ffmpegProcess1);
-        StopProcess(ref ffmpegProcess2);
-    }
-
-    void StopProcess(ref Process process)
-    {
-        if (process == null) return;
-
-        try
+        while (Time.unscaledTime >= nextFrameTime)
         {
-            if (!process.HasExited)
+            nextFrameTime += 1f / fps;
+
+            foreach (var r in records)
             {
-                process.StandardInput.Close();
-                if (!process.WaitForExit(2000))
-                {
-                    process.Kill();
-                }
+                if (r.camera == null || !r.recording) continue;
+
+                pendingCaptures.Add(new PendingCapture { record = r, captureTime = Time.unscaledTime });
             }
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error stopping FFmpeg: {e.Message}");
-        }
-        finally
-        {
-            process.Close();
-            process.Dispose();
-            process = null;
-        }
     }
 
-    void Update()
+    private async Task WriteToVideoAsync(CameraRecord record)
     {
-        if (!hasLoaded && RoundManager.rm != null && RoundManager.rm.hasLoaded)
-        {
-            SetupCameras();
-            hasLoaded = true;
-        }
-    }
+        if (record.frameQueue.IsEmpty) return;
 
-    void OnDestroy()
-    {
-        StopRecording();
-        Cleanup();
-    }
+        record.writing = true;
 
-    void Cleanup()
-    {
-        if (renderTexture1 != null)
+        string ffmpegPath = GetFFmpegPath();
+        if (!File.Exists(ffmpegPath))
         {
-            renderTexture1.Release();
-            Destroy(renderTexture1);
-            renderTexture1 = null;
+            record.writing = false;
+            return;
         }
 
-        if (renderTexture2 != null)
+        await Task.Run(async () =>
         {
-            renderTexture2.Release();
-            Destroy(renderTexture2);
-            renderTexture2 = null;
-        }
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = ffmpegPath,
+                    Arguments =
+                        $"-y -f rawvideo -pixel_format rgba -video_size {width}x{height} -framerate {fps} -i - " +
+                        $"-vf vflip -pix_fmt yuv420p -c:v libx264 -preset ultrafast \"{record.filePath}\"",
+
+                    UseShellExecute = false,
+                    RedirectStandardInput = true,
+                    CreateNoWindow = true
+                };
+
+                using (var proc = new Process { StartInfo = psi })
+                {
+                    proc.Start();
+
+                    using (var stdin = proc.StandardInput.BaseStream)
+                    {
+                        while (record.frameQueue.TryDequeue(out var frame))
+                            await stdin.WriteAsync(frame, 0, frame.Length);
+
+                        await stdin.FlushAsync();
+                    }
+
+                    proc.WaitForExit();
+                }
+            }
+            catch (Exception e) { Debug.LogError($"Write failed: {e}"); }
+            finally { record.writing = false; }
+        });
     }
 
-    void OnApplicationQuit()
+    private void OnEndFrameRendering(ScriptableRenderContext context, Camera[] cameras)
     {
-        StopRecording();
+        if (pendingCaptures.Count == 0) return;
+
+        var camSet = new HashSet<Camera>(cameras);
+
+        for (int i = pendingCaptures.Count - 1; i >= 0; --i)
+        {
+            var pc = pendingCaptures[i];
+            var r = pc.record;
+
+            if (r == null || r.camera == null || !r.recording || r.rt == null)
+            {
+                pendingCaptures.RemoveAt(i);
+                continue;
+            }
+
+            if (!camSet.Contains(r.camera))
+                continue;
+
+            AsyncGPUReadback.Request(r.rt, 0, TextureFormat.RGBA32, (req) =>
+            {
+                if (req.hasError || !r.recording) return;
+
+                var data = req.GetData<byte>();
+                byte[] frame = new byte[data.Length];
+                data.CopyTo(frame);
+                r.frameQueue.Enqueue(frame);
+            });
+
+            pendingCaptures.RemoveAt(i);
+        }
     }
 }

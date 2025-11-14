@@ -17092,7 +17092,7 @@ PrefabInstance:
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
       propertyPath: duelLandMaps.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
@@ -17119,6 +17119,18 @@ PrefabInstance:
         type: 2}
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
+      propertyPath: 'duelLandMaps.Array.data[3]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 900224633bb998d4c803aa8f98ce272f,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandMaps.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 569e6bfea32c8d048915920c0e1be305,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
       propertyPath: 'oneVsOneMaps.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: 46dc2677906926c4b96d25262e078511,
@@ -17128,6 +17140,52 @@ PrefabInstance:
       propertyPath: 'oneVsOneMaps.Array.data[1]'
       value: 
       objectReference: {fileID: 11400000, guid: 78b7f61c399139142ac89127a800f259,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: duelLandFanaticsMaps.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: duelLandHereticsMaps.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandFanaticsMaps.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 9f8e39fa9ab99f44bb9cab3b26cc1b43,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandFanaticsMaps.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: b9f93ee7308d2994597cc9b4443be6ba,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandFanaticsMaps.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 9685282cbd8e89f44b87261cd8c1f54b,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandFanaticsMaps.Array.data[3]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 900224633bb998d4c803aa8f98ce272f,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandFanaticsMaps.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 569e6bfea32c8d048915920c0e1be305,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandHereticsMaps.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 0f4cd965336fa9941a495005e8c98640,
         type: 2}
     - target: {fileID: 4641763803197208681, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
@@ -17184,11 +17242,42 @@ PrefabInstance:
       propertyPath: SpikeCountdown
       value: 
       objectReference: {fileID: 8300000, guid: 6a3494a081fe3c243a7638b2c2bd0dde, type: 3}
-    m_RemovedComponents: []
+    - target: {fileID: 8371748078834020457, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: frameRate
+      value: 60
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 8371748078834020457, guid: f7f96b04d01bc6b458db9d82c010dca0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 227471099825326087, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4990577266653261899}
   m_SourcePrefab: {fileID: 100100000, guid: f7f96b04d01bc6b458db9d82c010dca0, type: 3}
+--- !u!1 &4990577266653261898 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 227471099825326087, guid: f7f96b04d01bc6b458db9d82c010dca0,
+    type: 3}
+  m_PrefabInstance: {fileID: 4990577266653261897}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4990577266653261899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4990577266653261898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e580e3bd6a136e645926b74f1bf560c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  width: 1280
+  height: 720
+  fps: 30
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -70,6 +70,7 @@ namespace StarterAssets
 
         public GameObject myBody;
 
+        public LayerMask MyBodyLayer;
         public LayerMask Invisible;
         public LayerMask OrbMask;
 
@@ -114,6 +115,7 @@ namespace StarterAssets
 
         private Camera _CameraComponent;
         private Camera _UiCameraComponent;
+        public Camera recordCamera;
 
         private ShootManager _shootManager;
         private HpMaster _hpMaster;
@@ -159,7 +161,7 @@ namespace StarterAssets
 
         private float botAssistRangee = 200f;       // 敵を補正対象とする最大距離
         private float botMaxAssistAngle = 400f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
-        private float botAssistStrength = 270f;      // 補正の強さ（回転スピード）
+        private float botAssistStrength = 240f;      // 補正の強さ（回転スピード）
 
         public List<Transform> enemies = new List<Transform>();   // 敵のキャッシュリスト
         public List<Transform> enemiesForBot = new List<Transform>();   // 敵のキャッシュリスト
@@ -199,7 +201,7 @@ namespace StarterAssets
             if (isLocalPlayer && GetComponentInParent<BotManager>() == null)
             {
                 StartCoroutine(InitialSetInput());
-                myBody.layer = 7;
+                myBody.layer = 13;
                 _CameraComponent.enabled = true;
                 _UiCameraComponent.enabled = true;
             }
@@ -1406,6 +1408,7 @@ namespace StarterAssets
 
         public void BotStop()
         {
+            _speed = 0;
             _animator.SetFloat(_animIDSpeed, 0);
             _animator.SetFloat(_animIDMotionSpeed, 0);
         }
@@ -1691,5 +1694,6 @@ namespace StarterAssets
                 }
             }
         }
+
     }
 }

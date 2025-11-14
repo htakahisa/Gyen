@@ -6286,7 +6286,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  Bot: {fileID: 3543936278411775571, guid: 5ea185c8653eba849a9437a76880dd9a, type: 3}
+  Bot: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e, type: 3}
 --- !u!1 &566486397
 GameObject:
   m_ObjectHideFlags: 0
@@ -10201,22 +10201,32 @@ MonoBehaviour:
   myPlayer: {fileID: 0}
   attacker: {fileID: 0}
   defender: {fileID: 0}
+  oneVsOneMaps: []
+  duelLandFanaticsMaps: []
+  duelLandHereticsMaps: []
   attackSpawnPos: {x: 0, y: 0, z: 0}
   defenceSpawnPos: {x: 8.5, y: 2.708355, z: 7.511556}
+  attackSpawnRot: {x: 0, y: 0, z: 0}
+  defenceSpawnRot: {x: 0, y: 0, z: 0}
   spikePos: {x: 0, y: 0, z: 0}
   spike: {fileID: 0}
   Round: 1
   CurrentPhase: 0
-  Mode: 1VS1
+  currentMode: 0
   hasLoaded: 0
   currentBotMove: 0
   doesBotShoot: 1
+  spawnedIndex: 
   respawns: []
   playerManager: {fileID: 0}
   timeInRound: 0
   hasRoundEnded: 0
   hasReset: 0
   mapData: {fileID: 0}
+  duelLandFanaticsData: {fileID: 0}
+  duelLandHereticsData: {fileID: 0}
+  mapName: 
+  isFanatics: 0
 --- !u!224 &966734464
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12744,6 +12754,7 @@ MonoBehaviour:
   enemyRountText: {fileID: 1886781887}
   magazineText: {fileID: 1389387068}
   magazineSizeText: {fileID: 801761113}
+  mapNameText: {fileID: 0}
   headShotRate: {fileID: 2134709351}
   winText: {fileID: 0}
   speedrunText: {fileID: 0}

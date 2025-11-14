@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityGLTF;
 
 public class RoundManager : NetworkBehaviour
 {
@@ -18,11 +19,15 @@ public class RoundManager : NetworkBehaviour
     private List<GameObject> players = new List<GameObject>();
 
     public List<MapDatas> oneVsOneMaps = new List<MapDatas>();
-    public List<DuelLandDatas> duelLandMaps = new List<DuelLandDatas>();
+
+    public List<DuelLandFanaticsDatas> duelLandFanaticsMaps = new List<DuelLandFanaticsDatas>();
+    public List<DuelLandHereticsDatas> duelLandHereticsMaps = new List<DuelLandHereticsDatas>();
 
     public static RoundManager rm;
     public Vector3 attackSpawnPos;
     public Vector3 defenceSpawnPos;
+    public Vector3 attackSpawnRot;
+    public Vector3 defenceSpawnRot;
     public Vector3 spikePos;
     public GameObject spike;
 
@@ -63,11 +68,13 @@ public class RoundManager : NetworkBehaviour
     public bool hasReset;
 
     public MapDatas mapData;
-    public DuelLandDatas duelLandData;
+    public DuelLandFanaticsDatas duelLandFanaticsData;
+    public DuelLandHereticsDatas duelLandHereticsData;
 
     public string mapName;
 
     public Coroutine startGetting;
+    public bool isFanatics;
 
     public enum Mode
     {
@@ -119,6 +126,11 @@ public class RoundManager : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.O))
         {
             StartCoroutine(ResetPlayers());
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            DuelLandLoad(4);
+            ServerResetAllObjects();
         }
 
     }
@@ -221,17 +233,36 @@ public class RoundManager : NetworkBehaviour
         yield return new WaitWhile(() => !hasReset);
         hasReset = false;
         ResetStatus();
-
-        if (currentMode == Mode.DUELLAND)
+        if (isFanatics)
         {
-            hasRoundEnded = false;
-
-            duelLandData = duelLandMaps[Random.Range(0, duelLandMaps.Count)];
-            mapName = duelLandData.mapName;
-
+            DuelLandLoad(Random.Range(0, duelLandFanaticsMaps.Count));
+        }
+        else
+        {
+            DuelLandLoad(Random.Range(0, duelLandHereticsMaps.Count));
         }
         ServerResetAllObjects();
         AudioManager.Instance.CmdStopBGM();
+    }
+
+    public void DuelLandLoad(int index)
+    {
+        if (currentMode == Mode.DUELLAND)
+        {
+            hasRoundEnded = false;
+            if (isFanatics)
+            {
+                duelLandFanaticsData = duelLandFanaticsMaps[index];
+                mapName = duelLandFanaticsData.mapName;
+            }
+            else
+            {
+                attackSpawnRot = duelLandHereticsData.attackerRot;
+                duelLandHereticsData = duelLandHereticsMaps[index];
+                mapName = duelLandHereticsData.mapName;
+            }
+            
+        }
     }
 
     [Server]
@@ -245,19 +276,60 @@ public class RoundManager : NetworkBehaviour
         }
 
         spawnedIndex.Clear();
-        for (; spawnedIndex.Count < 4;)
+
+        int gimmicks = 4;
+
+        if (currentMode == Mode.DUELLAND)
         {
-            int index = Random.Range(0, duelLandData.gimmicks.Count);
-            var gimmickData = duelLandData.gimmicks[index];
-            GameObject gimmick = gimmickData.prefab;
+            if (isFanatics)
+            {
+                if (duelLandFanaticsData.gimmicks.Count < 4)
+                {
+                    gimmicks = duelLandFanaticsData.gimmicks.Count;
+                }
+                for (; spawnedIndex.Count < gimmicks;)
+                {
+                    int index = Random.Range(0, duelLandFanaticsData.gimmicks.Count);
+                    var gimmickData = duelLandFanaticsData.gimmicks[index];
+                    GameObject gimmick = gimmickData.prefab;
 
-            if (spawnedIndex.Contains(index)) continue;
+                    if (spawnedIndex.Contains(index)) continue;
 
-            GameObject prefab = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
-            prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
-            NetworkServer.Spawn(prefab);
-            spawns.Add(prefab);
-            spawnedIndex.Add(index);
+                    GameObject prefab = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
+                    prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
+                    prefab.GetComponent<BotManager>().weapon = gimmickData.weapon;
+                    prefab.GetComponent<BotManager>().armer = gimmickData.armer;
+                    NetworkServer.Spawn(prefab);
+                    spawns.Add(prefab);
+                    spawnedIndex.Add(index);
+                }
+            }
+            else
+            {
+                if (duelLandHereticsData.gimmicks.Count < 4)
+                {
+                    gimmicks = duelLandHereticsData.gimmicks.Count;
+                }
+                for (; spawnedIndex.Count < gimmicks;)
+                {
+                    int index = Random.Range(0, duelLandHereticsData.gimmicks.Count);
+                    var gimmickData = duelLandHereticsData.gimmicks[index];
+                    GameObject gimmick = gimmickData.prefab;
+
+                    if (spawnedIndex.Contains(index)) continue;
+
+                    GameObject prefab = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
+                    prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
+                    prefab.GetComponent<BotManager>().weapon = gimmickData.weapon;
+                    prefab.GetComponent<BotManager>().armer = gimmickData.armer;
+                    prefab.GetComponent<BotManager>().moveVector = gimmickData.moveVector;
+                    prefab.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
+                    prefab.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
+                    NetworkServer.Spawn(prefab);
+                    spawns.Add(prefab);
+                    spawnedIndex.Add(index);
+                }
+            }
         }
 
         // クライアント側でオブジェクトをリセット
@@ -279,7 +351,7 @@ public class RoundManager : NetworkBehaviour
         }
 
         StartCoroutine(BombArmCoroutine());
-        
+        StartCoroutine(RecordRoutine());
 
     }
 
@@ -337,7 +409,14 @@ public class RoundManager : NetworkBehaviour
         CurrentPhase = Phase.BUY;
         if (currentMode == Mode.DUELLAND)
         {
-            duelLandData = duelLandMaps[Random.Range(0, duelLandMaps.Count)];
+            if (isFanatics)
+            {
+                duelLandFanaticsData = duelLandFanaticsMaps[Random.Range(0, duelLandFanaticsMaps.Count)];
+            }
+            else
+            {
+                duelLandHereticsData = duelLandHereticsMaps[Random.Range(0, duelLandHereticsMaps.Count)];
+            }
         }
         if (currentMode == Mode.ONEVSONE)
         {
@@ -358,24 +437,39 @@ public class RoundManager : NetworkBehaviour
             }
         }
 
-        if (duelLandData != null)
+        if (duelLandFanaticsData != null)
         {
-            defenceSpawnPos = duelLandData.diffenderPos;
-            spikePos = duelLandData.spikePos;
+            defenceSpawnPos = duelLandFanaticsData.defenderPos;
+            spikePos = duelLandFanaticsData.spikePos;
             currentMode = Mode.DUELLAND;
-            mapName = duelLandData.mapName;
+            mapName = duelLandFanaticsData.mapName;
             if (isServer)
             {
                 if (currentMode == Mode.DUELLAND) 
                 { 
 
-                    respawns.Add(new ObjectAndPosition(duelLandData.mapPrefab, new Vector3(0, 0, 0)));
+                    respawns.Add(new ObjectAndPosition(duelLandFanaticsData.mapPrefab, new Vector3(0, 0, 0)));
+                    respawns.Add(new ObjectAndPosition(spike, spikePos));
+                }
+            }
+        }
+        if (duelLandHereticsData != null)
+        {
+            attackSpawnPos = duelLandHereticsData.attackerPos;
+            spikePos = duelLandHereticsData.spikePos;
+            currentMode = Mode.DUELLAND;
+            mapName = duelLandHereticsData.mapName;
+            if (isServer)
+            {
+                if (currentMode == Mode.DUELLAND)
+                {
+
+                    respawns.Add(new ObjectAndPosition(duelLandHereticsData.mapPrefab, new Vector3(0, 0, 0)));
                     respawns.Add(new ObjectAndPosition(spike, spikePos));
                 }
             }
         }
 
-    
 
         // 自分のプレイヤーを取得
         myPlayer = playerManager.GetLocalPlayer();
@@ -400,11 +494,12 @@ public class RoundManager : NetworkBehaviour
             {
                 myPlayer.GetComponentInChildren<CreditManager>().credit = 0;
                 myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999);
+
             }
 
             SetConditions();
-            ServerResetAllObjects();
             yield return new WaitWhile(() => !hasReset);
+            ServerResetAllObjects();
             hasReset = false;
             ResetStatus();
 
@@ -446,12 +541,41 @@ public class RoundManager : NetworkBehaviour
             defender.GetComponentInChildren<ThirdPersonController>().ResetPos(defenceSpawnPos);
         }
 
-        
+
+    }
+    IEnumerator RecordRoutine()
+    {
+        if (currentMode == Mode.DUELLAND)
+        {
+            MatchRecorder recorder = GetComponent<MatchRecorder>();
+
+
+            yield return recorder.StopRecordingAndWait().AsCoroutine();
+            recorder.ClearCamera();
+
+
+            foreach (var player in players)
+            {
+                Camera cam = player.GetComponentInChildren<ThirdPersonController>().recordCamera;
+                recorder.AddCamera(player.GetComponentInChildren<ThirdPersonController>().recordCamera);
+                recorder.AddHiddenObject(cam, player);
+            }
+            foreach (var bot in GetBots())
+            {
+                Camera cam = bot.GetComponentInChildren<ThirdPersonController>().recordCamera;
+                recorder.AddCamera(bot.GetComponentInChildren<ThirdPersonController>().recordCamera);
+                recorder.AddHiddenObject(cam, bot);
+            }
+
+            recorder.StartRecording();
+
+
+
+        }
     }
 
 
-
-    [Server]
+        [Server]
     public void GiveCredits(GameObject winner, GameObject loser)
     {
         winner.GetComponent<CreditManager>().ResetCurrentPaying();
@@ -482,6 +606,9 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
         myPlayer.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
         myPlayer.GetComponent<HpMaster>().ResetHp();
+        defender.GetComponentInParent<CharacterTransfromNetwork>().yaw = attackSpawnRot.y;
+        defender.transform.rotation = Quaternion.Euler(defenceSpawnRot);
+
         if (currentMode == Mode.ONEVSONE || myPlayer.GetComponentInChildren<WeaponManager>().GetCurrentWeaponSlot() == null)
         {
             myPlayer.GetComponent<HpMaster>().armer = 1;
@@ -493,7 +620,13 @@ public class RoundManager : NetworkBehaviour
             StartCoroutine(myPlayer.GetComponentInChildren<WeaponManager>().SetMagazineMax(0f));
         }
 
-        if (currentMode == Mode.ONEVSONE)
+        if (attacker != null)
+        {
+            attacker.GetComponentInParent<CharacterTransfromNetwork>().yaw = attackSpawnRot.y;
+            attacker.transform.rotation = Quaternion.Euler(attackSpawnRot);
+        }
+
+        if (otherPlayer != null)
         {
             otherPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
             otherPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
@@ -509,6 +642,8 @@ public class RoundManager : NetworkBehaviour
             otherPlayer.GetComponent<HpMaster>().ResetHp();
             otherPlayer.GetComponent<HpMaster>().armer = 1;
         }
+
+
     }
 
     [Command (requiresAuthority = false)]

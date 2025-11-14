@@ -10,35 +10,47 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be18b332618527b49bd741349c53fec2, type: 3}
-  m_Name: Discipline_DuelLand_TheDual
+  m_Name: Discipline_DuelLand_Fanatic_Seeker
   m_EditorClassIdentifier: 
   gimmicks:
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -15.9, y: 4.7999988, z: 5.884}
-    rotation: {x: 0, y: 0, z: 0}
+    position: {x: -17.440384, y: 4.8000016, z: 26.11261}
+    rotation: {x: 0, y: 180, z: 0}
+    weapon: 1
+    armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -31.307545, y: 9.5999975, z: 12.286}
+    position: {x: -40.57, y: -3.199996, z: 24.22}
     rotation: {x: 0, y: 90, z: 0}
+    weapon: 1
+    armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -18.809412, y: 8.8, z: 25.146198}
-    rotation: {x: 0, y: 165, z: 0}
+    position: {x: -39.800404, y: -3.1999972, z: 15.815832}
+    rotation: {x: 0, y: 0, z: 0}
+    weapon: 1
+    armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -34.86093, y: 5.5999994, z: 22.870766}
+    position: {x: -22.482, y: 4.8, z: 18.75}
     rotation: {x: 0, y: 125, z: 0}
+    weapon: 1
+    armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -52.449303, y: -2.399997, z: 27.094}
+    position: {x: -52.251, y: -0.00000047683716, z: -3.685}
     rotation: {x: 0, y: 90, z: 0}
+    weapon: 1
+    armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -40.387585, y: -0.7999978, z: 19.303236}
-    rotation: {x: 0, y: 0, z: 0}
+    position: {x: -48.70994, y: -3.1999986, z: 11.241415}
+    rotation: {x: 0, y: 20, z: 0}
+    weapon: 1
+    armer: 1
   diffenderPos: {x: 0, y: 0, z: 0}
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
   mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
     type: 3}
-  mapName: Discipline_TheDual
+  mapName: Discipline_Fanatic_Seeker

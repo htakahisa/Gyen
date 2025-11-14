@@ -24,6 +24,7 @@ public class CustomNetworkManager : NetworkManager
     public GameObject characterPrefab;
 
     public Mode selectedMode = Mode.ONEVSONE;
+    public bool isFanatics;
 
 
     public enum Mode
@@ -133,8 +134,9 @@ public class CustomNetworkManager : NetworkManager
 
     #region Game Flow
 
-    public void DuelLandConnect()
+    public void DuelLandConnect(bool isfanatics)
     {
+        isFanatics = isfanatics;
         requiredPlayers = 1;
         selectedMode = Mode.DUELLAND;
         Connect();
@@ -165,9 +167,23 @@ public class CustomNetworkManager : NetworkManager
         }
         else
         {
-            defender = pendingConnections[0];
+            if (selectedMode == Mode.DUELLAND)
+            {
+                if (isFanatics)
+                {
+                    defender = pendingConnections[0];
+                }
+                else
+                {
+                    attacker = pendingConnections[0];
+                }
+            }
+            if (selectedMode == Mode.PRACTICE)
+            {
+                defender = pendingConnections[0];
+            }
         }
-        Debug.Log($"Roles assigned - Attacker: {attacker?.connectionId}, Defender: {defender.connectionId}");
+        Debug.Log($"Roles assigned - Attacker: {attacker?.connectionId}, Defender: {defender?.connectionId}");
     }
 
 
@@ -233,6 +249,7 @@ public class CustomNetworkManager : NetworkManager
         relay.RpcSetPlayersRole(isAttacker, player);
         relay.RpcSetCharacter(index, player);
         RoundManager.rm.currentMode = (RoundManager.Mode)(int)selectedMode;
+        RoundManager.rm.isFanatics = isFanatics;
 
         Debug.Log($"Spawned player for connection {conn.connectionId} at {spawnPos}");
     }
