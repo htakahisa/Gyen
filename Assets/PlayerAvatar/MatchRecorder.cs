@@ -11,50 +11,40 @@ using Debug = UnityEngine.Debug;
 public class MatchRecorder : MonoBehaviour
 {
     // =====================================================
-    // ▼ 自分だけ映さない機能用の情報
+    // ▼ 自分だけ映さない機能用（Renderer.enabled方式で安全）
     // =====================================================
-    private Dictionary<Camera, List<GameObject>> hiddenObjects = new Dictionary<Camera, List<GameObject>>();
+    private Dictionary<Camera, List<Renderer>> hiddenRenderers = new Dictionary<Camera, List<Renderer>>();
 
-    // カメラに「このオブジェクトは写さない」を登録
     public void AddHiddenObject(Camera cam, GameObject obj)
     {
-        if (!hiddenObjects.ContainsKey(cam))
-            hiddenObjects[cam] = new List<GameObject>();
+        if (!hiddenRenderers.ContainsKey(cam))
+            hiddenRenderers[cam] = new List<Renderer>();
 
-        if (!hiddenObjects[cam].Contains(obj))
-            hiddenObjects[cam].Add(obj);
+        var renderers = obj.GetComponentsInChildren<Renderer>(true);
+        foreach (var r in renderers)
+            if (!hiddenRenderers[cam].Contains(r))
+                hiddenRenderers[cam].Add(r);
     }
 
-    // 実際のレンダリング前に呼ばれる（URP/HDRP/ビルトイン対応）
     void OnBeginCameraRendering(ScriptableRenderContext ctx, Camera cam)
     {
-        if (!hiddenObjects.ContainsKey(cam)) return;
-
-        List<GameObject> list = hiddenObjects[cam];
-        foreach (var obj in list)
-        {
-            if (obj != null && obj.activeSelf)
-                obj.SetActive(false);   // ★ 自分だけ消す（同レイヤー他オブジェクトは消さない）
-        }
+        if (!hiddenRenderers.ContainsKey(cam)) return;
+        foreach (var r in hiddenRenderers[cam])
+            if (r != null)
+                r.enabled = false;
     }
 
-    // レンダリング後に元に戻す
     void OnEndCameraRendering(ScriptableRenderContext ctx, Camera cam)
     {
-        if (!hiddenObjects.ContainsKey(cam)) return;
-
-        List<GameObject> list = hiddenObjects[cam];
-        foreach (var obj in list)
-        {
-            if (obj != null && !obj.activeSelf)
-                obj.SetActive(true);    // ★ 描画後すぐ元に戻す
-        }
+        if (!hiddenRenderers.ContainsKey(cam)) return;
+        foreach (var r in hiddenRenderers[cam])
+            if (r != null)
+                r.enabled = true;
     }
 
     // =====================================================
-    // ▼ あなたの元の MatchRecorder コード（AddCamera など一切変更なし）
+    // ▼ MatchRecorder 元の機能
     // =====================================================
-
     public class CameraRecord
     {
         public Camera camera;
@@ -84,10 +74,7 @@ public class MatchRecorder : MonoBehaviour
         QualitySettings.vSyncCount = 0;
         PrepareFFmpeg();
 
-        // ▼ 記録用イベント
         RenderPipelineManager.endFrameRendering += OnEndFrameRendering;
-
-        // ▼ 自分だけ非表示イベント
         RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
         RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
     }
@@ -99,15 +86,12 @@ public class MatchRecorder : MonoBehaviour
 #else
         string fileName = "ffmpeg";
 #endif
-
         string src = Path.Combine(Application.streamingAssetsPath, fileName);
         string dst = Path.Combine(Application.persistentDataPath, fileName);
         ffmpegRuntimePath = dst;
 
         if (File.Exists(dst)) return;
-
-        try { File.Copy(src, dst, true); }
-        catch (Exception e) { Debug.LogError($"ffmpeg copy failed: {e}"); }
+        try { File.Copy(src, dst, true); } catch (Exception e) { Debug.LogError($"ffmpeg copy failed: {e}"); }
 
 #if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
         try
@@ -122,8 +106,7 @@ public class MatchRecorder : MonoBehaviour
                     CreateNoWindow = true
                 }
             };
-            chmod.Start();
-            chmod.WaitForExit();
+            chmod.Start(); chmod.WaitForExit();
         }
         catch (Exception e) { Debug.LogError($"chmod failed: {e}"); }
 #endif
@@ -133,12 +116,10 @@ public class MatchRecorder : MonoBehaviour
 
     public void AddCamera(Camera cam)
     {
-        if (cam == null) return;
-        if (records.Exists(r => r.camera == cam)) return;
+        if (cam == null || records.Exists(r => r.camera == cam)) return;
 
         var record = new CameraRecord();
         record.camera = cam;
-
         record.rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
         record.rt.Create();
         cam.targetTexture = record.rt;
@@ -156,7 +137,6 @@ public class MatchRecorder : MonoBehaviour
         {
             if (r.camera != null)
                 r.camera.targetTexture = null;
-
             if (r.rt != null)
                 r.rt.Release();
         }
@@ -167,7 +147,6 @@ public class MatchRecorder : MonoBehaviour
     {
         if (isRecording) return;
         isRecording = true;
-
         nextFrameTime = Time.unscaledTime;
         foreach (var r in records) r.recording = true;
     }
@@ -176,7 +155,6 @@ public class MatchRecorder : MonoBehaviour
     {
         if (!isRecording) return;
         isRecording = false;
-
         foreach (var r in records) r.recording = false;
         await Task.Delay(50);
 
@@ -194,28 +172,19 @@ public class MatchRecorder : MonoBehaviour
         while (Time.unscaledTime >= nextFrameTime)
         {
             nextFrameTime += 1f / fps;
-
             foreach (var r in records)
-            {
-                if (r.camera == null || !r.recording) continue;
-
-                pendingCaptures.Add(new PendingCapture { record = r, captureTime = Time.unscaledTime });
-            }
+                if (r.camera != null && r.recording)
+                    pendingCaptures.Add(new PendingCapture { record = r, captureTime = Time.unscaledTime });
         }
     }
 
     private async Task WriteToVideoAsync(CameraRecord record)
     {
         if (record.frameQueue.IsEmpty) return;
-
         record.writing = true;
 
         string ffmpegPath = GetFFmpegPath();
-        if (!File.Exists(ffmpegPath))
-        {
-            record.writing = false;
-            return;
-        }
+        if (!File.Exists(ffmpegPath)) { record.writing = false; return; }
 
         await Task.Run(async () =>
         {
@@ -227,7 +196,6 @@ public class MatchRecorder : MonoBehaviour
                     Arguments =
                         $"-y -f rawvideo -pixel_format rgba -video_size {width}x{height} -framerate {fps} -i - " +
                         $"-vf vflip -pix_fmt yuv420p -c:v libx264 -preset ultrafast \"{record.filePath}\"",
-
                     UseShellExecute = false,
                     RedirectStandardInput = true,
                     CreateNoWindow = true
@@ -236,15 +204,12 @@ public class MatchRecorder : MonoBehaviour
                 using (var proc = new Process { StartInfo = psi })
                 {
                     proc.Start();
-
                     using (var stdin = proc.StandardInput.BaseStream)
                     {
                         while (record.frameQueue.TryDequeue(out var frame))
                             await stdin.WriteAsync(frame, 0, frame.Length);
-
                         await stdin.FlushAsync();
                     }
-
                     proc.WaitForExit();
                 }
             }
@@ -270,8 +235,7 @@ public class MatchRecorder : MonoBehaviour
                 continue;
             }
 
-            if (!camSet.Contains(r.camera))
-                continue;
+            if (!camSet.Contains(r.camera)) continue;
 
             AsyncGPUReadback.Request(r.rt, 0, TextureFormat.RGBA32, (req) =>
             {

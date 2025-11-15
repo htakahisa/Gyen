@@ -17,11 +17,12 @@ MonoBehaviour:
       type: 3}
     position: {x: -25.87, y: 4.8000007, z: 22.97}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 1
-    armer: 1
+    weapon: 2
+    armer: 0.5
     moveVector: 5
-    moveAsScriptTime: 3
+    moveAsScriptTime: 1
     movingAsScript: 1
+    waitForStart: 5
   attackerPos: {x: -43.332466, y: -3.199996, z: 26.118443}
   attackerRot: {x: 0, y: 90, z: 0}
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}

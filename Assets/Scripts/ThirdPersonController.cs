@@ -759,8 +759,7 @@ namespace StarterAssets
             xRotation -= mouseY * _sensitivity;
             xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-            if (mouseX != 0 || mouseY != 0)
-            {
+
                 // カメラに上下回転を適用
                 head.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
@@ -770,7 +769,7 @@ namespace StarterAssets
                 //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
                 //transformNetwork.CmdRotateCamera(_mainCamera.transform.localRotation);
 
-            }
+            
 
         }
         public void CameraParticularRotaion(float pitch)

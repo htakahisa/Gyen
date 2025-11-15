@@ -24,6 +24,7 @@ export const systems: System[] = [
       { version: "1.0.7", change: "プラクティスモードにて、ボットがプレイヤーに撃ち返してくるようになりました", type: "buff" as const },
       { version: "1.0.7", change: "デュエルランドモード中にボットをキルした場合に、キルバナーとフィニッシャーが表示されるように仕様を変更", type: "buff" as const },
       { version: "1.0.7", change: "デュエルランドモードに三つの難易度を追加。「Seeker, Elite, TheDual」", type: "buff" as const },
+      { version: "1.0.8", change: "デュエルランドモードに一つの難易度と一つの実験的難易度を追加。「Cheater, Two」", type: "buff" as const },
     ],
   },
     {
@@ -51,6 +52,7 @@ export const systems: System[] = [
     history: [
       { version: "1.0.6", change: "”スパイク”を追加しました。ラウンド開始から一定の時間で爆発し、爆発すればアタッカー、解除すればディフェンダーの勝利です", type: "buff" as const },
       { version: "1.0.6", change: "購入画面で、左クリックで購入に対して、右クリックで売却という対応を追加しました", type: "buff" as const },
+      { version: "1.0.8", change: "DuelLandモードにて、自動でボットの画面のリプレイを保存するようになりました", type: "buff" as const },
     ],
   },
     {

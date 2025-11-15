@@ -228,11 +228,6 @@ public class RoundManager : NetworkBehaviour
 
     public IEnumerator ResetRound()
     {
-        StartCoroutine(ResetPlayers());
-
-        yield return new WaitWhile(() => !hasReset);
-        hasReset = false;
-        ResetStatus();
         if (isFanatics)
         {
             DuelLandLoad(Random.Range(0, duelLandFanaticsMaps.Count));
@@ -241,6 +236,11 @@ public class RoundManager : NetworkBehaviour
         {
             DuelLandLoad(Random.Range(0, duelLandHereticsMaps.Count));
         }
+        StartCoroutine(ResetPlayers());
+
+        yield return new WaitWhile(() => !hasReset);
+        hasReset = false;
+        ResetStatus();
         ServerResetAllObjects();
         AudioManager.Instance.CmdStopBGM();
     }
@@ -325,6 +325,7 @@ public class RoundManager : NetworkBehaviour
                     prefab.GetComponent<BotManager>().moveVector = gimmickData.moveVector;
                     prefab.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
                     prefab.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
+                    prefab.GetComponent<BotManager>().waitForStart = gimmickData.waitForStart;
                     NetworkServer.Spawn(prefab);
                     spawns.Add(prefab);
                     spawnedIndex.Add(index);
@@ -443,6 +444,7 @@ public class RoundManager : NetworkBehaviour
             spikePos = duelLandFanaticsData.spikePos;
             currentMode = Mode.DUELLAND;
             mapName = duelLandFanaticsData.mapName;
+            currentBotMove = BotMove.CROUCH;
             if (isServer)
             {
                 if (currentMode == Mode.DUELLAND) 
@@ -456,9 +458,11 @@ public class RoundManager : NetworkBehaviour
         if (duelLandHereticsData != null)
         {
             attackSpawnPos = duelLandHereticsData.attackerPos;
+            attackSpawnRot = duelLandHereticsData.attackerRot;
             spikePos = duelLandHereticsData.spikePos;
             currentMode = Mode.DUELLAND;
             mapName = duelLandHereticsData.mapName;
+            currentBotMove = BotMove.CROUCH;
             if (isServer)
             {
                 if (currentMode == Mode.DUELLAND)
@@ -527,6 +531,10 @@ public class RoundManager : NetworkBehaviour
             attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
             attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
             attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(attackSpawnPos);
+            attacker.GetComponentInParent<CharacterTransfromNetwork>().yaw = attackSpawnRot.y;
+            attacker.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = false;
+            attacker.transform.rotation = Quaternion.Euler(attackSpawnRot);
+            attacker.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
         }
         if (defender != null)
         {
@@ -539,6 +547,8 @@ public class RoundManager : NetworkBehaviour
             defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
             defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
             defender.GetComponentInChildren<ThirdPersonController>().ResetPos(defenceSpawnPos);
+            defender.GetComponentInParent<CharacterTransfromNetwork>().yaw = defenceSpawnRot.y;
+            defender.transform.rotation = Quaternion.Euler(defenceSpawnRot);
         }
 
 
@@ -606,8 +616,6 @@ public class RoundManager : NetworkBehaviour
         myPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
         myPlayer.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
         myPlayer.GetComponent<HpMaster>().ResetHp();
-        defender.GetComponentInParent<CharacterTransfromNetwork>().yaw = attackSpawnRot.y;
-        defender.transform.rotation = Quaternion.Euler(defenceSpawnRot);
 
         if (currentMode == Mode.ONEVSONE || myPlayer.GetComponentInChildren<WeaponManager>().GetCurrentWeaponSlot() == null)
         {
@@ -618,12 +626,6 @@ public class RoundManager : NetworkBehaviour
         else
         {
             StartCoroutine(myPlayer.GetComponentInChildren<WeaponManager>().SetMagazineMax(0f));
-        }
-
-        if (attacker != null)
-        {
-            attacker.GetComponentInParent<CharacterTransfromNetwork>().yaw = attackSpawnRot.y;
-            attacker.transform.rotation = Quaternion.Euler(attackSpawnRot);
         }
 
         if (otherPlayer != null)

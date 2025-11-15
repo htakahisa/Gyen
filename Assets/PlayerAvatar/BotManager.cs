@@ -1,6 +1,7 @@
 using Mirror;
 using StarterAssets;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using static WeaponStatus;
 
@@ -26,30 +27,36 @@ public class BotManager : NetworkBehaviour
     public int moveVector;
     public float moveAsScriptTime;
     public bool movingAsScript;
+    public float waitForStart;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void Start()
     {
-        wm.RpcBuyWeapon(WeaponStatus.WeaponType.ReiNe);
+        wm.RpcBuyWeapon(weapon);
         hm.armer = this.armer;
         if (movingAsScript)
         {
-            MovingAsScript();
+            StartCoroutine(MovingAsScript());
         }
     }
 
-    public void MovingAsScript()
+    public IEnumerator MovingAsScript()
     {
+        Debug.Log("Before wait, active=" + gameObject.activeInHierarchy);
+        yield return new WaitForSeconds(waitForStart);
+
         float timer = 0;
 
         while (timer <= moveAsScriptTime)
         {
             timer += Time.deltaTime;
             tpc.BotMove(moveVector, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, false);
+            yield return null;
         }
         tpc.BotStop();
         movingAsScript = false;
     }
+
 
     // Update is called once per frame
     void Update()
@@ -58,9 +65,11 @@ public class BotManager : NetworkBehaviour
         {
             sm.BotShoot();
         }
-        if (!movingAsScript) {
+        if (!movingAsScript)
+        {
             if (RoundManager.rm.currentBotMove != RoundManager.BotMove.STOP)
             {
+                if(RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK || RoundManager.rm.currentBotMove == RoundManager.BotMove.RUN)
                 // ˆÚ“®ŽžŠÔ‚ªI—¹‚µ‚½‚çV‚µ‚¢•ûŒü‚ðŒˆ’è
                 if (moveTime <= 0)
                 {
@@ -124,7 +133,7 @@ public class BotManager : NetworkBehaviour
             else
             {
                 tpc.BotStop();
-            } 
+            }
         }
     }
 
