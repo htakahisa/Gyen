@@ -17,39 +17,39 @@ MonoBehaviour:
       type: 3}
     position: {x: -17.440384, y: 4.8000016, z: 26.11261}
     rotation: {x: 0, y: 180, z: 0}
-    weapon: 1
+    weapon: 2
     armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -40.57, y: -3.199996, z: 24.22}
     rotation: {x: 0, y: 90, z: 0}
-    weapon: 1
+    weapon: 2
     armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -39.800404, y: -3.1999972, z: 15.815832}
     rotation: {x: 0, y: 0, z: 0}
-    weapon: 1
+    weapon: 2
     armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -22.482, y: 4.8, z: 18.75}
     rotation: {x: 0, y: 125, z: 0}
-    weapon: 1
+    weapon: 2
     armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -52.251, y: -0.00000047683716, z: -3.685}
     rotation: {x: 0, y: 90, z: 0}
-    weapon: 1
+    weapon: 2
     armer: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -48.70994, y: -3.1999986, z: 11.241415}
     rotation: {x: 0, y: 20, z: 0}
-    weapon: 1
+    weapon: 2
     armer: 1
-  diffenderPos: {x: 0, y: 0, z: 0}
+  defenderPos: {x: 0, y: 0, z: 0}
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
   mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
     type: 3}

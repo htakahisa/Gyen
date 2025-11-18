@@ -27,7 +27,6 @@ public class BotManager : NetworkBehaviour
     public int moveVector;
     public float moveAsScriptTime;
     public bool movingAsScript;
-    public float waitForStart;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public void Start()
@@ -43,7 +42,6 @@ public class BotManager : NetworkBehaviour
     public IEnumerator MovingAsScript()
     {
         Debug.Log("Before wait, active=" + gameObject.activeInHierarchy);
-        yield return new WaitForSeconds(waitForStart);
 
         float timer = 0;
 

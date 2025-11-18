@@ -71,11 +71,16 @@ public class RoundManager : NetworkBehaviour
     public DuelLandFanaticsDatas duelLandFanaticsData;
     public DuelLandHereticsDatas duelLandHereticsData;
 
+    Coroutine spawnBotCoroutine;
+
+    public int botCount;
+
     public string mapName;
 
     public Coroutine startGetting;
     public bool isFanatics;
 
+    public bool hasMapLoad;
     public enum Mode
     {
         ONEVSONE,
@@ -127,7 +132,17 @@ public class RoundManager : NetworkBehaviour
         {
             StartCoroutine(ResetPlayers());
         }
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            DuelLandLoad(2);
+            ServerResetAllObjects();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            DuelLandLoad(3);
+            ServerResetAllObjects();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             DuelLandLoad(4);
             ServerResetAllObjects();
@@ -310,26 +325,11 @@ public class RoundManager : NetworkBehaviour
                 {
                     gimmicks = duelLandHereticsData.gimmicks.Count;
                 }
-                for (; spawnedIndex.Count < gimmicks;)
+                if (spawnBotCoroutine != null)
                 {
-                    int index = Random.Range(0, duelLandHereticsData.gimmicks.Count);
-                    var gimmickData = duelLandHereticsData.gimmicks[index];
-                    GameObject gimmick = gimmickData.prefab;
-
-                    if (spawnedIndex.Contains(index)) continue;
-
-                    GameObject prefab = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
-                    prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
-                    prefab.GetComponent<BotManager>().weapon = gimmickData.weapon;
-                    prefab.GetComponent<BotManager>().armer = gimmickData.armer;
-                    prefab.GetComponent<BotManager>().moveVector = gimmickData.moveVector;
-                    prefab.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
-                    prefab.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
-                    prefab.GetComponent<BotManager>().waitForStart = gimmickData.waitForStart;
-                    NetworkServer.Spawn(prefab);
-                    spawns.Add(prefab);
-                    spawnedIndex.Add(index);
+                    StopCoroutine(spawnBotCoroutine);
                 }
+                spawnBotCoroutine = StartCoroutine(SpawnBotCoroutine(gimmicks));
             }
         }
 
@@ -352,9 +352,39 @@ public class RoundManager : NetworkBehaviour
         }
 
         StartCoroutine(BombArmCoroutine());
-        StartCoroutine(RecordRoutine());
+#if !UNITY_EDITOR
+            StartCoroutine(RecordRoutine());
+#endif
 
     }
+
+    public IEnumerator SpawnBotCoroutine(int gimmicks)
+    {
+        botCount = gimmicks;
+        for (; spawnedIndex.Count < gimmicks;)
+        {
+            int index = Random.Range(0, duelLandHereticsData.gimmicks.Count);
+            var gimmickData = duelLandHereticsData.gimmicks[index];
+            GameObject gimmick = gimmickData.prefab;
+
+            if (spawnedIndex.Contains(index)) continue;
+            yield return new WaitWhile(() => botCount + spawnedIndex.Count != gimmicks);
+            yield return new WaitForSeconds(duelLandHereticsData.waitForSecondsList[spawnedIndex.Count]);
+
+
+            GameObject prefab = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
+            prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
+            prefab.GetComponent<BotManager>().weapon = gimmickData.weapon;
+            prefab.GetComponent<BotManager>().armer = gimmickData.armer;
+            prefab.GetComponent<BotManager>().moveVector = gimmickData.moveVector;
+            prefab.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
+            prefab.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
+            NetworkServer.Spawn(prefab);
+            spawns.Add(prefab);
+            spawnedIndex.Add(index);
+        }
+    }
+
 
     public IEnumerator BombArmCoroutine()
     {
@@ -445,6 +475,7 @@ public class RoundManager : NetworkBehaviour
             currentMode = Mode.DUELLAND;
             mapName = duelLandFanaticsData.mapName;
             currentBotMove = BotMove.CROUCH;
+            currentBotMove = BotMove.CROUCH;
             if (isServer)
             {
                 if (currentMode == Mode.DUELLAND) 
@@ -455,24 +486,7 @@ public class RoundManager : NetworkBehaviour
                 }
             }
         }
-        if (duelLandHereticsData != null)
-        {
-            attackSpawnPos = duelLandHereticsData.attackerPos;
-            attackSpawnRot = duelLandHereticsData.attackerRot;
-            spikePos = duelLandHereticsData.spikePos;
-            currentMode = Mode.DUELLAND;
-            mapName = duelLandHereticsData.mapName;
-            currentBotMove = BotMove.CROUCH;
-            if (isServer)
-            {
-                if (currentMode == Mode.DUELLAND)
-                {
 
-                    respawns.Add(new ObjectAndPosition(duelLandHereticsData.mapPrefab, new Vector3(0, 0, 0)));
-                    respawns.Add(new ObjectAndPosition(spike, spikePos));
-                }
-            }
-        }
 
 
         // é©ï™ÇÃÉvÉåÉCÉÑÅ[ÇéÊìæ
@@ -520,6 +534,28 @@ public class RoundManager : NetworkBehaviour
 
     public IEnumerator SetConditionsCoroutine()
     {
+
+        if (duelLandHereticsData != null)
+        {
+            attackSpawnPos = duelLandHereticsData.attackerPos;
+            attackSpawnRot = duelLandHereticsData.attackerRot;
+            spikePos = duelLandHereticsData.spikePos;
+            currentMode = Mode.DUELLAND;
+            mapName = duelLandHereticsData.mapName;
+            currentBotMove = BotMove.CROUCH;
+            if (!hasMapLoad) {
+
+                if (isServer)
+                {
+                    if (currentMode == Mode.DUELLAND)
+                    {
+                        respawns.Add(new ObjectAndPosition(duelLandHereticsData.mapPrefab, new Vector3(0, 0, 0)));
+                        respawns.Add(new ObjectAndPosition(spike, spikePos));
+                        hasMapLoad = true;
+                    }
+                } 
+            }
+        }
         if (attacker != null)
         {
             attacker.GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
@@ -689,6 +725,14 @@ public class RoundManager : NetworkBehaviour
         GetMyPlayer().GetComponentInChildren<ThirdPersonController>().RpcEndDance();
     }
 
+    public void AddBotCount(int i)
+    {
+        botCount += i;
+        if(botCount <= 0)
+        {
+            DuelLandRetry();
+        }
+    }
 
     public enum Phase
     {

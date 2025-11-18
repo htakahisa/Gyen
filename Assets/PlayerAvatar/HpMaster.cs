@@ -211,7 +211,10 @@ public class HpMaster : NetworkBehaviour
         }
         if (onDeath == EventOnDeath.DUELLANDKILL)
         {
-            RoundManager.rm.Finisher(gameObject, headshot);
+            if(!RoundManager.rm.isFanatics)
+            {
+                RoundManager.rm.AddBotCount(-1);
+            }
             NetworkServer.Destroy(gameObject);
         }
     }

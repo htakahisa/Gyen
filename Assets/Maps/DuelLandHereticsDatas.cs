@@ -17,7 +17,6 @@ public class DuelLandHereticsDatas : ScriptableObject
         public int moveVector;
         public float moveAsScriptTime;
         public bool movingAsScript;
-        public float waitForStart;
 
 
         public ObjectAndPosition(GameObject prefab, Vector3 position, Vector3 rotation, WeaponType weapon, float armer, int moveVector, float moveAsScriptTime, bool movingAsScript, float waitForStart)
@@ -30,7 +29,6 @@ public class DuelLandHereticsDatas : ScriptableObject
             this.moveVector = moveVector;
             this.moveAsScriptTime = moveAsScriptTime;
             this.movingAsScript = movingAsScript;
-            this.waitForStart = waitForStart;
         }
     }
 
@@ -41,4 +39,5 @@ public class DuelLandHereticsDatas : ScriptableObject
     public Vector3 spikePos;
     public GameObject mapPrefab;
     public string mapName;
+    public List<float> waitForSecondsList = new List<float>();
 }
