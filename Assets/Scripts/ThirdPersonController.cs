@@ -636,8 +636,9 @@ namespace StarterAssets
             Quaternion targetRot = Quaternion.LookRotation(toTarget);
 
             float angleDiff = Quaternion.Angle(currentRot, targetRot);
-            float step = assistStrength * Time.deltaTime * angleDiff * (hasInput ? 0.3f : 1f);
-            Quaternion finalRot = Quaternion.RotateTowards(currentRot, targetRot, step);
+            float amount = botAssistStrength * (angleDiff / botMaxAssistAngle);
+            amount = Mathf.Clamp01(amount);
+            Quaternion finalRot = Quaternion.RotateTowards(currentRot, targetRot, amount);
 
             Vector3 euler = finalRot.eulerAngles;
             currentPitch = euler.x > 180f ? euler.x - 360f : euler.x;
@@ -689,8 +690,9 @@ namespace StarterAssets
             Quaternion targetRot = Quaternion.LookRotation(toTarget);
 
             float angleDiff = Quaternion.Angle(currentRot, targetRot);
-            float step = botAssistStrength * Time.deltaTime * (angleDiff * 0.1f);
-            Quaternion finalRot = Quaternion.RotateTowards(currentRot, targetRot, step);
+            float amount = botAssistStrength * (angleDiff / botMaxAssistAngle);
+            amount = Mathf.Clamp01(amount);
+            Quaternion finalRot = Quaternion.RotateTowards(currentRot, targetRot, amount);
 
             Vector3 euler = finalRot.eulerAngles;
             currentPitch = euler.x > 180f ? euler.x - 360f : euler.x;

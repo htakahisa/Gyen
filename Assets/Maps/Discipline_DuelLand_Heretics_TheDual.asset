@@ -42,6 +42,15 @@ MonoBehaviour:
     movingAsScript: 1
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
+    position: {x: -18.767298, y: 4.800001, z: 25.876}
+    rotation: {x: 0, y: -180, z: 0}
+    weapon: 8
+    armer: 0.5
+    moveVector: 1
+    moveAsScriptTime: 1
+    movingAsScript: 1
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
+      type: 3}
     position: {x: -16.194824, y: 4.800001, z: 19.753204}
     rotation: {x: 0, y: -90, z: 0}
     weapon: 8
@@ -55,16 +64,7 @@ MonoBehaviour:
     rotation: {x: 0, y: -90, z: 0}
     weapon: 8
     armer: 0.5
-    moveVector: 1
-    moveAsScriptTime: 3
-    movingAsScript: 1
-  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
-      type: 3}
-    position: {x: -19.842945, y: 4.800002, z: 26.013}
-    rotation: {x: 0, y: -140, z: 0}
-    weapon: 8
-    armer: 0.5
-    moveVector: 1
+    moveVector: -1
     moveAsScriptTime: 3
     movingAsScript: 1
   attackerPos: {x: -33.21456, y: 5.6000004, z: 13.218}
