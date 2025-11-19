@@ -69,7 +69,7 @@ public class BuyPanel : NetworkBehaviour
 
         if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>()?.currentControlScheme == "Keyboard&Mouse")
         {
-            cursorSpeed = 100f;
+            cursorSpeed = 250f;
         }
         else if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<ThirdPersonController>()?.currentControlScheme == "Gamepad")
         {

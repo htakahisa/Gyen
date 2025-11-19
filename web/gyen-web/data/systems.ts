@@ -21,10 +21,13 @@ export const systems: System[] = [
     description: "ゲームモード自体やそれの処理について。",
     history: [
       { version: "1.0.7", change: "新しいゲームモード「デュエルランド」を追加しました。実際の1VS1でのマップを使い、ボットを殲滅するモードです。", type: "buff" as const },
-      { version: "1.0.7", change: "プラクティスモードにて、ボットがプレイヤーに撃ち返してくるようになりました", type: "buff" as const },
+      { version: "1.0.7", change: "プラクティスモードにて、ボットがプレイヤーに撃ち返してくるように仕様変更", type: "buff" as const },
       { version: "1.0.7", change: "デュエルランドモード中にボットをキルした場合に、キルバナーとフィニッシャーが表示されるように仕様を変更", type: "buff" as const },
       { version: "1.0.7", change: "デュエルランドモードに三つの難易度を追加。「Seeker, Elite, TheDual」", type: "buff" as const },
       { version: "1.0.8", change: "デュエルランドモードに一つの難易度と一つの実験的難易度を追加。「Cheater, Two」", type: "buff" as const },
+      { version: "1.0.8", change: "デュエルランドモード中に、ボットがランダムにしゃがみ込むように仕様変更", type: "buff" as const },
+      { version: "1.0.8", change: "デュエルランドモードに、普段のサイド「Fanatics」に、もう一つ「Heretics」を追加。「Heretics」サイドではサイトに向かって攻めてくるボット達のピークを抑えきるというのが目標のモードです。現在「Heretics」サイドで使用できる難易度は、EliteとTheDualだけですが、今後のアップデートに合わせて随時追加予定です。", type: "buff" as const },
+      { version: "1.0.8", change: "デュエルランドモード中に、ボットの所持する武器、アーマー、反応速度値が難易度によって強くなるよう仕様変更しました", type: "buff" as const },
     ],
   },
     {
@@ -77,6 +80,7 @@ export const systems: System[] = [
       { version: "1.0.5", change: "入力デバイスがコントローラーのときのみ、エイムアシストが入るよう仕様を追加しました", type: "buff" as const },
       { version: "1.0.5", change: "購入画面を開いたとき、入力デバイスにかかわらず専用のカーソルが表示されるように仕様を変更しました", type: "neutral" as const },
       { version: "1.0.6", change: "ロビーでキーコンフィグを変更できるようにしました", type: "neutral" as const },
+    　{ version: "1.0.8", change: "エイムアシストのシステムの微調整と、それに応じて、ボットのプレイヤーへのエイムのシステムも微調整しました。特定の状況でボットが外しすぎる場合をなくしただけなので、大幅に強化・弱体化したわけではありません。", type: "neutral" as const },
     ],
   },
     {
@@ -96,6 +100,14 @@ export const systems: System[] = [
       { version: "1.0.5", change: "購入画面と、ラウンド表示パネルのUIを変更しました", type: "buff" as const },
       { version: "1.0.6", change: "購入画面と、ラウンド表示パネルのUIを変更しました", type: "buff" as const },
       { version: "1.0.6", change: "画面左上に、ミニマップを表示しました", type: "buff" as const },
+    ],
+  },
+      {
+    name: "System_Elements",
+    rank: "C", 
+    description: "そこまでゲームプレイに影響しない程度の小ネタや試合中以外の要素などについて。",
+    history: [
+      { version: "1.0.8", change: "新要素「バッジ」を追加しました。ミッション達成に応じて入手でき、入手したバッジはキャラクター選択画面で一覧表示されるほか、マッチング相手の持っているバッジを確認することもできます。", type: "buff" as const },
     ],
   },
 ];

@@ -14,16 +14,16 @@ public class DuelLandFanaticsDatas : ScriptableObject
         public Vector3 rotation;
         public WeaponType weapon;
         public float armer;
+        public float foundDelayTime;
 
-
-        public ObjectAndPosition(GameObject prefab, Vector3 position, Vector3 rotation, WeaponType weapon, float armer)
+        public ObjectAndPosition(GameObject prefab, Vector3 position, Vector3 rotation, WeaponType weapon, float armer, float foundDelayTime)
         {
             this.prefab = prefab;
             this.position = position;
             this.rotation = rotation;
             this.weapon = weapon;
             this.armer = armer;
-
+            this.foundDelayTime = foundDelayTime;
         }
     }
 

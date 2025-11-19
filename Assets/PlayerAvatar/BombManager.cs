@@ -241,7 +241,7 @@ public class BombManager : NetworkBehaviour
         }
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
-            RoundManager.rm.DuelLandRetry();
+            RoundManager.rm.DuelLandRetry(false);
         }
     }
 
@@ -256,7 +256,7 @@ public class BombManager : NetworkBehaviour
         }
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
-            RoundManager.rm.DuelLandRetry();
+            RoundManager.rm.DuelLandRetry(true);
         }
     }
 

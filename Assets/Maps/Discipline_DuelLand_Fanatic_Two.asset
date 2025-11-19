@@ -19,13 +19,15 @@ MonoBehaviour:
     rotation: {x: 0, y: 125, z: 0}
     weapon: 7
     armer: 0.5
+    foundDelayTime: 0
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -27.29558, y: 4.8000026, z: 25.053}
     rotation: {x: 0, y: 135, z: 0}
     weapon: 7
     armer: 0.5
-  diffenderPos: {x: 0, y: 0, z: 0}
+    foundDelayTime: 0
+  defenderPos: {x: 0, y: 0, z: 0}
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
   mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
     type: 3}

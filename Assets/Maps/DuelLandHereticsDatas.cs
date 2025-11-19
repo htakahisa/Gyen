@@ -17,9 +17,10 @@ public class DuelLandHereticsDatas : ScriptableObject
         public int moveVector;
         public float moveAsScriptTime;
         public bool movingAsScript;
+        public float foundDelayTime;
 
 
-        public ObjectAndPosition(GameObject prefab, Vector3 position, Vector3 rotation, WeaponType weapon, float armer, int moveVector, float moveAsScriptTime, bool movingAsScript, float waitForStart)
+        public ObjectAndPosition(GameObject prefab, Vector3 position, Vector3 rotation, WeaponType weapon, float armer, int moveVector, float moveAsScriptTime, bool movingAsScript, float waitForStart, float foundDelayTime)
         {
             this.prefab = prefab;
             this.position = position;
@@ -29,6 +30,7 @@ public class DuelLandHereticsDatas : ScriptableObject
             this.moveVector = moveVector;
             this.moveAsScriptTime = moveAsScriptTime;
             this.movingAsScript = movingAsScript;
+            this.foundDelayTime = foundDelayTime;
         }
     }
 

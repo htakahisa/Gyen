@@ -14,7 +14,7 @@ public class CharacterManager : NetworkBehaviour
     }
     private void Start()
     {
-        GameObject.DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(gameObject);
     }
 
 }

@@ -158,7 +158,7 @@ public class RoundManager : NetworkBehaviour
 
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
         RpcSwitchBuyPhase();
-        StartCoroutine(ResetRound());
+        StartCoroutine(ResetRound(winner == myPlayer));
         GiveCredits(winner, loser);
         GiveRound(winner);
 
@@ -166,13 +166,13 @@ public class RoundManager : NetworkBehaviour
         Invoke("RpcSwitchBattlePhase", 20f);
     }
 
-    public void DuelLandRetry()
+    public void DuelLandRetry(bool win)
     {
         if (hasRoundEnded) return;
         hasRoundEnded = true;
         Round++;
 
-        StartCoroutine(ResetRound());
+        StartCoroutine(ResetRound(win));
     }
 
 
@@ -181,7 +181,8 @@ public class RoundManager : NetworkBehaviour
         //if (currentMode == Mode.ONEVSONE || currentMode == Mode.PRACTICE)
         {
             GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
-            FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser, headshot);
+            FinisherManager.instance.PlayPlayerKillBanner(loser, headshot);
+            FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
         }
     }
 
@@ -241,15 +242,27 @@ public class RoundManager : NetworkBehaviour
         AudioManager.Instance.CmdStopBGM();
     }
 
-    public IEnumerator ResetRound()
+    public IEnumerator ResetRound(bool win)
     {
-        if (isFanatics)
+        if (currentMode == Mode.DUELLAND)
         {
-            DuelLandLoad(Random.Range(0, duelLandFanaticsMaps.Count));
-        }
-        else
-        {
-            DuelLandLoad(Random.Range(0, duelLandHereticsMaps.Count));
+            if (isFanatics)
+            {
+                if (win) 
+                {
+                    GetComponent<BadgeManager>().ConfirmBadge(duelLandFanaticsData);
+                }
+                DuelLandLoad(Random.Range(0, duelLandFanaticsMaps.Count));
+            }
+            else
+            {
+                if (win)
+                {
+                    GetComponent<BadgeManager>().ConfirmBadge(duelLandHereticsData);
+                }
+                DuelLandLoad(Random.Range(0, duelLandHereticsMaps.Count));
+            }
+            
         }
         StartCoroutine(ResetPlayers());
 
@@ -314,6 +327,7 @@ public class RoundManager : NetworkBehaviour
                     prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
                     prefab.GetComponent<BotManager>().weapon = gimmickData.weapon;
                     prefab.GetComponent<BotManager>().armer = gimmickData.armer;
+                    prefab.GetComponent<BotManager>().foundDelayTime = gimmickData.foundDelayTime;
                     NetworkServer.Spawn(prefab);
                     spawns.Add(prefab);
                     spawnedIndex.Add(index);
@@ -379,6 +393,7 @@ public class RoundManager : NetworkBehaviour
             prefab.GetComponent<BotManager>().moveVector = gimmickData.moveVector;
             prefab.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
             prefab.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
+            prefab.GetComponent<BotManager>().foundDelayTime = gimmickData.foundDelayTime;
             NetworkServer.Spawn(prefab);
             spawns.Add(prefab);
             spawnedIndex.Add(index);
@@ -730,7 +745,7 @@ public class RoundManager : NetworkBehaviour
         botCount += i;
         if(botCount <= 0)
         {
-            DuelLandRetry();
+            DuelLandRetry(true);
         }
     }
 

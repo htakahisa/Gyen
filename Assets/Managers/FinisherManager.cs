@@ -20,10 +20,8 @@ public class FinisherManager : NetworkBehaviour
 
     // ÉâÉEÉìÉhèIóπéûÇ…åƒÇ‘
     [Server]
-    public void PlayPlayerFinisher(WeaponDatabase weaponData, GameObject losePlayer, bool headshot)
+    public void PlayPlayerKillBanner(GameObject losePlayer, bool headshot)
     {
-        GameObject prefab = GetFinisher(weaponData.weaponName);
-        Vector3 pos = losePlayer.transform.position + losePlayer.transform.up;
 
         Sprite icon = normalIcon;
 
@@ -49,6 +47,14 @@ public class FinisherManager : NetworkBehaviour
         NetworkConnection conn = winnerPlayer.GetComponent<NetworkIdentity>().connectionToClient;
 
         KillCircleUI.Instance.TargetPlayEffect(conn, icon.name, headshot);
+
+    }
+
+    [Server]
+    public void PlayPlayerFinisher(WeaponDatabase weaponData, GameObject losePlayer)
+    {
+        GameObject prefab = GetFinisher(weaponData.weaponName);
+        Vector3 pos = losePlayer.transform.position + losePlayer.transform.up;
 
         if (prefab != null)
         {

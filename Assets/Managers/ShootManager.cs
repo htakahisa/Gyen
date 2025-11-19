@@ -51,6 +51,9 @@ namespace StarterAssets
         private bool currentFireState;
         private bool lastFireState = false;
 
+        public bool hasFound;
+        Coroutine foundDelayCoroutine;
+
         private Animator _animator;
 
 
@@ -198,12 +201,12 @@ namespace StarterAssets
             {
                 if (IsZooming && currentWeapon.burst != 0)
                 {
-                    if (BotCanShoot(false))
+                    if (BotCanShoot())
                     {
                         StartCoroutine(BurstFire());
                     }
                 }
-                else if (BotCanShoot(currentWeapon.isAuto))
+                else if (BotCanShoot())
                 {
                     ShootWeapon();
                 }
@@ -280,7 +283,7 @@ namespace StarterAssets
                     StopCoroutine(recoilBounce);
                 }
                 
-                if (Input.GetMouseButton(3))
+                if (Input.GetMouseButton(3) && GetComponentInParent<BotManager>() == null)
                 {   
 
                     Transform myhead;
@@ -426,8 +429,10 @@ namespace StarterAssets
             return timeSinceLastAttack >= currentWeapon.rate;
             
         }
-        public bool BotCanShoot(bool Auto)
+        public bool BotCanShoot()
         {
+
+            if (!hasFound) return false;
             Vector3 position = RoundManager.rm.GetMyPlayer().transform.position;
             position.y += 2f;
 
@@ -449,6 +454,39 @@ namespace StarterAssets
 
         }
 
+        public void FoundDelay(float foundDelayTime)
+        {
+            if (hasFound) return;
+            if(foundDelayCoroutine == null)
+            {
+                foundDelayCoroutine = StartCoroutine(FoundDelayCoroutine(foundDelayTime));
+            }
+        }
+
+        public IEnumerator FoundDelayCoroutine(float foundDelayTime)
+        {
+
+            // 条件が成立するまでループ
+            while (true)
+            {
+                // 毎フレーム最新のプレイヤー位置を取得
+                Vector3 position = RoundManager.rm.GetMyPlayer().transform.position;
+                position.y += 2f;
+
+                // Linecast の結果をチェック
+                bool hit = Physics.Linecast(_mainCamera.transform.position, position, wallMask);
+
+                // 条件成立したらループを抜ける
+                if (!hit)
+                    break;
+
+                // 1フレーム待つ（position を毎フレーム更新させるため）
+                yield return null;
+            }
+
+            yield return new WaitForSeconds(foundDelayTime);
+            hasFound = true;
+        }
 
 
         // リコイル処理のコルーチン

@@ -134,7 +134,7 @@ public class HpMaster : NetworkBehaviour
         {
             ResetHp();
             GetComponent<BotManager>().ResetPos();
-            FinisherManager.instance.PlayPlayerFinisher(RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), gameObject, headshot);
+            FinisherManager.instance.PlayPlayerKillBanner(gameObject, headshot);
         }
         if (onDeath == EventOnDeath.DESTROY)
         {
@@ -207,7 +207,7 @@ public class HpMaster : NetworkBehaviour
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
             GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
-            RoundManager.rm.DuelLandRetry();
+            RoundManager.rm.DuelLandRetry(false);
         }
         if (onDeath == EventOnDeath.DUELLANDKILL)
         {
@@ -215,6 +215,7 @@ public class HpMaster : NetworkBehaviour
             {
                 RoundManager.rm.AddBotCount(-1);
             }
+            FinisherManager.instance.PlayPlayerKillBanner(gameObject, headshot);
             NetworkServer.Destroy(gameObject);
         }
     }

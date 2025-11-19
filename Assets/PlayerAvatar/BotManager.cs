@@ -27,6 +27,7 @@ public class BotManager : NetworkBehaviour
     public int moveVector;
     public float moveAsScriptTime;
     public bool movingAsScript;
+    public float foundDelayTime;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public void Start()
@@ -59,6 +60,7 @@ public class BotManager : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        sm.FoundDelay(foundDelayTime);
         if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() == 0 && tpc.Grounded)
         {
             sm.BotShoot();
