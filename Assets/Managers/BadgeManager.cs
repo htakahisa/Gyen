@@ -40,6 +40,14 @@ public class BadgeManager : MonoBehaviour
                 sync.CmdAddBadge(badge); 
             }
         }
+        var UIManager = BadgeUIManager.Instance;
+        if (UIManager != null)
+        {
+            foreach (var badge in havingBadges)
+            {
+                UIManager.AddBadge(badge);
+            }
+        }
         // •û–@1: foreach‚Åo—Í
         foreach (var badge in havingBadges)
         {

@@ -61,6 +61,7 @@ public class BotManager : NetworkBehaviour
     void Update()
     {
         sm.FoundDelay(foundDelayTime);
+        sm.UnFound();
         if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() == 0 && tpc.Grounded)
         {
             sm.BotShoot();
@@ -78,7 +79,7 @@ public class BotManager : NetworkBehaviour
                 }
 
                 // 移動実行
-                tpc.BotMove(currentMoveDirection, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchTime < crouchDuration);
+                tpc.BotMove(currentMoveDirection, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchTime < crouchDuration && sm.hasFound);
                 moveTime += Time.deltaTime;
 
                 // 移動時間が終了したらリセット

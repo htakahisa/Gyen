@@ -1,5 +1,6 @@
 using Mirror;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class BadgeSync : NetworkBehaviour
 {
@@ -7,7 +8,10 @@ public class BadgeSync : NetworkBehaviour
 
     private void Update()
     {
-        UpdateUI();
+        if (SceneManager.GetActiveScene().name == "Loading")
+        {
+            UpdateUI();
+        }
     }
 
     void UpdateUI()

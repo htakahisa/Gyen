@@ -534,9 +534,12 @@ namespace StarterAssets
             }
             if (GetComponentInParent<BotManager>() != null)
             {
-                // 補正対象の敵を検索
-                targetEnemy = FindBestEnemyTarget();
-                BotApplyAimAssist();
+                if (GetComponent<ShootManager>().hasFound)
+                {
+                    // 補正対象の敵を検索
+                    targetEnemy = FindBestEnemyTarget();
+                    BotApplyAimAssist(); 
+                }
             }
         }
 

@@ -22,6 +22,8 @@ public class BadgeUIManager : MonoBehaviour
 
     public GameObject remotePanelParent;
 
+    public readonly List<Badges> havingBadgesList = new List<Badges>();
+
     void Awake()
     {
         Instance = this;
@@ -33,6 +35,16 @@ public class BadgeUIManager : MonoBehaviour
         {
             remotePanelParent.SetActive(false);
         }
+        else
+        {
+            UpdateLocalUI(havingBadgesList);
+        }
+    }
+
+    public void AddBadge(Badges badge)
+    {
+        if (!havingBadgesList.Contains(badge))
+            havingBadgesList.Add(badge);
     }
 
     void Start()

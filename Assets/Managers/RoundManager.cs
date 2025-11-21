@@ -132,6 +132,11 @@ public class RoundManager : NetworkBehaviour
         {
             StartCoroutine(ResetPlayers());
         }
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            DuelLandLoad(1);
+            ServerResetAllObjects();
+        }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             DuelLandLoad(2);

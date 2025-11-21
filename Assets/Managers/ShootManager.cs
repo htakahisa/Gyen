@@ -433,10 +433,7 @@ namespace StarterAssets
         {
 
             if (!hasFound) return false;
-            Vector3 position = RoundManager.rm.GetMyPlayer().transform.position;
-            position.y += 2f;
 
-            if (Physics.Linecast(_mainCamera.transform.position, position, wallMask)) return false;
             if (!canShoot) return false;
 
             WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
@@ -453,6 +450,23 @@ namespace StarterAssets
             return timeSinceLastAttack >= currentWeapon.rate;
 
         }
+
+        public void UnFound()
+        {
+            Vector3 position = RoundManager.rm.GetMyPlayer().transform.position;
+            position.y += 2f;
+
+            if(Physics.Linecast(_mainCamera.transform.position, position, wallMask))
+            {
+                hasFound = false;
+                if (foundDelayCoroutine != null)
+                {
+                    StopCoroutine(foundDelayCoroutine);
+                    foundDelayCoroutine = null;
+                }
+            }
+        }
+
 
         public void FoundDelay(float foundDelayTime)
         {
