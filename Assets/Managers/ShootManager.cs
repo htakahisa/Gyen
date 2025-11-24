@@ -2,7 +2,9 @@ using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityGLTF;
 using static WeaponManager;
 
 namespace StarterAssets
@@ -240,21 +242,27 @@ namespace StarterAssets
         private IEnumerator Zoom()
         {
             WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
-            if (currentWeapon != null)
+            if (currentWeapon == null || !currentWeapon.zoomable)
+                yield break;
+
+            float duration = currentWeapon.zoomSpeed;        // ← ズームにかけたい秒数（例: 0.25f）
+            float startFOV = _CameraComponent.fieldOfView;   // 現在のFOV
+            float endFOV = currentWeapon.zoomRatio;          // ズーム後のFOV
+            float elapsed = 0f;
+
+            while (elapsed < duration)
             {
-                if (currentWeapon.zoomable)
-                {
-                    while (currentWeapon.zoomRatio < _CameraComponent.fieldOfView)
-                    {
-                        _CameraComponent.fieldOfView -= 1;
-                        yield return new WaitForSeconds(currentWeapon.zoomSpeed / (74.03f - currentWeapon.zoomRatio));
-                    }
-                    IsZooming = true;
-                }
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+
+                // フレームレートに依存しない滑らかなズーム補間
+                _CameraComponent.fieldOfView = Mathf.Lerp(startFOV, endFOV, t);
+
+                yield return null;  // 次のフレームまで待つ（フレームレートに依存しない）
             }
 
-           
-            
+            _CameraComponent.fieldOfView = endFOV;
+            IsZooming = true;
         }
 
         public void ResetZoom()
@@ -451,56 +459,78 @@ namespace StarterAssets
 
         }
 
-        public void UnFound()
-        {
-            Vector3 position = RoundManager.rm.GetMyPlayer().transform.position;
-            position.y += 2f;
 
-            if(Physics.Linecast(_mainCamera.transform.position, position, wallMask))
-            {
-                hasFound = false;
-                if (foundDelayCoroutine != null)
-                {
-                    StopCoroutine(foundDelayCoroutine);
-                    foundDelayCoroutine = null;
-                }
-            }
+        public void StartFoundDelay(float foundDelayTime)
+        {
+            // すでにコルーチンが動いていれば何もしない
+            if (foundDelayCoroutine != null) return;
+
+            foundDelayCoroutine = StartCoroutine(FoundDelayCoroutine(foundDelayTime));
         }
 
-
-        public void FoundDelay(float foundDelayTime)
+        public void StopFoundDelay()
         {
-            if (hasFound) return;
-            if(foundDelayCoroutine == null)
+            // コルーチンが動いていれば停止
+            if (foundDelayCoroutine != null)
             {
-                foundDelayCoroutine = StartCoroutine(FoundDelayCoroutine(foundDelayTime));
+                StopCoroutine(foundDelayCoroutine);
+                foundDelayCoroutine = null;
             }
+
+            hasFound = false; // 敵が見えなくなったのでフラグリセット
         }
 
-        public IEnumerator FoundDelayCoroutine(float foundDelayTime)
+        private IEnumerator FoundDelayCoroutine(float foundDelayTime)
         {
+            var tpc = GetComponentInChildren<ThirdPersonController>();
+            tpc.BotRefreshEnemyTargets();
 
-            // 条件が成立するまでループ
             while (true)
             {
-                // 毎フレーム最新のプレイヤー位置を取得
-                Vector3 position = RoundManager.rm.GetMyPlayer().transform.position;
-                position.y += 2f;
+                // 敵が見えない場合はコルーチンを終了してフラグを戻す
+                if (!CanSeeAnyEnemy(tpc))
+                {
+                    hasFound = false;
+                    foundDelayCoroutine = null;
+                    yield break;
+                }
 
-                // Linecast の結果をチェック
-                bool hit = Physics.Linecast(_mainCamera.transform.position, position, wallMask);
+                // 敵が見える場合はフラグを true にして処理を進める
+                hasFound = true;
 
-                // 条件成立したらループを抜ける
-                if (!hit)
-                    break;
+                // 遅延処理
+                yield return new WaitForSeconds(foundDelayTime);
 
-                // 1フレーム待つ（position を毎フレーム更新させるため）
+                // フラグは保持したままループして次フレームもチェック
                 yield return null;
             }
-
-            yield return new WaitForSeconds(foundDelayTime);
-            hasFound = true;
         }
+
+        private bool CanSeeAnyEnemy(ThirdPersonController tpc)
+        {
+            Vector3 camPos = _mainCamera.transform.position;
+
+            foreach (var target in tpc.enemiesForBot)
+            {
+                var cols = target.GetComponentsInChildren<Collider>();
+
+                foreach (var col in cols)
+                {
+                    Vector3 pos = col.bounds.center;
+
+                    if (!Physics.Linecast(camPos, pos, wallMask))
+                    {
+                        return true; // 1つでも見えれば true
+                    }
+                }
+            }
+
+            return false; // 全部壁越しなら false
+        }
+
+
+
+
 
 
         // リコイル処理のコルーチン

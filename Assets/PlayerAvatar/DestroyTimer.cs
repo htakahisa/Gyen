@@ -15,6 +15,11 @@ public class DestroyTimer : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdDestroy()
     {
+        if (time == 0)
+        {
+            Debug.Log("destruction was canceled because time was set to 0");
+            return;
+        }
         if (onTimeOut == OnTimeOut.DESTROY)
         {
             NetworkServer.Destroy(gameObject);

@@ -132,6 +132,11 @@ public class RoundManager : NetworkBehaviour
         {
             StartCoroutine(ResetPlayers());
         }
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            DuelLandLoad(0);
+            ServerResetAllObjects();
+        }
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             DuelLandLoad(1);
@@ -336,6 +341,27 @@ public class RoundManager : NetworkBehaviour
                     NetworkServer.Spawn(prefab);
                     spawns.Add(prefab);
                     spawnedIndex.Add(index);
+                }
+                foreach (var standing in duelLandFanaticsData.standingGimmicks)
+                {
+                    GameObject gimmick = standing.prefab;
+                    GameObject prefab = Instantiate(gimmick, standing.position, Quaternion.Euler(standing.rotation));
+                    if (prefab.GetComponent<CharacterTransfromNetwork>() != null)
+                    {
+                        prefab.GetComponent<CharacterTransfromNetwork>().yaw = standing.rotation.y;
+                    }
+                    if (prefab.GetComponent<BotManager>() != null)
+                    {
+                        prefab.GetComponent<BotManager>().weapon = standing.weapon;
+                        prefab.GetComponent<BotManager>().armer = standing.armer;
+                        prefab.GetComponent<BotManager>().foundDelayTime = standing.foundDelayTime;
+                    }
+                    if(prefab.GetComponent<DestroyTimer>() != null)
+                    {
+                        prefab.GetComponent<DestroyTimer>().time = 0;
+                    }
+                    NetworkServer.Spawn(prefab);
+                    spawns.Add(prefab);
                 }
             }
             else

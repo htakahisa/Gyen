@@ -65,7 +65,7 @@ MonoBehaviour:
     foundDelayTime: 0.2
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -17.431503, y: 4.8000007, z: 19.925}
+    position: {x: -17.411575, y: 4.800001, z: 19.290936}
     rotation: {x: 0, y: -90, z: 0}
     weapon: 8
     armer: 0.5

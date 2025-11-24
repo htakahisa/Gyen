@@ -60,8 +60,7 @@ public class BotManager : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        sm.FoundDelay(foundDelayTime);
-        sm.UnFound();
+        sm.StartFoundDelay(foundDelayTime);
         if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() == 0 && tpc.Grounded)
         {
             sm.BotShoot();

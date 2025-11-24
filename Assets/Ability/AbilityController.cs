@@ -149,7 +149,10 @@ public class AbilityController : NetworkBehaviour
         {
             GetComponentInChildren<ThirdPersonController>().CmdResetSpeed();
             GetComponentInChildren<ShootManager>().ResetZoom();
-            GetComponentInChildren<WeaponManager>().StopCoroutine(GetComponentInChildren<WeaponManager>().reloadCoroutine);
+            if (GetComponentInChildren<WeaponManager>().reloadCoroutine != null)
+            {
+                GetComponentInChildren<WeaponManager>().StopCoroutine(GetComponentInChildren<WeaponManager>().reloadCoroutine);
+            }
             GetComponent<HpMaster>().isInvincible = true;
             nowControlled = objectList.FirstOrDefault(obj => obj.name == "YellowObject");
             if (isLocalPlayer)

@@ -29,6 +29,7 @@ public class DuelLandFanaticsDatas : ScriptableObject
 
     // Inspector‚Åİ’è‰Â”\‚É‚·‚é
     public List<ObjectAndPosition> gimmicks = new List<ObjectAndPosition>();
+    public List<ObjectAndPosition> standingGimmicks = new List<ObjectAndPosition>();
     public Vector3 defenderPos;
     public Vector3 spikePos;
     public GameObject mapPrefab;

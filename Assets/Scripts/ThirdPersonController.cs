@@ -161,7 +161,7 @@ namespace StarterAssets
 
         private float botAssistRangee = 200f;       // 敵を補正対象とする最大距離
         private float botMaxAssistAngle = 400f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
-        private float botAssistStrength = 240f;      // 補正の強さ（回転スピード）
+        private float botAssistStrength = 380f;      // 補正の強さ（回転スピード）
 
         public List<Transform> enemies = new List<Transform>();   // 敵のキャッシュリスト
         public List<Transform> enemiesForBot = new List<Transform>();   // 敵のキャッシュリスト
@@ -534,12 +534,10 @@ namespace StarterAssets
             }
             if (GetComponentInParent<BotManager>() != null)
             {
-                if (GetComponent<ShootManager>().hasFound)
-                {
-                    // 補正対象の敵を検索
-                    targetEnemy = FindBestEnemyTarget();
-                    BotApplyAimAssist(); 
-                }
+                // 補正対象の敵を検索
+                targetEnemy = FindBestEnemyTarget();
+                BotApplyAimAssist(); 
+                
             }
         }
 

@@ -19,36 +19,57 @@ MonoBehaviour:
     rotation: {x: 0, y: 90, z: 0}
     weapon: 7
     armer: 0.5
+    foundDelayTime: 0.15
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -18.809412, y: 8.8, z: 25.146198}
-    rotation: {x: 0, y: 165, z: 0}
+    rotation: {x: 0, y: 180, z: 0}
     weapon: 7
     armer: 0.5
+    foundDelayTime: 0.15
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -38.006863, y: -0.7999983, z: 19.364563}
-    rotation: {x: 0, y: -20, z: 0}
+    rotation: {x: 0, y: -30, z: 0}
     weapon: 7
     armer: 0.5
+    foundDelayTime: 0.15
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -36.70698, y: -3.199999, z: 6.205773}
+    position: {x: -35.068752, y: -1.5999982, z: 7.2955523}
     rotation: {x: 0, y: -5, z: 0}
     weapon: 7
     armer: 0.5
+    foundDelayTime: 0.15
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -52.251, y: -0.00000047683716, z: -3.685}
-    rotation: {x: 0, y: 90, z: 0}
+    position: {x: -49.554806, y: -3.1999984, z: 14.370686}
+    rotation: {x: 0, y: 45, z: 0}
     weapon: 7
     armer: 0.5
+    foundDelayTime: 0.15
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -47.7201, y: 3.5730014, z: 33.08766}
-    rotation: {x: 0, y: 20, z: 0}
+    position: {x: -17.18488, y: 4.800001, z: 19.957392}
+    rotation: {x: 0, y: 160, z: 0}
     weapon: 7
     armer: 0.5
+    foundDelayTime: 0.15
+  standingGimmicks:
+  - prefab: {fileID: 3539715179979286606, guid: f6640a8a82c26614c8f80227a4f15d91,
+      type: 3}
+    position: {x: -38.67, y: -0.81, z: 25.69}
+    rotation: {x: 0, y: 0, z: 0}
+    weapon: 0
+    armer: 0
+    foundDelayTime: 0
+  - prefab: {fileID: 3539715179979286606, guid: f6640a8a82c26614c8f80227a4f15d91,
+      type: 3}
+    position: {x: -14.908281, y: 5.95, z: 9.624921}
+    rotation: {x: 0, y: 0, z: 0}
+    weapon: 0
+    armer: 0
+    foundDelayTime: 0
   defenderPos: {x: 0, y: 0, z: 0}
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
   mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
