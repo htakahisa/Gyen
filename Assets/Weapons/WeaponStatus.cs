@@ -21,7 +21,7 @@ public class WeaponStatus
         RapetPuppet,
         Violets,
         Rebelliousness,
-
+        Share,
 
     }
 

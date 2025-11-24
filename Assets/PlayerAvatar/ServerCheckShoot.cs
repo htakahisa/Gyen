@@ -14,7 +14,7 @@ public class ServerCheckShoot : NetworkBehaviour
     public float maxDistance = 100f;
     public float lineDuration = 0.05f;
 
-    private LineRenderer lineRenderer;
+    public LineRenderer lineRenderer;
 
     public static float headShot;
 
@@ -30,12 +30,11 @@ public class ServerCheckShoot : NetworkBehaviour
     public LayerMask ground;   // ï«Ç‚è·äQï®ÇÃLayerÇéwíË
 
     public SyncList<GameObject> darkOrbPrefabs = new SyncList<GameObject>();
+    Coroutine drawCoroutine;
 
     // Start is called before the first frame update
     void Awake()
     {
-
-        lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.positionCount = 2;
         lineRenderer.enabled = false;
     }
@@ -302,10 +301,15 @@ public class ServerCheckShoot : NetworkBehaviour
             endPoint = hit.point;
         }
 
-        StartCoroutine(ShowLine(origin, endPoint));
+        if(drawCoroutine != null)
+        {
+            StopCoroutine(drawCoroutine);
+            drawCoroutine = null;
+        }
+        drawCoroutine = StartCoroutine(ShowLine(origin, endPoint));
     }
 
-    private System.Collections.IEnumerator ShowLine(Vector3 start, Vector3 end)
+    private IEnumerator ShowLine(Vector3 start, Vector3 end)
     {
         lineRenderer.SetPosition(0, start);
         lineRenderer.SetPosition(1, end);

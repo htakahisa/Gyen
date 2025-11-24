@@ -897,6 +897,7 @@ MonoBehaviour:
   transformNetwork: {fileID: -4732923928998472460}
   parentOfPlayer: {fileID: 3543936278411775571}
   hazardScope: {fileID: 2517295520851128215}
+  hasFound: 0
 --- !u!114 &1470853562863111889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1019,6 +1020,14 @@ MonoBehaviour:
     dataBase: {fileID: 11400000, guid: 04cfe3358ec8a1b4a915c1b8ce0f0067, type: 2}
     instance: {fileID: 0}
     isOwned: 0
+  - currentAmmo: 0
+    weaponIndex: 13
+    weaponType: 13
+    weaponPrefab: {fileID: 1224986874259182196, guid: 0603b69d72c28764fa96eabfcfb13007,
+      type: 3}
+    dataBase: {fileID: 11400000, guid: 801fbb43fc0b6c54d8da2684558c0a2d, type: 2}
+    instance: {fileID: 0}
+    isOwned: 0
   magazine: 0
   isReloading: 0
   mainWeaponType: 0
@@ -1044,6 +1053,7 @@ MonoBehaviour:
     m_Bits: 1608
   maxDistance: 100
   lineDuration: 0.1
+  lineRenderer: {fileID: 6959269338981759375}
   Blood: {fileID: 4178278509775477463, guid: 3d0463f291d0351418a22c3bcd66ccdd, type: 3}
   Fragment: {fileID: 6236630861130584601, guid: a87e483792b9d194b8616c7e2be9bdca,
     type: 3}
@@ -3321,6 +3331,7 @@ MonoBehaviour:
   moveVector: 0
   moveAsScriptTime: 0
   movingAsScript: 0
+  foundDelayTime: 0
 --- !u!1 &3561717742706190703
 GameObject:
   m_ObjectHideFlags: 0
