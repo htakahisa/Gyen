@@ -81,7 +81,7 @@ public class ServerCheckShoot : NetworkBehaviour
         Vector3 shootDir = (targetPoint - weaponPos).normalized;
         DrawBulletLine(weaponPos, shootDir, playerObject);
 
-        if (tpc.GetSpeed() == 0 && tpc.Grounded)
+        if (tpc.GetSpeed() <= 0.5f && tpc.Grounded)
         {
             float originalDamage = damage;
             float originalHeadDamage = headDamage;
@@ -145,15 +145,18 @@ public class ServerCheckShoot : NetworkBehaviour
 
                             bool headshot = false;
 
-                            if (hitpoint.collider.tag == "Head")
+                            if (GetComponentInParent<BotManager>() == null)
                             {
-                                headshot = true;
-                                headShot++;
-                            }
-                            else
-                            {
-                                headshot = false;
-                                bodyShot++;
+                                if (hitpoint.collider.tag == "Head")
+                                {
+                                    headshot = true;
+                                    headShot++;
+                                }
+                                else
+                                {
+                                    headshot = false;
+                                    bodyShot++;
+                                }
                             }
 
                             hpMaster.TakeDamage(finalDamage, headshot);
@@ -305,6 +308,8 @@ public class ServerCheckShoot : NetworkBehaviour
         {
             StopCoroutine(drawCoroutine);
             drawCoroutine = null;
+            lineRenderer.SetPosition(0, Vector3.zero);
+            lineRenderer.SetPosition(1, Vector3.zero);
         }
         drawCoroutine = StartCoroutine(ShowLine(origin, endPoint));
     }
@@ -318,6 +323,15 @@ public class ServerCheckShoot : NetworkBehaviour
         yield return new WaitForSeconds(lineDuration);
 
         lineRenderer.enabled = false;
+        drawCoroutine = null;
+        lineRenderer.SetPosition(0, Vector3.zero);
+        lineRenderer.SetPosition(1, Vector3.zero);
+    }
+
+    private void OnDisable()
+    {
+        if (lineRenderer != null)
+            lineRenderer.enabled = false;
     }
 
 }
