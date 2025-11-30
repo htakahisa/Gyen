@@ -48,7 +48,7 @@ public class Tweaks : NetworkBehaviour
                         if (hp != null)
                         {
                             hp.TakeDamage(damage, false);
-                            hp.TakeStun(0.1f, 1);
+                            hp.TakeStun(0.2f, 1);
                         }
                     }
                 }
@@ -65,17 +65,25 @@ public class Tweaks : NetworkBehaviour
         foreach (var t in targets)
         {
             // 自分自身ならスキップ
-            var netIdentity = t.GetComponentInParent<NetworkIdentity>();
+            var identity = t.GetComponentInParent<NetworkIdentity>();
 
-            //NetworkIdentityがあることを確認、対象のオブジェクトのオーナーが自分だった場合かつ、これがプラクティスで相手がボットであるというわけでもない場合にそれを無効のターゲットとしてやり直す
-            if (netIdentity == null) continue;             
-            if (t.GetComponentInParent<SpawnOwner>() != null)
+            if (GetComponent<SpawnOwner>().ownerNetId != 12345)
             {
-                if (t.GetComponentInParent<SpawnOwner>().WhoseThis() == GetComponentInParent<SpawnOwner>().WhoseThis()) continue;
+                //NetworkIdentityがあることを確認、対象のオブジェクトのオーナーが自分だった場合かつ、これがプラクティスで相手がボットであるというわけでもない場合にそれを無効のターゲットとしてやり直す
+                if (identity == null) continue;
+                if (t.GetComponentInParent<SpawnOwner>() != null)
+                {
+                    if (t.GetComponentInParent<SpawnOwner>().WhoseThis() == GetComponentInParent<SpawnOwner>().WhoseThis()) continue;
+                }
+                else
+                {
+                    if (CheckAuthority(identity, GetComponentInParent<SpawnOwner>().WhoseThis())) continue;
+                }
             }
             else
             {
-                if (CheckAuthority(netIdentity, GetComponentInParent<SpawnOwner>().WhoseThis())) continue;
+                if (gameObject == identity.gameObject) continue;
+                if (RoundManager.rm.IsGameObjectSpawnedAsGimmick(identity.gameObject)) continue;
             }
 
             float dist = Vector3.Distance(transform.position, t.transform.position);

@@ -20,8 +20,8 @@ MonoBehaviour:
   defaultMaxAssistAngle: 6
   defaultAssistStrength: 10
   defaultFootStepTime: 1
-  defaultGroundAcceleration: 12
-  defaultGroundDeceleration: 10
+  defaultGroundAcceleration: 10
+  defaultGroundDeceleration: 20
   defaultAirControl: 0.3
   defaultMaxAirSpeedMultiplier: 0.9
   defaultCounterStrafeStrength: 15

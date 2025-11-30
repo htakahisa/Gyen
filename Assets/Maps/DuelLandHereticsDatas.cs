@@ -20,7 +20,7 @@ public class DuelLandHereticsDatas : ScriptableObject
         public float foundDelayTime;
 
 
-        public ObjectAndPosition(GameObject prefab, Vector3 position, Vector3 rotation, WeaponType weapon, float armer, int moveVector, float moveAsScriptTime, bool movingAsScript, float waitForStart, float foundDelayTime)
+        public ObjectAndPosition(GameObject prefab, Vector3 position, Vector3 rotation, WeaponType weapon, float armer, int moveVector, float moveAsScriptTime, bool movingAsScript, float foundDelayTime)
         {
             this.prefab = prefab;
             this.position = position;
@@ -32,10 +32,34 @@ public class DuelLandHereticsDatas : ScriptableObject
             this.movingAsScript = movingAsScript;
             this.foundDelayTime = foundDelayTime;
         }
+
+    }
+    [System.Serializable]
+    public struct ObjectWithBot
+    {
+        public GameObject prefab;
+        public Vector3 position;
+        public Vector3 rotation;
+        public int withIndex;
+        public float delayTime;
+        public float probability;
+
+        public ObjectWithBot(GameObject prefab, Vector3 position, Vector3 rotation, int withIndex, float delayTime, float probability)
+        {
+            this.prefab = prefab;
+            this.position = position;
+            this.rotation = rotation;
+            this.withIndex = withIndex;
+            this.delayTime = delayTime;
+            this.probability = probability;
+        }
+
     }
 
     // InspectorÇ≈ê›íËâ¬î\Ç…Ç∑ÇÈ
     public List<ObjectAndPosition> gimmicks = new List<ObjectAndPosition>();
+    public List<ObjectWithBot> gimmicksWithBot = new List<ObjectWithBot>();
+    public List<ObjectAndPosition> standingGimmicks = new List<ObjectAndPosition>();
     public Vector3 attackerPos;
     public Vector3 attackerRot;
     public Vector3 spikePos;

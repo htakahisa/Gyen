@@ -81,7 +81,7 @@ public class ServerCheckShoot : NetworkBehaviour
         Vector3 shootDir = (targetPoint - weaponPos).normalized;
         DrawBulletLine(weaponPos, shootDir, playerObject);
 
-        if (tpc.GetSpeed() <= 0.5f && tpc.Grounded)
+        if (tpc.GetSpeed() <= 0.7f && tpc.Grounded)
         {
             float originalDamage = damage;
             float originalHeadDamage = headDamage;

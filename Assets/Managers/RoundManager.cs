@@ -42,6 +42,8 @@ public class RoundManager : NetworkBehaviour
     public bool doesBotShoot = true;
     public List<int> spawnedIndex = new List<int>();
 
+    public List<GameObject> spawnedGimmicks = new List<GameObject>();
+
     public static List<GameObject> spawns = new List<GameObject>();
 
     [System.Serializable]
@@ -339,6 +341,7 @@ public class RoundManager : NetworkBehaviour
                     prefab.GetComponent<BotManager>().armer = gimmickData.armer;
                     prefab.GetComponent<BotManager>().foundDelayTime = gimmickData.foundDelayTime;
                     NetworkServer.Spawn(prefab);
+                    spawnedGimmicks.Add(prefab);
                     spawns.Add(prefab);
                     spawnedIndex.Add(index);
                 }
@@ -361,7 +364,25 @@ public class RoundManager : NetworkBehaviour
                         prefab.GetComponent<DestroyTimer>().time = 0;
                     }
                     NetworkServer.Spawn(prefab);
+                    spawnedGimmicks.Add(prefab);
                     spawns.Add(prefab);
+                }
+                // クライアント側でオブジェクトをリセット
+                foreach (var item in respawns)
+                {
+                    if (item.prefab != null)
+                    {
+                        ObjectSpawn(item.prefab, item.position);
+                        if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
+                        {
+                            item.prefab.GetComponent<CharacterTransfromNetwork>().yaw = item.prefab.GetComponent<CharacterTransfromNetwork>().yaw;
+                            item.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, item.prefab.GetComponent<CharacterTransfromNetwork>().yaw, transform.rotation.eulerAngles.z);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Prefabが設定されていません。");
+                    }
                 }
             }
             else
@@ -378,23 +399,6 @@ public class RoundManager : NetworkBehaviour
             }
         }
 
-        // クライアント側でオブジェクトをリセット
-        foreach (var item in respawns)
-        {
-            if (item.prefab != null)
-            {
-                ObjectSpawn(item.prefab, item.position);
-                if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
-                {
-                    item.prefab.GetComponent<CharacterTransfromNetwork>().yaw = item.prefab.GetComponent<CharacterTransfromNetwork>().yaw;
-                    item.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, item.prefab.GetComponent<CharacterTransfromNetwork>().yaw, transform.rotation.eulerAngles.z);
-                }
-            }
-            else
-            {
-                Debug.LogWarning("Prefabが設定されていません。");
-            }
-        }
 
         StartCoroutine(BombArmCoroutine());
 #if !UNITY_EDITOR
@@ -405,30 +409,123 @@ public class RoundManager : NetworkBehaviour
 
     public IEnumerator SpawnBotCoroutine(int gimmicks)
     {
+
         botCount = gimmicks;
         for (; spawnedIndex.Count < gimmicks;)
         {
+
             int index = Random.Range(0, duelLandHereticsData.gimmicks.Count);
             var gimmickData = duelLandHereticsData.gimmicks[index];
             GameObject gimmick = gimmickData.prefab;
 
             if (spawnedIndex.Contains(index)) continue;
+
             yield return new WaitWhile(() => botCount + spawnedIndex.Count != gimmicks);
+
+            foreach (var spawn in spawns)
+            {
+                NetworkServer.Destroy(spawn);
+            }
+
+            foreach (var item in respawns)
+            {
+                if (item.prefab != null)
+                {
+                    ObjectSpawn(item.prefab, item.position);
+                    if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
+                    {
+                        item.prefab.GetComponent<CharacterTransfromNetwork>().yaw = item.prefab.GetComponent<CharacterTransfromNetwork>().yaw;
+                        item.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, item.prefab.GetComponent<CharacterTransfromNetwork>().yaw, transform.rotation.eulerAngles.z);
+                    }
+
+                }
+                else
+                {
+                    Debug.LogWarning("Prefabが設定されていません。");
+                }
+            }
+
             yield return new WaitForSeconds(duelLandHereticsData.waitForSecondsList[spawnedIndex.Count]);
 
+            foreach (var standing in duelLandHereticsData.standingGimmicks)
+            {
+                GameObject stand = standing.prefab;
+                GameObject prefab = Instantiate(stand, standing.position, Quaternion.Euler(standing.rotation));
+                if (prefab.GetComponent<CharacterTransfromNetwork>() != null)
+                {
+                    prefab.GetComponent<CharacterTransfromNetwork>().yaw = standing.rotation.y;
+                }
+                if (prefab.GetComponent<BotManager>() != null)
+                {
+                    prefab.GetComponent<BotManager>().weapon = standing.weapon;
+                    prefab.GetComponent<BotManager>().armer = standing.armer;
+                    prefab.GetComponent<BotManager>().foundDelayTime = standing.foundDelayTime;
+                }
+                if (prefab.GetComponent<DestroyTimer>() != null)
+                {
+                    prefab.GetComponent<DestroyTimer>().time = 0;
+                }
+                prefab.AddComponent<SpawnOwner>().ownerNetId = 12345;
+                NetworkServer.Spawn(prefab);
+                spawnedGimmicks.Add(prefab);
+                spawns.Add(prefab);
+            }
 
-            GameObject prefab = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
-            prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
-            prefab.GetComponent<BotManager>().weapon = gimmickData.weapon;
-            prefab.GetComponent<BotManager>().armer = gimmickData.armer;
-            prefab.GetComponent<BotManager>().moveVector = gimmickData.moveVector;
-            prefab.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
-            prefab.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
-            prefab.GetComponent<BotManager>().foundDelayTime = gimmickData.foundDelayTime;
-            NetworkServer.Spawn(prefab);
-            spawns.Add(prefab);
+            GameObject bot = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
+            bot.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
+            bot.GetComponent<BotManager>().weapon = gimmickData.weapon;
+            bot.GetComponent<BotManager>().armer = gimmickData.armer;
+            bot.GetComponent<BotManager>().moveVector = gimmickData.moveVector;
+            bot.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
+            bot.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
+            bot.GetComponent<BotManager>().foundDelayTime = gimmickData.foundDelayTime;
+            NetworkServer.Spawn(bot);
+            spawnedGimmicks.Add(bot);
+            spawns.Add(bot);
             spawnedIndex.Add(index);
+
+            foreach (var gimmickWithBotData in duelLandHereticsData.gimmicksWithBot)
+            {
+                if (gimmickWithBotData.withIndex != index) continue;
+
+                //probabilityが90なら、90~99の10通りにおいてcontinueで通過しない。つまり100分の90通りにおいて通過するため90%で通過する。
+                if (Random.Range(0, 100) >= gimmickWithBotData.probability) continue;
+
+                GameObject gimmickWithBot = gimmickWithBotData.prefab;
+                GameObject with = Instantiate(gimmickWithBot, gimmickWithBotData.position, Quaternion.Euler(gimmickWithBotData.rotation));
+                with.AddComponent<SpawnOwner>().ownerNetId = 12345;
+                NetworkServer.Spawn(with);
+                spawnedGimmicks.Add(with);
+                spawns.Add(with); 
+            }
+
         }
+
+        yield return new WaitWhile(() => botCount + spawnedIndex.Count != gimmicks);
+
+        foreach (var spawn in spawns)
+        {
+            NetworkServer.Destroy(spawn);
+        }
+
+        foreach (var item in respawns)
+        {
+            if (item.prefab != null)
+            {
+                ObjectSpawn(item.prefab, item.position);
+                if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
+                {
+                    item.prefab.GetComponent<CharacterTransfromNetwork>().yaw = item.prefab.GetComponent<CharacterTransfromNetwork>().yaw;
+                    item.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, item.prefab.GetComponent<CharacterTransfromNetwork>().yaw, transform.rotation.eulerAngles.z);
+                }
+
+            }
+            else
+            {
+                Debug.LogWarning("Prefabが設定されていません。");
+            }
+        }
+
     }
 
 
@@ -778,6 +875,11 @@ public class RoundManager : NetworkBehaviour
         {
             DuelLandRetry(true);
         }
+    }
+
+    public bool IsGameObjectSpawnedAsGimmick(GameObject obj)
+    {
+        return spawnedGimmicks.Contains(obj);    
     }
 
     public enum Phase

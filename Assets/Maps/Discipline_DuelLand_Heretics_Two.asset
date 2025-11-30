@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 189742396791048418dce55c5666b850, type: 3}
+  m_Name: Discipline_DuelLand_Heretics_Two
+  m_EditorClassIdentifier: 
+  gimmicks:
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
+      type: 3}
+    position: {x: -17.694256, y: 4.800001, z: 20.395424}
+    rotation: {x: 0, y: -90, z: 0}
+    weapon: 7
+    armer: 0.5
+    moveVector: -1
+    moveAsScriptTime: 0.5
+    movingAsScript: 1
+    foundDelayTime: 0.25
+  - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
+      type: 3}
+    position: {x: -19.377, y: 4.8000026, z: 26.153225}
+    rotation: {x: 0, y: -180, z: 0}
+    weapon: 7
+    armer: 0.5
+    moveVector: 1
+    moveAsScriptTime: 0.5
+    movingAsScript: 1
+    foundDelayTime: 0.25
+  gimmicksWithBot:
+  - prefab: {fileID: 3539715179979286606, guid: 0db30ad600550f947998e40ca4084f5f,
+      type: 3}
+    position: {x: -17.694256, y: 6.800001, z: 20.395424}
+    rotation: {x: 0, y: -180, z: 0}
+    withIndex: 0
+    delayTime: 0
+    probability: 30
+  - prefab: {fileID: 3539715179979286606, guid: 0db30ad600550f947998e40ca4084f5f,
+      type: 3}
+    position: {x: -19.377, y: 6.800003, z: 26.153225}
+    rotation: {x: 0, y: -90, z: 0}
+    withIndex: 1
+    delayTime: 0
+    probability: 30
+  standingGimmicks:
+  - prefab: {fileID: 3539715179979286606, guid: aa368046966557e49892aa3252f4ac9b,
+      type: 3}
+    position: {x: -35.45, y: 9.425532, z: 15}
+    rotation: {x: 0, y: 0, z: 0}
+    weapon: 0
+    armer: 0
+    moveVector: 0
+    moveAsScriptTime: 0
+    movingAsScript: 0
+    foundDelayTime: 0
+  attackerPos: {x: -33.21456, y: 5.6000004, z: 13.218}
+  attackerRot: {x: 0, y: 90, z: 0}
+  spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
+  mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
+    type: 3}
+  mapName: Discipline_Heretics_Two
+  waitForSecondsList:
+  - 5
+  - 0
+  - 0

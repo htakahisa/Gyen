@@ -442,6 +442,10 @@ namespace StarterAssets
             {
                 return;
             }
+            if (isLocalPlayer || GetComponentInParent<BotManager>() != null)
+            {
+                JumpAndGravity();
+            }
             if (!isLocalPlayer)
             {
                 return;
@@ -450,7 +454,7 @@ namespace StarterAssets
             _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
             _hasAnimator = TryGetComponent(out _animator);
 
-            JumpAndGravity();
+
             if (canMove)
             {
 
@@ -958,7 +962,7 @@ namespace StarterAssets
             // ---- アニメーション ----
             if (_hasAnimator)
             {
-                float targetAnim = _speed * 0.3f; // 実速度の1/3
+                float targetAnim = _speed * 0.1f; // 実速度の1/10
 
                 _animationBlend = Mathf.Lerp(
                     _animationBlend,
@@ -1194,7 +1198,7 @@ namespace StarterAssets
             // ---- アニメーション ----
             if (_hasAnimator)
             {
-                float targetAnim = _speed * 0.3f; // 実速度の1/3
+                float targetAnim = _speed * 0.1f; // 実速度の1/10
 
                 _animationBlend = Mathf.Lerp(
                     _animationBlend,

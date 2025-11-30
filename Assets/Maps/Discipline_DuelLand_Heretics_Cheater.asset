@@ -10,77 +10,119 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 189742396791048418dce55c5666b850, type: 3}
-  m_Name: Discipline_DuelLand_Heretics_TheDual
+  m_Name: Discipline_DuelLand_Heretics_Cheater
   m_EditorClassIdentifier: 
   gimmicks:
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: 7.609565, y: 0, z: 4.2203283}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 0.5
+    moveAsScriptTime: 0.3
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -17.694256, y: 4.800001, z: 20.395424}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 7
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.7
+    moveAsScriptTime: 0.5
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -19.377, y: 4.8000026, z: 26.153225}
     rotation: {x: 0, y: -180, z: 0}
-    weapon: 8
+    weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 1
+    moveAsScriptTime: 0.5
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -19.282, y: 4.800001, z: 26.314}
     rotation: {x: 0, y: -180, z: 0}
-    weapon: 8
+    weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 1
+    moveAsScriptTime: 0.5
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -16.194824, y: 4.800001, z: 19.753204}
+    position: {x: -17.77, y: 4.800001, z: 19.65}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 7
     armer: 0.5
     moveVector: -1
     moveAsScriptTime: 0.5
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -17.411575, y: 4.800001, z: 19.290936}
+    position: {x: -17.411575, y: 4.800001, z: 19.65}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 7
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.5
+    moveAsScriptTime: 0.3
     movingAsScript: 1
-    foundDelayTime: 0.3
-  gimmicksWithBot: []
+    foundDelayTime: 0.25
+  gimmicksWithBot:
+  - prefab: {fileID: 3539715179979286606, guid: aa368046966557e49892aa3252f4ac9b,
+      type: 3}
+    position: {x: -35.45, y: 8.884302, z: 14.051359}
+    rotation: {x: 0, y: 0, z: 0}
+    withIndex: 0
+    delayTime: 0
+    probability: 70
+  - prefab: {fileID: 3539715179979286606, guid: 0db30ad600550f947998e40ca4084f5f,
+      type: 3}
+    position: {x: -17.694256, y: 6.800001, z: 20.395424}
+    rotation: {x: 0, y: -180, z: 0}
+    withIndex: 1
+    delayTime: 0
+    probability: 50
+  - prefab: {fileID: 3539715179979286606, guid: 0db30ad600550f947998e40ca4084f5f,
+      type: 3}
+    position: {x: -19.377, y: 6.800003, z: 26.153225}
+    rotation: {x: 0, y: -90, z: 0}
+    withIndex: 2
+    delayTime: 0
+    probability: 50
+  - prefab: {fileID: 3539715179979286606, guid: 0db30ad600550f947998e40ca4084f5f,
+      type: 3}
+    position: {x: -19.282, y: 6.800001, z: 26.314}
+    rotation: {x: 0, y: -90, z: 0}
+    withIndex: 3
+    delayTime: 0
+    probability: 50
+  - prefab: {fileID: 3539715179979286606, guid: bd31141f5512fd54cb6f630b21bbcc0d,
+      type: 3}
+    position: {x: -31.28984, y: 8.856, z: 13.893}
+    rotation: {x: 0, y: 0, z: 0}
+    withIndex: 4
+    delayTime: 0
+    probability: 70
+  - prefab: {fileID: 3539715179979286606, guid: bd31141f5512fd54cb6f630b21bbcc0d,
+      type: 3}
+    position: {x: -31.28984, y: 8.856, z: 13.893}
+    rotation: {x: 0, y: 0, z: 0}
+    withIndex: 5
+    delayTime: 0
+    probability: 70
   standingGimmicks: []
   attackerPos: {x: -33.21456, y: 5.6000004, z: 13.218}
   attackerRot: {x: 0, y: 90, z: 0}
   spikePos: {x: -38.96819, y: -2.95, z: 15.93516}
   mapPrefab: {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e,
     type: 3}
-  mapName: Discipline_Heretics_TheDual
+  mapName: Discipline_Heretics_Cheater
   waitForSecondsList:
   - 5
   - 2

@@ -130,10 +130,7 @@ public class BotManager : NetworkBehaviour
                 }
 
             }
-            else
-            {
-                tpc.BotStop();
-            }
+
         }
     }
 

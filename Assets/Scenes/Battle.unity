@@ -17615,7 +17615,7 @@ PrefabInstance:
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
       propertyPath: duelLandHereticsMaps.Array.size
-      value: 2
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
@@ -17651,13 +17651,31 @@ PrefabInstance:
         type: 3}
       propertyPath: 'duelLandHereticsMaps.Array.data[0]'
       value: 
-      objectReference: {fileID: 11400000, guid: f477fe016f3b1054e96ae3530acdb14e,
+      objectReference: {fileID: 11400000, guid: 74fabb1deae271d4dbd38c27145cb783,
         type: 2}
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
       propertyPath: 'duelLandHereticsMaps.Array.data[1]'
       value: 
+      objectReference: {fileID: 11400000, guid: f477fe016f3b1054e96ae3530acdb14e,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandHereticsMaps.Array.data[2]'
+      value: 
       objectReference: {fileID: 11400000, guid: 0f4cd965336fa9941a495005e8c98640,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandHereticsMaps.Array.data[3]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 95a94608b3d205b46bfa41af6fba611a,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'duelLandHereticsMaps.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 4e9066346b27d694ca8bb4fcea32846a,
         type: 2}
     - target: {fileID: 4641763803197208681, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
