@@ -49,10 +49,10 @@ public class BotManager : NetworkBehaviour
         while (timer <= moveAsScriptTime)
         {
             timer += Time.deltaTime;
-            tpc.BotMove(moveVector, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, false);
+            tpc.BotMove(moveVector, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, false);
             yield return null;
         }
-        tpc.BotStop();
+        
         movingAsScript = false;
     }
 
@@ -60,25 +60,58 @@ public class BotManager : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        sm.StartFoundDelay(foundDelayTime);
-        if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() == 0 && tpc.Grounded)
+        if (!GetComponent<SpawnOwner>().IsMine() && GetComponent<SpawnOwner>().ownerNetId != 12345) return;
+
+        if(wm.magazine == 0)
         {
-            sm.BotShoot();
+            wm.CmdReload();
         }
+        bool jump = false;
+
+
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
+        {
+            sm.StartFoundDelay(foundDelayTime);
+            if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() <= 0.7f && tpc.Grounded)
+            {
+                sm.BotShoot();
+            }
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
+        {
+            if (RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE) 
+            {
+                sm.StartFoundDelay(foundDelayTime); 
+            }
+            if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() <= 0.7f && tpc.Grounded)
+            {
+                if (RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE)
+                {
+                    sm.BotShoot();
+                }
+            }
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP) return;
         if (!movingAsScript)
         {
             if (RoundManager.rm.currentBotMove != RoundManager.BotMove.STOP)
             {
-                if(RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK || RoundManager.rm.currentBotMove == RoundManager.BotMove.RUN)
-                // 移動時間が終了したら新しい方向を決定
-                if (moveTime <= 0)
+                if (RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK || RoundManager.rm.currentBotMove == RoundManager.BotMove.RUN)
                 {
-                    currentMoveDirection = Random.Range(-1, 2);
-                    moveDuration = Random.Range(0.3f, 1f);
+
+                    if (moveTime <= 0)
+                    {
+                        currentMoveDirection = Random.Range(-1, 2);
+                        moveDuration = Random.Range(0.3f, 1f);
+                    }
+                }
+                else
+                {
+                    currentMoveDirection = 0;
                 }
 
                 // 移動実行
-                tpc.BotMove(currentMoveDirection, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchTime < crouchDuration && sm.hasFound);
+                tpc.BotMove(currentMoveDirection, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchTime < crouchDuration && sm.hasFound);
                 moveTime += Time.deltaTime;
 
                 // 移動時間が終了したらリセット
@@ -95,19 +128,11 @@ public class BotManager : NetworkBehaviour
 
                         if (jumpTime >= jumpDuration)
                         {
-                            tpc.BotJumpAndGravity(true);
+                            jump = true;
                             jumpTime = 0;
                             jumpDuration = Random.Range(1.0f, 5.0f);
                         }
-                        else
-                        {
-                            tpc.BotJumpAndGravity(false);
-                        }
 
-                    }
-                    else
-                    {
-                        tpc.BotJumpAndGravity(false);
                     }
 
                 }
@@ -132,6 +157,8 @@ public class BotManager : NetworkBehaviour
             }
 
         }
+
+        tpc.jumpBot = jump;
     }
 
     public void ResetPos()

@@ -22,7 +22,7 @@ MonoBehaviour:
     moveVector: 1
     moveAsScriptTime: 0.5
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.35
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -17.694256, y: 4.800001, z: 20.395424}
@@ -32,7 +32,7 @@ MonoBehaviour:
     moveVector: -1
     moveAsScriptTime: 0.7
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.35
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -19.377, y: 4.8000026, z: 26.153225}
@@ -42,7 +42,7 @@ MonoBehaviour:
     moveVector: 1
     moveAsScriptTime: 1
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.35
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -19.282, y: 4.800001, z: 26.314}
@@ -52,7 +52,7 @@ MonoBehaviour:
     moveVector: 1
     moveAsScriptTime: 1
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.35
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -16.194824, y: 4.800001, z: 19.753204}
@@ -60,9 +60,9 @@ MonoBehaviour:
     weapon: 8
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.5
+    moveAsScriptTime: 0.6
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.35
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -17.411575, y: 4.800001, z: 19.290936}
@@ -70,9 +70,9 @@ MonoBehaviour:
     weapon: 8
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.5
+    moveAsScriptTime: 0.6
     movingAsScript: 1
-    foundDelayTime: 0.3
+    foundDelayTime: 0.35
   gimmicksWithBot: []
   standingGimmicks: []
   attackerPos: {x: -33.21456, y: 5.6000004, z: 13.218}

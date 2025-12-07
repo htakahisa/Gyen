@@ -17522,6 +17522,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
+      propertyPath: botPrefab
+      value: 
+      objectReference: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
+        type: 3}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
       propertyPath: duelLandData
       value: 
       objectReference: {fileID: 0}
@@ -17567,6 +17573,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
+      propertyPath: doubleTapMaps.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
       propertyPath: 'duelLandMaps.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: 9f8e39fa9ab99f44bb9cab3b26cc1b43,
@@ -17604,6 +17615,12 @@ PrefabInstance:
     - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
       propertyPath: 'oneVsOneMaps.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 78b7f61c399139142ac89127a800f259,
+        type: 2}
+    - target: {fileID: 4477108005606380657, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: 'doubleTapMaps.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: 78b7f61c399139142ac89127a800f259,
         type: 2}
@@ -17727,6 +17744,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5819946418002064921, guid: f7f96b04d01bc6b458db9d82c010dca0,
+        type: 3}
+      propertyPath: headBlood
+      value: 
+      objectReference: {fileID: 8300000, guid: 203f4c3805a500645962bd510447b6d8, type: 3}
     - target: {fileID: 5819946418002064921, guid: f7f96b04d01bc6b458db9d82c010dca0,
         type: 3}
       propertyPath: SpikeCountdown

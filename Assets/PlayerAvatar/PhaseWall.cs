@@ -20,6 +20,10 @@ public class PhaseWall : MonoBehaviour
         {
             phaseWall.SetActive(RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY);
         }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
+        {
+            phaseWall.SetActive(RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY);
+        }
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
             phaseWall.SetActive(false);

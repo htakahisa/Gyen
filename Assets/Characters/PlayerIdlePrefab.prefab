@@ -870,6 +870,7 @@ MonoBehaviour:
   canMove: 1
   lockManager: {fileID: 728472207448528687}
   footStepTime: 0
+  jumpBot: 0
 --- !u!114 &8334744245603090709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -899,6 +900,7 @@ MonoBehaviour:
   parentOfPlayer: {fileID: 3543936278411775571}
   hazardScope: {fileID: 2517295520851128215}
   hasFound: 0
+  head: {fileID: 3627787299491913062}
 --- !u!114 &1470853562863111889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1031,6 +1033,7 @@ MonoBehaviour:
     isOwned: 0
   magazine: 0
   isReloading: 0
+  currentWeaponIndex: -1
   mainWeaponType: 0
   subWeaponType: 0
   abilityWeaponType: 0
@@ -1056,6 +1059,8 @@ MonoBehaviour:
   lineDuration: 0.05
   lineRenderer: {fileID: 6959269338981759375}
   Blood: {fileID: 4178278509775477463, guid: 3d0463f291d0351418a22c3bcd66ccdd, type: 3}
+  HeadBlood: {fileID: 4178278509775477463, guid: 6857828e714bf094eb1f7ea47c2d8100,
+    type: 3}
   Fragment: {fileID: 6236630861130584601, guid: a87e483792b9d194b8616c7e2be9bdca,
     type: 3}
   isDarkness: 0
@@ -2711,6 +2716,8 @@ GameObject:
   - component: {fileID: 8392387640287732223}
   - component: {fileID: 1641871602304337997}
   - component: {fileID: 124543901704949302}
+  - component: {fileID: -5529438648694075618}
+  - component: {fileID: -8875152168310219667}
   m_Layer: 0
   m_Name: PlayerIdlePrefab
   m_TagString: Untagged
@@ -2773,7 +2780,6 @@ MonoBehaviour:
   controller: {fileID: 1112727817626628774}
   cameraRoot: {fileID: 3627787299491913062}
   isSynchronize: 1
-  yaw: 0
 --- !u!114 &8825841003792857049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2804,6 +2810,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentCharacter: {fileID: 0}
+  shootManager: {fileID: 8334744245603090709}
 --- !u!114 &3159636760548436729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3162,6 +3169,43 @@ MonoBehaviour:
   - {fileID: -7003257168439074378}
   - {fileID: 8392387640287732223}
   - {fileID: 1641871602304337997}
+--- !u!114 &-5529438648694075618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad8e0328224c6db4eac33546c29546ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConductController
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  conductor: {fileID: 707285249987993866, guid: 28b5d522a72255c459088b9971155c31,
+    type: 3}
+  conductorInstance: {fileID: 0}
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 520
+--- !u!114 &-8875152168310219667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753fb406a9ff89743a6a114ee73f78d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnOwner
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  ownerNetId: 0
 --- !u!1 &3561717742706190703
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,4 +1,4 @@
-using Mirror;
+ï»¿using Mirror;
 using UnityEngine;
 
 public class CharacterTransfromNetwork : NetworkBehaviour
@@ -8,145 +8,164 @@ public class CharacterTransfromNetwork : NetworkBehaviour
     [SerializeField, Range(0.01f, 1f)] private float rotationLerpFactor = 0.2f;
     [SerializeField, Range(0.01f, 1f)] private float pitchLerpFactor = 0.2f;
 
-    [Header("References")]
     public CharacterController controller;
-    public Transform cameraRoot; // FPS‚ÌƒJƒƒ‰e (pitch§Œä—p)
+    public Transform cameraRoot;
 
-    [SyncVar] public bool isSynchronize = true;
-
-    private Vector3 targetPosition;
-    private Quaternion targetRotation;
+    // å—ä¿¡ç”¨
+    private Vector3 targetPos;
+    private float targetYaw;
     private float targetPitch;
 
-    private Vector3 lastSentPosition;
-    private Quaternion lastSentRotation;
+    // é€ä¿¡ç”¨
+    private Vector3 lastSentPos;
+    private float lastSentYaw;
     private float lastSentPitch;
 
-    private const float positionSendThreshold = 0.02f;
-    private const float rotationSendThreshold = 0.5f;
-    private const float pitchSendThreshold = 0.5f;
+    [SerializeField] private float posThreshold = 0.005f;
+    [SerializeField] private float rotThreshold = 0.2f;
+    [SerializeField] private float pitchThreshold = 0.2f;
 
-    private double lastSentTime;   // ƒNƒ‰ƒCƒAƒ“ƒg‚ª‘—M‚µ‚½
-    private double lastRecvTime;   // ƒNƒ‰ƒCƒAƒ“ƒg‚ªóM‚µ‚½ÅV‚Ì
+    private double lastRecvTime;
+    public bool isSynchronize;
 
-    public float yaw;
+    //--------------------------------------------------------------------
+    // ã“ã“ãŒè¶…é‡è¦ï¼šãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚‚ãƒœãƒƒãƒˆã‚‚åŒã˜æ‰±ã„ã§ã€æ‰€æœ‰è€…(isOwned)ã ã‘é€ä¿¡
+    //--------------------------------------------------------------------
+    private bool isOwned =>
+        GetComponent<SpawnOwner>().IsMine() ||
+        GetComponent<SpawnOwner>().ownerNetId == 12345; // ãƒœãƒƒãƒˆæ‰€æœ‰è€…
 
-    private void Start()
+    void Start()
     {
-        targetPosition = transform.position;
-        targetRotation = transform.rotation;
-        if (cameraRoot != null)
+        targetPos = transform.position;
+        targetYaw = transform.eulerAngles.y;
+
+        if (cameraRoot)
             targetPitch = cameraRoot.localEulerAngles.x;
+
+        lastSentPos = targetPos;
     }
 
-    private void Update()
+    void Update()
     {
-        if (isLocalPlayer && isSynchronize)
+        //----------------------------------------------------------
+        // è‡ªåˆ†ãŒæ‰€æœ‰ã—ã¦ã„ã‚‹ã‚­ãƒ£ãƒ©ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ or ãƒœãƒƒãƒˆï¼‰
+        //----------------------------------------------------------
+        if (isOwned)
         {
             TrySendTransform();
-            return;
+            return; // è‡ªåˆ†ã¯è£œé–“ä¸è¦
         }
 
-        // ‘¼ƒNƒ‰ƒCƒAƒ“ƒg‘¤F•âŠÔ
-        if (!isLocalPlayer && isSynchronize)
-        {
-            transform.position = Vector3.Lerp(transform.position, targetPosition, positionLerpFactor);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationLerpFactor);
-
-            if (cameraRoot != null)
-            {
-                Vector3 euler = cameraRoot.localEulerAngles;
-                euler.x = Mathf.LerpAngle(euler.x, targetPitch, pitchLerpFactor);
-                cameraRoot.localEulerAngles = euler;
-            }
-        }
+        //----------------------------------------------------------
+        // æ‰€æœ‰ã—ã¦ã„ãªã„ â†’ è£œé–“è¡¨ç¤º
+        //----------------------------------------------------------
+        ApplyInterpolation();
     }
 
+    //--------------------------------------------------------------------
+    // é€ä¿¡å‡¦ç†ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã§ã‚‚ãƒœãƒƒãƒˆã§ã‚‚å…±é€šï¼‰
+    //--------------------------------------------------------------------
     private void TrySendTransform()
     {
         Vector3 pos = transform.position;
-        Quaternion rot = transform.rotation;
-        float pitch = cameraRoot != null ? cameraRoot.localEulerAngles.x : 0f;
+        float yaw = transform.eulerAngles.y;
+        float pitch = cameraRoot ? cameraRoot.localEulerAngles.x : 0f;
 
-        if (Vector3.Distance(pos, lastSentPosition) > positionSendThreshold ||
-            Quaternion.Angle(rot, lastSentRotation) > rotationSendThreshold ||
-            Mathf.Abs(Mathf.DeltaAngle(pitch, lastSentPitch)) > pitchSendThreshold)
+        if (Vector3.Distance(pos, lastSentPos) > posThreshold ||
+            Mathf.Abs(Mathf.DeltaAngle(yaw, lastSentYaw)) > rotThreshold ||
+            Mathf.Abs(Mathf.DeltaAngle(pitch, lastSentPitch)) > pitchThreshold)
         {
-            lastSentPosition = pos;
-            lastSentRotation = rot;
+            lastSentPos = pos;
+            lastSentYaw = yaw;
             lastSentPitch = pitch;
-            lastSentTime = NetworkTime.time; // Mirror‚ª’ñ‹Ÿ‚·‚éƒT[ƒo[“¯ŠúŠÔ
 
-            CmdSendTransform(pos, rot, pitch, lastSentTime);
+            double t = NetworkTime.time;
+            CmdSendTransform(pos, yaw, pitch, t);
         }
     }
 
     [Command(requiresAuthority = false)]
-    private void CmdSendTransform(Vector3 position, Quaternion rotation, float pitch, double timestamp)
+    private void CmdSendTransform(Vector3 pos, float yaw, float pitch, double timestamp)
     {
         if (!isSynchronize) return;
-
-        // ƒT[ƒo[‘¤‚ÅƒNƒ‰ƒCƒAƒ“ƒg‚©‚ç‚Ìtimestamp‚ğ‚»‚Ì‚Ü‚Ü“]‘—
-        RpcSyncTransform(position, rotation, pitch, timestamp);
+        RpcSyncTransform(pos, yaw, pitch, timestamp);
     }
 
-    [ClientRpc(includeOwner = false)]
-    private void RpcSyncTransform(Vector3 position, Quaternion rotation, float pitch, double timestamp)
+    //--------------------------------------------------------------------
+    // å—ä¿¡å‡¦ç†ï¼ˆå…¨ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆï¼‰
+    //--------------------------------------------------------------------
+    [ClientRpc]
+    private void RpcSyncTransform(Vector3 pos, float yaw, float pitch, double timestamp)
     {
-        // ŒÃ‚¢ƒf[ƒ^‚ğ–³‹
-        if (timestamp <= lastRecvTime)
-            return;
-
+        if (timestamp + 0.001 <= lastRecvTime) return;
         lastRecvTime = timestamp;
 
-        // ·•ª•âŠÔiŠª‚«–ß‚ç‚È‚¢j
-        targetPosition = Vector3.Lerp(targetPosition, position, 0.5f);
-        targetRotation = Quaternion.Slerp(targetRotation, rotation, 0.5f);
-        targetPitch = Mathf.LerpAngle(targetPitch, pitch, 0.5f);
+        targetPos = pos;
+        targetYaw = yaw;
+        targetPitch = pitch;
     }
 
-    [Server]
-    public void ResetPosition(Vector3 newPosition, Quaternion newRotation, float newPitch = 0f)
+    //--------------------------------------------------------------------
+    // è£œé–“å‡¦ç†ï¼ˆæ‰€æœ‰è€…ä»¥å¤–ã®ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®ã¿ï¼‰
+    //--------------------------------------------------------------------
+    private void ApplyInterpolation()
     {
-        transform.position = newPosition;
-        transform.rotation = newRotation;
+        if (controller) controller.enabled = false;
 
-        if (cameraRoot != null)
+        transform.position = Vector3.Lerp(
+            transform.position,
+            targetPos,
+            positionLerpFactor
+        );
+
+        float newYaw = Mathf.LerpAngle(
+            transform.eulerAngles.y,
+            targetYaw,
+            rotationLerpFactor
+        );
+
+        transform.rotation = Quaternion.Euler(0, newYaw, 0);
+
+        if (cameraRoot)
         {
-            Vector3 euler = cameraRoot.localEulerAngles;
-            euler.x = newPitch;
-            cameraRoot.localEulerAngles = euler;
+            float newPitch = Mathf.LerpAngle(
+                cameraRoot.localEulerAngles.x,
+                targetPitch,
+                pitchLerpFactor
+            );
+
+            cameraRoot.localEulerAngles = new Vector3(newPitch, 0, 0);
         }
 
-        double resetTime = NetworkTime.time;
-        RpcForceSetTransform(newPosition, newRotation, newPitch, resetTime);
+        if (controller) controller.enabled = true;
+    }
 
-        lastSentPosition = newPosition;
-        lastSentRotation = newRotation;
-        lastSentPitch = newPitch;
-        lastRecvTime = resetTime;
+    // ---- å¼·åˆ¶ãƒ¯ãƒ¼ãƒ—ç”¨ï¼ˆç¬é–“ç§»å‹•ï¼‰----
+    [Server]
+    public void ForceSetPosition(Vector3 pos, float yaw)
+    {
+        RpcForceTeleport(pos, yaw);
     }
 
     [ClientRpc]
-    private void RpcForceSetTransform(Vector3 position, Quaternion rotation, float pitch, double timestamp)
+    private void RpcForceTeleport(Vector3 pos, float yaw)
     {
-        if (timestamp <= lastRecvTime)
-            return;
+        if (controller)
+            controller.enabled = false;
 
-        lastRecvTime = timestamp;
+        transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
 
-        transform.position = position;
-        transform.rotation = rotation;
+        if (controller)
+            controller.enabled = true;
 
-        if (cameraRoot != null)
-        {
-            Vector3 euler = cameraRoot.localEulerAngles;
-            euler.x = pitch;
-            cameraRoot.localEulerAngles = euler;
-        }
+        targetPos = pos;
+        targetYaw = yaw;
+    }
 
-        targetPosition = position;
-        targetRotation = rotation;
-        targetPitch = pitch;
+    [Server]
+    public void SetSynchronize(bool synchronize)
+    {
+        isSynchronize = synchronize;
     }
 }

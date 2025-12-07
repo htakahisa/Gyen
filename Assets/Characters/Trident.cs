@@ -89,10 +89,8 @@ public class Trident : CharacterSkills
     public void CmdLime(Vector3 pos, Vector3 dir)
     {
         currentCharacter.skill1Energy--;
-        GameObject instance = Instantiate(limePre, pos, Quaternion.LookRotation(dir));
-        NetworkServer.Spawn(instance);
-        RoundManager.spawns.Add(instance);
-
+        RoundManager.rm.ObjectSpawn(limePre, pos, Quaternion.LookRotation(dir));
+        
     }
 
     public void Yellow()

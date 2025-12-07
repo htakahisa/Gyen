@@ -15,7 +15,7 @@ public class WeaponManager : NetworkBehaviour
     [SyncVar] public int magazine;  // ← 現在装備中の武器の残弾数
     [SyncVar] public bool isReloading = false;
 
-    [SyncVar] private int currentWeaponIndex = -1;
+    [SyncVar] public int currentWeaponIndex = -1;
 
     [SyncVar] public WeaponType mainWeaponType;
     [SyncVar] public WeaponType subWeaponType;
@@ -141,6 +141,13 @@ public class WeaponManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdBuyWeapon(WeaponType type)
     {
+        if(RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
+        {
+            foreach (var bot in RoundManager.rm.GetMyBots(GetComponentInParent<NetworkIdentity>()))
+            {
+                bot.GetComponentInChildren<WeaponManager>().RpcBuyWeapon(type);
+            }
+        }
         RpcBuyWeapon(type);
     }
 
@@ -251,5 +258,15 @@ public class WeaponManager : NetworkBehaviour
     {
         if (currentWeaponIndex != -1)
             weapons[currentWeaponIndex].instance.SetActive(true);
+    }
+
+    [Command]
+    public void CmdStopReload()
+    {
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            isReloading = false;
+        }
     }
 }

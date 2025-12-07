@@ -1,9 +1,10 @@
+using StarterAssets;
 using UnityEngine;
 
 public class SkillManager : MonoBehaviour
 {
     public CharacterSkills currentCharacter;
-
+    public ShootManager shootManager;
 
 
     // ÉXÉLÉã1Çé¿çs
@@ -13,6 +14,7 @@ public class SkillManager : MonoBehaviour
         if (currentCharacter != null && currentCharacter.Skill1 != null)
         {
             currentCharacter.Skill1.Invoke();
+            shootManager.ResetZoom();
         }
     }
 
@@ -23,6 +25,7 @@ public class SkillManager : MonoBehaviour
         if (currentCharacter != null && currentCharacter.Skill2 != null)
         {
             currentCharacter.Skill2.Invoke();
+            shootManager.ResetZoom();
         }
     }
 
@@ -33,6 +36,7 @@ public class SkillManager : MonoBehaviour
         if (currentCharacter != null && currentCharacter.Skill3 != null)
         {
             currentCharacter.Skill3.Invoke();
+            shootManager.ResetZoom();
         }
     }
 }

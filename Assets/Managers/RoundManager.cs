@@ -16,9 +16,16 @@ public class RoundManager : NetworkBehaviour
     public GameObject attacker;
     public GameObject defender;
 
+    public List<GameObject> attackers = new List<GameObject>();
+    public List<GameObject> defenders = new List<GameObject>();
+
+    public List<GameObject> dead = new List<GameObject>();
+
     private List<GameObject> players = new List<GameObject>();
 
     public List<MapDatas> oneVsOneMaps = new List<MapDatas>();
+
+    public List<MapDatas> doubleTapMaps = new List<MapDatas>();
 
     public List<DuelLandFanaticsDatas> duelLandFanaticsMaps = new List<DuelLandFanaticsDatas>();
     public List<DuelLandHereticsDatas> duelLandHereticsMaps = new List<DuelLandHereticsDatas>();
@@ -31,6 +38,7 @@ public class RoundManager : NetworkBehaviour
     public Vector3 spikePos;
     public GameObject spike;
 
+    [SyncVar]
     public int Round = 1;
     public Phase CurrentPhase;
 
@@ -51,11 +59,13 @@ public class RoundManager : NetworkBehaviour
     {
         public GameObject prefab;
         public Vector3 position;
+        public Quaternion rotation;
 
-        public ObjectAndPosition(GameObject prefab, Vector3 position)
+        public ObjectAndPosition(GameObject prefab, Vector3 position, Quaternion rotation)
         {
             this.prefab = prefab;
             this.position = position;
+            this.rotation = rotation;
         }
     }
 
@@ -83,11 +93,16 @@ public class RoundManager : NetworkBehaviour
     public bool isFanatics;
 
     public bool hasMapLoad;
+
+    public GameObject botPrefab;
+
+
     public enum Mode
     {
         ONEVSONE,
         PRACTICE,
         DUELLAND,
+        DOUBLETAP,
     }
 
 
@@ -169,6 +184,8 @@ public class RoundManager : NetworkBehaviour
         Round++;
 
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
+        dead.Clear();
+
         RpcSwitchBuyPhase();
         StartCoroutine(ResetRound(winner == myPlayer));
         GiveCredits(winner, loser);
@@ -315,6 +332,22 @@ public class RoundManager : NetworkBehaviour
             NetworkServer.Destroy(spawn);
         }
 
+        foreach (var item in respawns)
+        {
+            if (item.prefab != null)
+            {
+                ObjectSpawn(item.prefab, item.position);
+                if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
+                {
+                    item.prefab.transform.rotation = item.rotation;
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Prefabが設定されていません。");
+            }
+        }
+
         spawnedIndex.Clear();
 
         int gimmicks = 4;
@@ -336,10 +369,10 @@ public class RoundManager : NetworkBehaviour
                     if (spawnedIndex.Contains(index)) continue;
 
                     GameObject prefab = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
-                    prefab.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
                     prefab.GetComponent<BotManager>().weapon = gimmickData.weapon;
                     prefab.GetComponent<BotManager>().armer = gimmickData.armer;
                     prefab.GetComponent<BotManager>().foundDelayTime = gimmickData.foundDelayTime;
+                    prefab.GetComponent<SpawnOwner>().ownerNetId = 12345;
                     NetworkServer.Spawn(prefab);
                     spawnedGimmicks.Add(prefab);
                     spawns.Add(prefab);
@@ -349,15 +382,12 @@ public class RoundManager : NetworkBehaviour
                 {
                     GameObject gimmick = standing.prefab;
                     GameObject prefab = Instantiate(gimmick, standing.position, Quaternion.Euler(standing.rotation));
-                    if (prefab.GetComponent<CharacterTransfromNetwork>() != null)
-                    {
-                        prefab.GetComponent<CharacterTransfromNetwork>().yaw = standing.rotation.y;
-                    }
                     if (prefab.GetComponent<BotManager>() != null)
                     {
                         prefab.GetComponent<BotManager>().weapon = standing.weapon;
                         prefab.GetComponent<BotManager>().armer = standing.armer;
                         prefab.GetComponent<BotManager>().foundDelayTime = standing.foundDelayTime;
+                        prefab.GetComponent<SpawnOwner>().ownerNetId = 12345;
                     }
                     if(prefab.GetComponent<DestroyTimer>() != null)
                     {
@@ -375,8 +405,8 @@ public class RoundManager : NetworkBehaviour
                         ObjectSpawn(item.prefab, item.position);
                         if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
                         {
-                            item.prefab.GetComponent<CharacterTransfromNetwork>().yaw = item.prefab.GetComponent<CharacterTransfromNetwork>().yaw;
-                            item.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, item.prefab.GetComponent<CharacterTransfromNetwork>().yaw, transform.rotation.eulerAngles.z);
+                            item.prefab.transform.rotation = item.rotation;
+                            item.prefab.GetComponent<SpawnOwner>().ownerNetId = 12345;
                         }
                     }
                     else
@@ -401,9 +431,12 @@ public class RoundManager : NetworkBehaviour
 
 
         StartCoroutine(BombArmCoroutine());
-#if !UNITY_EDITOR
+
+        if (!Application.isEditor)
+        {
             StartCoroutine(RecordRoutine());
-#endif
+        }
+
 
     }
 
@@ -434,8 +467,8 @@ public class RoundManager : NetworkBehaviour
                     ObjectSpawn(item.prefab, item.position);
                     if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
                     {
-                        item.prefab.GetComponent<CharacterTransfromNetwork>().yaw = item.prefab.GetComponent<CharacterTransfromNetwork>().yaw;
-                        item.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, item.prefab.GetComponent<CharacterTransfromNetwork>().yaw, transform.rotation.eulerAngles.z);
+                        item.prefab.transform.rotation = item.rotation;
+                        item.prefab.GetComponent<SpawnOwner>().ownerNetId = 12345;
                     }
 
                 }
@@ -451,10 +484,6 @@ public class RoundManager : NetworkBehaviour
             {
                 GameObject stand = standing.prefab;
                 GameObject prefab = Instantiate(stand, standing.position, Quaternion.Euler(standing.rotation));
-                if (prefab.GetComponent<CharacterTransfromNetwork>() != null)
-                {
-                    prefab.GetComponent<CharacterTransfromNetwork>().yaw = standing.rotation.y;
-                }
                 if (prefab.GetComponent<BotManager>() != null)
                 {
                     prefab.GetComponent<BotManager>().weapon = standing.weapon;
@@ -465,20 +494,20 @@ public class RoundManager : NetworkBehaviour
                 {
                     prefab.GetComponent<DestroyTimer>().time = 0;
                 }
-                prefab.AddComponent<SpawnOwner>().ownerNetId = 12345;
+                prefab.GetComponent<SpawnOwner>().ownerNetId = 12345;
                 NetworkServer.Spawn(prefab);
                 spawnedGimmicks.Add(prefab);
                 spawns.Add(prefab);
             }
 
             GameObject bot = Instantiate(gimmick, gimmickData.position, Quaternion.Euler(gimmickData.rotation));
-            bot.GetComponent<CharacterTransfromNetwork>().yaw = gimmickData.rotation.y;
             bot.GetComponent<BotManager>().weapon = gimmickData.weapon;
             bot.GetComponent<BotManager>().armer = gimmickData.armer;
             bot.GetComponent<BotManager>().moveVector = gimmickData.moveVector;
             bot.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
             bot.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
             bot.GetComponent<BotManager>().foundDelayTime = gimmickData.foundDelayTime;
+            bot.GetComponent<SpawnOwner>().ownerNetId = 12345;
             NetworkServer.Spawn(bot);
             spawnedGimmicks.Add(bot);
             spawns.Add(bot);
@@ -493,7 +522,7 @@ public class RoundManager : NetworkBehaviour
 
                 GameObject gimmickWithBot = gimmickWithBotData.prefab;
                 GameObject with = Instantiate(gimmickWithBot, gimmickWithBotData.position, Quaternion.Euler(gimmickWithBotData.rotation));
-                with.AddComponent<SpawnOwner>().ownerNetId = 12345;
+                with.GetComponent<SpawnOwner>().ownerNetId = 12345;
                 NetworkServer.Spawn(with);
                 spawnedGimmicks.Add(with);
                 spawns.Add(with); 
@@ -515,8 +544,7 @@ public class RoundManager : NetworkBehaviour
                 ObjectSpawn(item.prefab, item.position);
                 if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
                 {
-                    item.prefab.GetComponent<CharacterTransfromNetwork>().yaw = item.prefab.GetComponent<CharacterTransfromNetwork>().yaw;
-                    item.prefab.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, item.prefab.GetComponent<CharacterTransfromNetwork>().yaw, transform.rotation.eulerAngles.z);
+                    item.prefab.transform.rotation = item.rotation;
                 }
 
             }
@@ -535,7 +563,12 @@ public class RoundManager : NetworkBehaviour
         {
             yield return new WaitWhile(() => CurrentPhase == Phase.BUY); 
         }
-        
+
+        if (currentMode == Mode.DOUBLETAP)
+        {
+            yield return new WaitWhile(() => CurrentPhase == Phase.BUY);
+        }
+
         var bombs = FindObjectsOfType<BombManager>();
 
         if (bombs == null || bombs.Length == 0) {
@@ -549,17 +582,56 @@ public class RoundManager : NetworkBehaviour
         bombs[0].ArmBomb();
     }
 
-    public void ObjectSpawn(GameObject prefab, Vector3 pos = default(Vector3))
+    public GameObject ObjectSpawn(GameObject prefab, Vector3 pos = default(Vector3), Quaternion rot = default(Quaternion), bool AddToSpawns = true, bool instantiated = false, NetworkConnectionToClient conn = null)
     {
-        ServerSpawn(prefab, pos);
+        if (isServer)
+        {
+            return ServerSpawn(prefab, pos, rot, AddToSpawns, instantiated, conn);
+        }
+        else
+        {
+            GameObject instance;
+            if (instantiated)
+            {
+                instance = prefab;
+            }
+            else
+            {
+                instance = Instantiate(prefab, pos, rot);
+            }
+
+            NetworkServer.Spawn(instance, conn);
+            SpawnsAdd(instance);
+            return instance;
+        }
     }
 
     [Server]
-    public void ServerSpawn(GameObject prefab, Vector3 pos)
+    public GameObject ServerSpawn(GameObject prefab, Vector3 pos, Quaternion rot = default(Quaternion), bool AddToSpawns = true, bool instantiated = false, NetworkConnectionToClient conn = null)
     {
-        GameObject instance = Instantiate(prefab, pos, Quaternion.identity);
-        NetworkServer.Spawn(instance);
-        spawns.Add(instance);
+
+        GameObject instance;
+        if (instantiated)
+        {
+            instance = prefab;
+        }
+        else
+        {
+            instance = Instantiate(prefab, pos, rot);
+        }
+
+        NetworkServer.Spawn(instance, conn);
+        if (AddToSpawns)
+        {
+            spawns.Add(instance);
+        }
+        return instance;
+    }
+
+    [Command]
+    public void SpawnsAdd(GameObject prefab)
+    {
+        spawns.Add(prefab);
     }
 
     public IEnumerator ResetPlayers()
@@ -597,7 +669,12 @@ public class RoundManager : NetworkBehaviour
             mapData = oneVsOneMaps[Random.Range(0, oneVsOneMaps.Count)];
             Invoke("RpcSwitchBattlePhase", 15f);
         }
-
+        if (currentMode == Mode.DOUBLETAP)
+        {
+            currentBotMove = BotMove.CROUCH;
+            mapData = doubleTapMaps[Random.Range(0, doubleTapMaps.Count)];
+            Invoke("RpcSwitchBattlePhase", 15f);
+        }
         if (mapData != null)
         {
             attackSpawnPos = mapData.attackerPos;
@@ -606,8 +683,8 @@ public class RoundManager : NetworkBehaviour
             mapName = mapData.mapName;
             if (isServer)
             {                
-                respawns.Add(new ObjectAndPosition(mapData.mapPrefab, new Vector3(0, 0, 0)));
-                respawns.Add(new ObjectAndPosition(spike, spikePos));                
+                respawns.Add(new ObjectAndPosition(mapData.mapPrefab, new Vector3(0, 0, 0), Quaternion.identity));
+                respawns.Add(new ObjectAndPosition(spike, spikePos, Quaternion.identity));                
             }
         }
 
@@ -618,14 +695,13 @@ public class RoundManager : NetworkBehaviour
             currentMode = Mode.DUELLAND;
             mapName = duelLandFanaticsData.mapName;
             currentBotMove = BotMove.CROUCH;
-            currentBotMove = BotMove.CROUCH;
             if (isServer)
             {
                 if (currentMode == Mode.DUELLAND) 
                 { 
 
-                    respawns.Add(new ObjectAndPosition(duelLandFanaticsData.mapPrefab, new Vector3(0, 0, 0)));
-                    respawns.Add(new ObjectAndPosition(spike, spikePos));
+                    respawns.Add(new ObjectAndPosition(duelLandFanaticsData.mapPrefab, new Vector3(0, 0, 0), Quaternion.identity));
+                    respawns.Add(new ObjectAndPosition(spike, spikePos, Quaternion.identity));
                 }
             }
         }
@@ -641,8 +717,54 @@ public class RoundManager : NetworkBehaviour
             otherPlayer = playerManager.GetOtherPlayer();
             players.Add(otherPlayer);
         }
+        if (currentMode == Mode.DOUBLETAP)
+        {
+            // 相手のプレイヤーを取得
+            otherPlayer = playerManager.GetOtherPlayer();
+            players.Add(otherPlayer);
+        }
+
+
+        if (isServer)
+        {
+            if (currentMode == Mode.DOUBLETAP)
+            {
+                NetworkIdentity attNetId = attacker.GetComponent<NetworkIdentity>();
+                NetworkConnectionToClient attConn = attNetId.connectionToClient;
+                var attackerBot = ObjectSpawn(botPrefab, attackSpawnPos, Quaternion.Euler(attackSpawnRot), false, false, attConn);
+                attackerBot.GetComponent<SpawnOwner>().ownerNetId = attacker.GetComponent<NetworkIdentity>().netId;
+                attackers.Add(attackerBot);
+
+                NetworkIdentity defNetId = defender.GetComponent<NetworkIdentity>();
+                NetworkConnectionToClient defConn = defNetId.connectionToClient;
+                var defenderBot = ObjectSpawn(botPrefab, defenceSpawnPos, Quaternion.Euler(defenceSpawnRot), false, false, defConn);
+                defenderBot.GetComponent<SpawnOwner>().ownerNetId = defender.GetComponent<NetworkIdentity>().netId;
+
+                defenders.Add(defenderBot);
+            }
+        }
 
         players.Add(myPlayer);
+        if (attacker != null)
+        {
+            attackers.Add(attacker);
+        }
+        if (defender != null)
+        {
+            defenders.Add(defender);
+        }
+
+        if (isServer)
+        {
+            foreach (var attack in attackers)
+            {
+                attack.GetComponent<SpawnOwner>().ownerNetId = attacker.GetComponent<NetworkIdentity>().netId; 
+            }
+            foreach (var defence in defenders)
+            {
+                defence.GetComponent<SpawnOwner>().ownerNetId = defender.GetComponent<NetworkIdentity>().netId;
+            }
+        }
 
         if (isServer)
         {
@@ -665,7 +787,8 @@ public class RoundManager : NetworkBehaviour
             ResetStatus();
 
         }
-        
+
+        hasMapLoad = true;
         hasLoaded = true;
     }
 
@@ -692,42 +815,61 @@ public class RoundManager : NetworkBehaviour
                 {
                     if (currentMode == Mode.DUELLAND)
                     {
-                        respawns.Add(new ObjectAndPosition(duelLandHereticsData.mapPrefab, new Vector3(0, 0, 0)));
-                        respawns.Add(new ObjectAndPosition(spike, spikePos));
-                        hasMapLoad = true;
+                        respawns.Add(new ObjectAndPosition(duelLandHereticsData.mapPrefab, new Vector3(0, 0, 0), Quaternion.identity));
+                        respawns.Add(new ObjectAndPosition(spike, spikePos, Quaternion.identity));
                     }
                 } 
             }
         }
-        if (attacker != null)
+
+        foreach (var attacker in attackers)
         {
-            attacker.GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
+            if (attacker != null)
+            {
+                attacker.GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
 
-            yield return new WaitWhile(() => attacker.GetComponent<AbilityController>().currentForm != AbilityController.PlayerForm.Human);
+                yield return new WaitWhile(() => attacker.GetComponent<AbilityController>().currentForm != AbilityController.PlayerForm.Human);
 
-            attacker.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
-            attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
-            attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
-            attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
-            attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(attackSpawnPos);
-            attacker.GetComponentInParent<CharacterTransfromNetwork>().yaw = attackSpawnRot.y;
-            attacker.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = false;
-            attacker.transform.rotation = Quaternion.Euler(attackSpawnRot);
-            attacker.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
+                attacker.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
+                attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
+                attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
+                attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
+                Vector3 spawnPos = attackSpawnPos;
+                if(attacker.GetComponent<BotManager>() != null)
+                {
+                    spawnPos.y += 30;
+                    attacker.GetComponentInChildren<ShootManager>().hasFound = false;
+                }
+                attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(spawnPos);
+                attacker.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = false;
+                attacker.transform.rotation = Quaternion.Euler(attackSpawnRot);
+                attacker.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
+            
+            }
         }
-        if (defender != null)
+        foreach (var defender in defenders)
         {
-            defender.GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
+            if (defender != null)
+            {
+                defender.GetComponent<AbilityController>().SwitchForm(AbilityController.PlayerForm.Human);
 
-            yield return new WaitWhile(() => defender.GetComponent<AbilityController>().currentForm != AbilityController.PlayerForm.Human);
+                yield return new WaitWhile(() => defender.GetComponent<AbilityController>().currentForm != AbilityController.PlayerForm.Human);
 
-            defender.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
-            defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
-            defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
-            defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
-            defender.GetComponentInChildren<ThirdPersonController>().ResetPos(defenceSpawnPos);
-            defender.GetComponentInParent<CharacterTransfromNetwork>().yaw = defenceSpawnRot.y;
-            defender.transform.rotation = Quaternion.Euler(defenceSpawnRot);
+                defender.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
+                defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
+                defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
+                defender.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
+                Vector3 spawnPos = defenceSpawnPos;
+                if (defender.GetComponent<BotManager>() != null)
+                {
+                    spawnPos.y += 30;
+                    defender.GetComponentInChildren<ShootManager>().hasFound = false;
+                }
+                defender.GetComponentInChildren<ThirdPersonController>().ResetPos(spawnPos);
+                defender.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = false;
+                defender.transform.rotation = Quaternion.Euler(defenceSpawnRot);
+                defender.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
+            }
         }
 
 
@@ -737,28 +879,9 @@ public class RoundManager : NetworkBehaviour
         if (currentMode == Mode.DUELLAND)
         {
             MatchRecorder recorder = GetComponent<MatchRecorder>();
-
-
             yield return recorder.StopRecordingAndWait().AsCoroutine();
             recorder.ClearCamera();
-
-
-            foreach (var player in players)
-            {
-                Camera cam = player.GetComponentInChildren<ThirdPersonController>().recordCamera;
-                recorder.AddCamera(player.GetComponentInChildren<ThirdPersonController>().recordCamera);
-                recorder.AddHiddenObject(cam, player);
-            }
-            foreach (var bot in GetBots())
-            {
-                Camera cam = bot.GetComponentInChildren<ThirdPersonController>().recordCamera;
-                recorder.AddCamera(bot.GetComponentInChildren<ThirdPersonController>().recordCamera);
-                recorder.AddHiddenObject(cam, bot);
-            }
-
             recorder.StartRecording();
-
-
 
         }
     }
@@ -785,47 +908,71 @@ public class RoundManager : NetworkBehaviour
     [Server]
     public void ResetStatus()
     {
-        myPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
-        myPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
-        myPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
-        myPlayer.GetComponentsInChildren<CharacterSkills>().FirstOrDefault(c => c.enabled).ResetSkill();
-        myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
-        myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
-        myPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);       
-        myPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
-        myPlayer.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
-        myPlayer.GetComponent<HpMaster>().ResetHp();
 
-        if (currentMode == Mode.ONEVSONE || myPlayer.GetComponentInChildren<WeaponManager>().GetCurrentWeaponSlot() == null)
+        List<GameObject> players = new List<GameObject>();
+
+        foreach (var bot in GetBots())
+            players.Add(bot);
+        if (GetMyPlayer() != null)
         {
-            myPlayer.GetComponent<HpMaster>().armer = 1;
-            myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
-            myPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+            players.Add(GetMyPlayer());
         }
-        else
+        if (GetOtherPlayer() != null)
         {
-            StartCoroutine(myPlayer.GetComponentInChildren<WeaponManager>().SetMagazineMax(0f));
+            players.Add(GetOtherPlayer());
         }
 
-        if (otherPlayer != null)
+        foreach (var player in players)
         {
-            otherPlayer.GetComponentInChildren<ShootManager>().ResetZoom();
-            otherPlayer.GetComponentInChildren<ShootManager>().StopAllCoroutines();
-            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
-            otherPlayer.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
-            otherPlayer.GetComponentInChildren<ShootManager>().isBursting = false;
-            otherPlayer.GetComponentsInChildren<CharacterSkills>().FirstOrDefault(c => c.enabled).ResetSkill();
-            otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
-            otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
-            otherPlayer.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
-            otherPlayer.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
-            otherPlayer.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
-            otherPlayer.GetComponent<HpMaster>().ResetHp();
-            otherPlayer.GetComponent<HpMaster>().armer = 1;
-        }
+            player.GetComponentInChildren<ShootManager>().ResetZoom();
+            player.GetComponentInChildren<ShootManager>().StopAllCoroutines();
+            player.GetComponentInChildren<ShootManager>().isBursting = false;
+            if (player.GetComponentsInChildren<CharacterSkills>().FirstOrDefault(c => c.enabled) != null)
+            {
+                player.GetComponentsInChildren<CharacterSkills>().FirstOrDefault(c => c.enabled).ResetSkill();
+            }
+            player.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
+            player.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
+            player.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
+            player.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
+            player.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
+            player.GetComponent<HpMaster>().ResetHp();
 
+            if (currentMode == Mode.ONEVSONE || currentMode == Mode.DOUBLETAP || player.GetComponentInChildren<WeaponManager>().GetCurrentWeaponSlot() == null)
+            {
+                player.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Hotaru);
+                player.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponStatus.WeaponType.Lover);
+                player.GetComponent<HpMaster>().armer = 1;
+            }
+            else
+            {
+                StartCoroutine(ResetMagazine(player));
+            }
+        }
 
     }
+
+    public void SetMode(int index)
+    {
+        RpcSetMode(index);
+    }
+
+    [ClientRpc]
+    public void RpcSetMode(int selectedMode)
+    {
+        currentMode = (Mode)selectedMode;
+    }
+
+    public IEnumerator ResetMagazine(GameObject player)
+    {
+        var currentType = player.GetComponentInChildren<WeaponManager>().GetCurrentWeaponType();
+        player.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(player.GetComponentInChildren<WeaponManager>().mainWeaponType);
+        yield return null;
+        player.GetComponentInChildren<WeaponManager>().CmdBuyWeapon(player.GetComponentInChildren<WeaponManager>().subWeaponType);
+        yield return null;
+        player.GetComponentInChildren<WeaponManager>().CmdSwitchWeapon(currentType);
+    }
+
 
     [Command (requiresAuthority = false)]
     public void CmdHasReset()
@@ -847,14 +994,46 @@ public class RoundManager : NetworkBehaviour
     {
         List<GameObject> botsList = new List<GameObject>();
 
-        foreach (var bots in FindObjectsByType<BotManager>(FindObjectsSortMode.None))
+        foreach (var bot in FindObjectsByType<BotManager>(FindObjectsSortMode.None))
         {
-            botsList.Add(bots.gameObject);
+            botsList.Add(bot.gameObject);
         }
 
         return botsList;
     }
 
+    public List<GameObject> GetMyBots(NetworkIdentity player = null)
+    {
+        List<GameObject> botsList = new List<GameObject>();
+
+        NetworkIdentity identity = player;
+        if(identity == null)
+        {
+            identity = GetMyPlayer().GetComponent<NetworkIdentity>();
+        }
+
+        foreach (var bot in FindObjectsByType<BotManager>(FindObjectsSortMode.None))
+        {
+            if (!bot.GetComponent<SpawnOwner>().WhoseThis() == identity) break;
+
+            botsList.Add(bot.gameObject);
+        }
+
+        return botsList;
+    }
+    public List<GameObject> GetOtherBots()
+    {
+        List<GameObject> botsList = new List<GameObject>();
+
+        foreach (var bot in FindObjectsByType<BotManager>(FindObjectsSortMode.None))
+        {
+            if (bot.GetComponent<SpawnOwner>().IsMine()) break;
+
+            botsList.Add(bot.gameObject);
+        }
+
+        return botsList;
+    }
 
     [Command]
     public void CmdCallDance()
@@ -881,6 +1060,34 @@ public class RoundManager : NetworkBehaviour
     {
         return spawnedGimmicks.Contains(obj);    
     }
+
+    public void PlayerDead(bool attacker, GameObject obj)
+    {
+        dead.Add(obj);
+        if (defender)
+        {
+            if (IsDefendersAllDead())
+            {
+                RoundEnd(defender);
+            }
+        }
+    }
+
+    private bool IsDefendersAllDead()
+    {
+        // attackers が 1つでも dead に入っていないなら false
+        foreach (var a in defenders)
+        {
+            if (!dead.Contains(a))
+            {
+                return false;
+            }
+        }
+
+        // 全員 dead に入っていたら attackers の負け
+        return true;
+    }
+
 
     public enum Phase
     {

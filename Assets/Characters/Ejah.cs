@@ -228,6 +228,19 @@ public class Ejah : CharacterSkills
         {
             DestroyMentumPre();
         }
+
+        if (shootManager.IsZooming && isTerra)
+        {
+            ChangeTerra();
+        }
+        if (shootManager.IsZooming && isHorus)
+        {
+            ChangeHorus();
+        }
+        if (shootManager.IsZooming && isMentum)
+        {
+            ChangeMentum();
+        }
     }
 
     Quaternion GetProjectedRotation(Vector3 forward, Vector3 normal)
@@ -294,10 +307,7 @@ public class Ejah : CharacterSkills
     public IEnumerator TerraSpawn(Vector3 spawnPos, NetworkConnectionToClient conn = null)
     {
         
-
-        GameObject dustPre = Instantiate(dustPuff, spawnPos, Quaternion.identity);
-        NetworkServer.Spawn(dustPre);
-        RoundManager.spawns.Add(dustPre);
+        GameObject dustPre = RoundManager.rm.ObjectSpawn(dustPuff, spawnPos, Quaternion.identity);
         if (terraPreInstance != null)
         {
             terraPreInstance.gameObject.SetActive(false);
@@ -306,12 +316,9 @@ public class Ejah : CharacterSkills
         yield return new WaitForSeconds(0.5f);
         NetworkServer.Destroy(dustPre);
 
-        GameObject terraPre = Instantiate(terra, spawnPos, Quaternion.identity);
-        // ’N‚ª¶¬ˆË—Š‚µ‚½‚©‚ğ‹L˜^
-        var ownerTag = terraPre.AddComponent<SpawnOwner>();
+        GameObject terraPre = RoundManager.rm.ObjectSpawn(terra, spawnPos, Quaternion.identity);
+        var ownerTag = terraPre.GetComponent<SpawnOwner>();
         ownerTag.ownerNetId = conn.identity.netId; // ˆË—ŠÒ‚ÌnetId‚ğ‹L˜^
-        NetworkServer.Spawn(terraPre);
-        RoundManager.spawns.Add(terraPre);
 
         RpcChangeTerra(connectionToClient);
     }
@@ -424,15 +431,11 @@ public class Ejah : CharacterSkills
     public void HorusSpawn(Vector3 spawnPos, Quaternion dir, NetworkConnectionToClient conn = null) 
     {
 
-        
-        GameObject horusPrefab = Instantiate(horus, spawnPos, dir);
+        GameObject instance = RoundManager.rm.ObjectSpawn(horus, spawnPos, dir);
 
         // ’N‚ª¶¬ˆË—Š‚µ‚½‚©‚ğ‹L˜^
-        var ownerTag = horusPrefab.AddComponent<SpawnOwner>();
+        var ownerTag = instance.GetComponent<SpawnOwner>();
         ownerTag.ownerNetId = conn.identity.netId; // ˆË—ŠÒ‚ÌnetId‚ğ‹L˜^
-
-        NetworkServer.Spawn(horusPrefab, conn);
-        RoundManager.spawns.Add(horusPrefab);
 
         RpcChangeHorus(connectionToClient);
     }
@@ -508,16 +511,11 @@ public class Ejah : CharacterSkills
 
     public void MentumSpawn(Vector3 spawnPos, Quaternion spawnRot, NetworkConnectionToClient conn = null)
     {
-
-
-        GameObject mentumPrefab = Instantiate(mentum, spawnPos, spawnRot);
+        GameObject instance = RoundManager.rm.ObjectSpawn(mentum, spawnPos, spawnRot);
 
         // ’N‚ª¶¬ˆË—Š‚µ‚½‚©‚ğ‹L˜^
-        var ownerTag = mentumPrefab.AddComponent<SpawnOwner>();
+        var ownerTag = instance.GetComponent<SpawnOwner>();
         ownerTag.ownerNetId = conn.identity.netId; // ˆË—ŠÒ‚ÌnetId‚ğ‹L˜^
-
-        NetworkServer.Spawn(mentumPrefab, conn);
-        RoundManager.spawns.Add(mentumPrefab);
 
         RpcChangeMentum(connectionToClient);
     }

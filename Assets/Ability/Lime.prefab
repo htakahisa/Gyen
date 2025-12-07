@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 2773015015101538363}
   - component: {fileID: -1809848207890565621}
   - component: {fileID: -258710924979905969}
+  - component: {fileID: 40805766588040476}
   m_Layer: 10
   m_Name: Lime
   m_TagString: Untagged
@@ -65,6 +66,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -86,6 +89,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -127,6 +131,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   time: 3
+  onTimeOut: 0
 --- !u!114 &-1809848207890565621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -161,3 +166,19 @@ MonoBehaviour:
   syncInterval: 0
   effect: {fileID: 6823302871133167919, guid: 3138a83bedbd6ad4481ba0b061da2eb6, type: 3}
   effectInstance: {fileID: 0}
+--- !u!114 &40805766588040476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3539715179979286606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753fb406a9ff89743a6a114ee73f78d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnOwner
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  ownerNetId: 0

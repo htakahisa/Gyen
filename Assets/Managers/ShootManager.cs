@@ -1,4 +1,4 @@
-using Mirror;
+ï»¿using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ namespace StarterAssets
 
         public WeaponManager weaponManager;
 
-        private float lastAttackTime; // ÅŒã‚ÉUŒ‚‚µ‚½
+        private float lastAttackTime; // æœ€å¾Œã«æ”»æ’ƒã—ãŸæ™‚åˆ»
 
         private ThirdPersonController tpc;
 
@@ -57,7 +57,7 @@ namespace StarterAssets
         Coroutine foundDelayCoroutine;
 
         private Animator _animator;
-
+        public Transform head;
 
         private void Start()
         {
@@ -227,7 +227,7 @@ namespace StarterAssets
             {
                     ShootWeapon();
 
-                    // ÅŒã‚ÌËŒ‚Œã‚Í‘Ò‹@‚µ‚È‚¢
+                    // æœ€å¾Œã®å°„æ’ƒå¾Œã¯å¾…æ©Ÿã—ãªã„
                     if (i < currentWeapon.burst - 1)
                     {
                         yield return new WaitForSeconds(currentWeapon.burstRate);
@@ -245,9 +245,9 @@ namespace StarterAssets
             if (currentWeapon == null || !currentWeapon.zoomable)
                 yield break;
 
-            float duration = currentWeapon.zoomSpeed;        // © ƒY[ƒ€‚É‚©‚¯‚½‚¢•b”i—á: 0.25fj
-            float startFOV = _CameraComponent.fieldOfView;   // Œ»İ‚ÌFOV
-            float endFOV = currentWeapon.zoomRatio;          // ƒY[ƒ€Œã‚ÌFOV
+            float duration = currentWeapon.zoomSpeed;        // â† ã‚ºãƒ¼ãƒ ã«ã‹ã‘ãŸã„ç§’æ•°ï¼ˆä¾‹: 0.25fï¼‰
+            float startFOV = _CameraComponent.fieldOfView;   // ç¾åœ¨ã®FOV
+            float endFOV = currentWeapon.zoomRatio;          // ã‚ºãƒ¼ãƒ å¾Œã®FOV
             float elapsed = 0f;
 
             while (elapsed < duration)
@@ -255,10 +255,10 @@ namespace StarterAssets
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
 
-                // ƒtƒŒ[ƒ€ƒŒ[ƒg‚ÉˆË‘¶‚µ‚È‚¢ŠŠ‚ç‚©‚ÈƒY[ƒ€•âŠÔ
+                // ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¬ãƒ¼ãƒˆã«ä¾å­˜ã—ãªã„æ»‘ã‚‰ã‹ãªã‚ºãƒ¼ãƒ è£œé–“
                 _CameraComponent.fieldOfView = Mathf.Lerp(startFOV, endFOV, t);
 
-                yield return null;  // Ÿ‚ÌƒtƒŒ[ƒ€‚Ü‚Å‘Ò‚ÂiƒtƒŒ[ƒ€ƒŒ[ƒg‚ÉˆË‘¶‚µ‚È‚¢j
+                yield return null;  // æ¬¡ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã¾ã§å¾…ã¤ï¼ˆãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¬ãƒ¼ãƒˆã«ä¾å­˜ã—ãªã„ï¼‰
             }
 
             _CameraComponent.fieldOfView = endFOV;
@@ -284,92 +284,106 @@ namespace StarterAssets
 
         private void ShootWeapon()
         {
-            if (weaponManager.magazine >= 1 || RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
+            // å¼¾ãŒã‚ã‚‹ã€ã¾ãŸã¯ PRACTICE ãªã‚‰æ’ƒã¦ã‚‹
+            if (weaponManager.magazine < 1 && RoundManager.rm.currentMode != RoundManager.Mode.PRACTICE)
+                return;
+
+            // ãƒªã‚³ã‚¤ãƒ«ä¸­æ–­
+            if (recoilBounce != null)
+                StopCoroutine(recoilBounce);
+
+            bool isPlayerNotBot = (GetComponentInParent<BotManager>() == null);
+
+            // ======================
+            //  â˜… ã‚µãƒ¼ãƒ‰ãƒœã‚¿ãƒ³ã§ AIM è£œæ­£
+            // ======================
+            if (isPlayerNotBot && Input.GetMouseButton(3))
             {
-                if (recoilBounce != null)
+                Transform myHead = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
+                Transform enemyHead = SelectAimTarget();
+
+                // --- Pitchï¼ˆä¸Šä¸‹è§’åº¦ï¼‰è¨ˆç®— ---
+                Vector3 camPos = _mainCamera.transform.position;
+                Vector3 camToTarget = enemyHead.position - camPos;
+
+                if (camToTarget.sqrMagnitude > 0.0001f)
                 {
-                    StopCoroutine(recoilBounce);
-                }
-                
-                if (Input.GetMouseButton(3) && GetComponentInParent<BotManager>() == null)
-                {   
+                    float flatDist = new Vector2(camToTarget.x, camToTarget.z).magnitude;
+                    float desiredPitch = Mathf.Atan2(camToTarget.y, flatDist) * Mathf.Rad2Deg;
 
-                    Transform myhead;
-                    Transform enemyhead;
-
-                    if (RoundManager.rm.GetOtherPlayer() != null)
-                    {
-                        myhead = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
-                        enemyhead = RoundManager.rm.GetOtherPlayer().GetComponentInChildren<Camera>().transform;
-                        
-                    }  
-                    else
-                    {
-                        myhead = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
-                        enemyhead = RoundManager.rm.GetBots()[UnityEngine.Random.Range(0, RoundManager.rm.GetBots().Count)].GetComponentInChildren<Camera>().transform;
-
-                    }
-
-
-                    // ƒJƒƒ‰ˆÊ’u‚©‚çƒ^[ƒQƒbƒg•ûŒüƒxƒNƒgƒ‹
-                    Vector3 camPos = Camera.main.transform.position;
-                    Vector3 camToTarget = enemyhead.position - camPos;
-
-                    if (camToTarget.sqrMagnitude > 0.0001f)
-                    {
-                        // …•½•ûŒü‚Ì‹——£
-                        float flatDist = new Vector2(camToTarget.x, camToTarget.z).magnitude;
-
-                        // ƒsƒbƒ`Šp“x = atan2(‚‚³, …•½•ûŒü‹——£)
-                        float desiredPitch = Mathf.Atan2(camToTarget.y, flatDist) * Mathf.Rad2Deg;
-
-                        // ‚±‚±‚Å’¼Úuâ‘ÎŠp“xv‚Æ‚µ‚Ä“n‚·
-                        GetComponent<ThirdPersonController>().CameraParticularRotaion(desiredPitch);
-                    }
-
-
-                    Vector3 targetDir = enemyhead.position - myhead.position;
-                    Vector3 bodyDir = new Vector3(targetDir.x, 0, targetDir.z);
-
-                    if (bodyDir.sqrMagnitude > 0.0001f)
-                    {
-                        Quaternion bodyRot = Quaternion.LookRotation(bodyDir, Vector3.up);
-                        transformNetwork.yaw = bodyRot.eulerAngles.y;
-                        parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
-                    }
-
-
+                    // ã‚«ãƒ¡ãƒ©ã®ä¸Šä¸‹å›è»¢ã‚’çµ¶å¯¾è§’åº¦ã§åæ˜ 
+                    GetComponent<ThirdPersonController>().CameraParticularRotaion(desiredPitch);
                 }
 
-                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.SHOOT, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.06f, 15);
-                if (weaponManager.magazine >= 1)
+                // --- Yawï¼ˆæ°´å¹³è§’åº¦ï¼‰ ---
+                Vector3 bodyDir = enemyHead.position - myHead.position;
+                bodyDir.y = 0f;
+
+                if (bodyDir.sqrMagnitude > 0.0001f)
                 {
-                    weaponManager.magazine--;
-                }
-                lastAttackTime = Time.time;
-                WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
-                if (currentWeapon != null)
-                {
-                 
-
-                    Vector3 direction = _mainCamera.transform.forward;
-                    if (!currentWeapon.isNeedZoom || IsZooming)
-                    {
-                        if (weaponManager.GetCurrentWeaponStats().weaponName == "Hazard")
-                        {
-                            ResetZoom();
-                        }
-
-                        GetComponent<ServerCheckShoot>().CmdGetShoot(transform.parent.parent.gameObject, _mainCamera.transform.position, direction, currentWeapon.damage, currentWeapon.headDamage, weaponPos.transform.position);
-                    }
-
-                    StartCoroutine(RecoilCoroutine(0.1f, new Vector3(-currentWeapon.Xrecoil, currentWeapon.Yrecoil, 0f)));
-
-                    recoilBounce = StartCoroutine(Recoilbounce(0.1f, new Vector3(0, currentWeapon.Yrecoil, 0f)));
-                    
+                    float yaw = Quaternion.LookRotation(bodyDir, Vector3.up).eulerAngles.y;
+                    parentOfPlayer.transform.rotation = Quaternion.Euler(0, yaw, 0);
                 }
             }
+
+            // ======================
+            //  â˜… ç™ºå°„éŸ³ & å¼¾æ¶ˆè²»
+            // ======================
+            AudioManager.Instance.CmdPlaySoundAtPoint(
+                AudioManager.Sounds.SHOOT,
+                transform.TransformPoint(GetComponentInParent<CharacterController>().center),
+                0.06f,
+                15
+            );
+
+            if (weaponManager.magazine >= 1)
+                weaponManager.magazine--;
+
+            lastAttackTime = Time.time;
+
+            // ======================
+            //  â˜… å¼¾ã®RPCå‡¦ç†
+            // ======================
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
+            if (currentWeapon != null)
+            {
+                Vector3 shootDir = _mainCamera.transform.forward;
+
+                if (!currentWeapon.isNeedZoom || IsZooming)
+                {
+                    if (currentWeapon.weaponName == "Hazard")
+                        ResetZoom();
+
+                    GetComponent<ServerCheckShoot>().CmdGetShoot(
+                        parentOfPlayer,
+                        _mainCamera.transform.position,
+                        shootDir,
+                        currentWeapon.damage,
+                        currentWeapon.headDamage,
+                        weaponPos.transform.position
+                    );
+                }
+
+                // ãƒªã‚³ã‚¤ãƒ«
+                StartCoroutine(RecoilCoroutine(0.1f, new Vector3(currentWeapon.Xrecoil, -currentWeapon.Yrecoil, 0f)));
+                recoilBounce = StartCoroutine(Recoilbounce(0.1f, new Vector3(0, -currentWeapon.Yrecoil, 0f)));
+            }
         }
+
+
+        // =======================================
+        // â˜…æ•µã‚’æ±ºå®šã™ã‚‹å‡¦ç†ã‚’é–¢æ•°åŒ–ï¼ˆå¯èª­æ€§UPï¼‰
+        // =======================================
+        private Transform SelectAimTarget()
+        {
+            if (RoundManager.rm.GetOtherPlayer() != null)
+                return RoundManager.rm.GetOtherPlayer().GetComponentInChildren<Camera>().transform;
+
+            var bots = RoundManager.rm.GetBots();
+            int idx = UnityEngine.Random.Range(0, bots.Count);
+            return bots[idx].GetComponentInChildren<Camera>().transform;
+        }
+
 
         public GameObject GetCamera()
         {
@@ -383,7 +397,7 @@ namespace StarterAssets
                 return;
             }
             Vector3 direction = _mainCamera.transform.forward;
-            // ƒJƒƒ‰‚ÌˆÊ’u‚©‚çw’è•ûŒü‚ÉƒŒƒC‚ğ•`‰æ
+            // ã‚«ãƒ¡ãƒ©ã®ä½ç½®ã‹ã‚‰æŒ‡å®šæ–¹å‘ã«ãƒ¬ã‚¤ã‚’æç”»
             Gizmos.color = Color.red;
             Gizmos.DrawRay(_mainCamera.transform.position, direction.normalized * 10);
         }
@@ -415,13 +429,13 @@ namespace StarterAssets
             }
             else
             {
-                // ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é‚©
+                // ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹ã‹
                 bool currentFireState = inputActions.Player.Fire.ReadValue<float>() > 0.5f;
 
-                // ‰Ÿ‚³‚ê‚½uŠÔ‚¾‚¯ true
+                // æŠ¼ã•ã‚ŒãŸç¬é–“ã ã‘ true
                 bool pressedThisFrame = currentFireState && !lastFireState;
 
-                // ó‘Ô‚ğXV
+                // çŠ¶æ…‹ã‚’æ›´æ–°
                 lastFireState = currentFireState;
                 shoot = pressedThisFrame;
             }
@@ -431,7 +445,7 @@ namespace StarterAssets
             if (weaponManager.isReloading) return false;
 
 
-            // Œ»İ‚ÆÅŒã‚ÌUŒ‚‚ğ”äŠr
+            // ç¾åœ¨æ™‚åˆ»ã¨æœ€å¾Œã®æ”»æ’ƒæ™‚åˆ»ã‚’æ¯”è¼ƒ
             float timeSinceLastAttack = Time.time - lastAttackTime;
 
             return timeSinceLastAttack >= currentWeapon.rate;
@@ -452,7 +466,7 @@ namespace StarterAssets
             if (weaponManager.isReloading) return false;
 
 
-            // Œ»İ‚ÆÅŒã‚ÌUŒ‚‚ğ”äŠr
+            // ç¾åœ¨æ™‚åˆ»ã¨æœ€å¾Œã®æ”»æ’ƒæ™‚åˆ»ã‚’æ¯”è¼ƒ
             float timeSinceLastAttack = Time.time - lastAttackTime;
 
             return timeSinceLastAttack >= currentWeapon.rate;
@@ -462,7 +476,7 @@ namespace StarterAssets
 
         public void StartFoundDelay(float foundDelayTime)
         {
-            // ‚·‚Å‚ÉƒRƒ‹[ƒ`ƒ“‚ª“®‚¢‚Ä‚¢‚ê‚Î‰½‚à‚µ‚È‚¢
+            // ã™ã§ã«ã‚³ãƒ«ãƒ¼ãƒãƒ³ãŒå‹•ã„ã¦ã„ã‚Œã°ä½•ã‚‚ã—ãªã„
             if (foundDelayCoroutine != null) return;
 
             foundDelayCoroutine = StartCoroutine(FoundDelayCoroutine(foundDelayTime));
@@ -470,24 +484,31 @@ namespace StarterAssets
 
         public void StopFoundDelay()
         {
-            // ƒRƒ‹[ƒ`ƒ“‚ª“®‚¢‚Ä‚¢‚ê‚Î’â~
+            // ã‚³ãƒ«ãƒ¼ãƒãƒ³ãŒå‹•ã„ã¦ã„ã‚Œã°åœæ­¢
             if (foundDelayCoroutine != null)
             {
                 StopCoroutine(foundDelayCoroutine);
                 foundDelayCoroutine = null;
             }
 
-            hasFound = false; // “G‚ªŒ©‚¦‚È‚­‚È‚Á‚½‚Ì‚Åƒtƒ‰ƒOƒŠƒZƒbƒg
+            hasFound = false; // æ•µãŒè¦‹ãˆãªããªã£ãŸã®ã§ãƒ•ãƒ©ã‚°ãƒªã‚»ãƒƒãƒˆ
         }
 
         private IEnumerator FoundDelayCoroutine(float foundDelayTime)
         {
+
+            if (!GetComponentInParent<SpawnOwner>().IsMine() && GetComponentInParent<SpawnOwner>().ownerNetId != 12345)
+            {
+                foundDelayCoroutine = null;
+                yield break;
+            }
+
             var tpc = GetComponentInChildren<ThirdPersonController>();
             tpc.BotRefreshEnemyTargets();
 
             while (true)
             {
-                // “G‚ªŒ©‚¦‚È‚¢ê‡‚ÍƒRƒ‹[ƒ`ƒ“‚ğI—¹‚µ‚Äƒtƒ‰ƒO‚ğ–ß‚·
+                // æ•µãŒè¦‹ãˆãªã„å ´åˆã¯ã‚³ãƒ«ãƒ¼ãƒãƒ³ã‚’çµ‚äº†ã—ã¦ãƒ•ãƒ©ã‚°ã‚’æˆ»ã™
                 if (!CanSeeAnyEnemy(tpc))
                 {
                     hasFound = false;
@@ -495,13 +516,13 @@ namespace StarterAssets
                     yield break;
                 }
 
-                // “G‚ªŒ©‚¦‚éê‡‚Íƒtƒ‰ƒO‚ğ true ‚É‚µ‚Äˆ—‚ği‚ß‚é
+                // æ•µãŒè¦‹ãˆã‚‹å ´åˆã¯ãƒ•ãƒ©ã‚°ã‚’ true ã«ã—ã¦å‡¦ç†ã‚’é€²ã‚ã‚‹
                 hasFound = true;
 
-                // ’x‰„ˆ—
+                // é…å»¶å‡¦ç†
                 yield return new WaitForSeconds(foundDelayTime);
 
-                // ƒtƒ‰ƒO‚Í•Û‚µ‚½‚Ü‚Üƒ‹[ƒv‚µ‚ÄŸƒtƒŒ[ƒ€‚àƒ`ƒFƒbƒN
+                // ãƒ•ãƒ©ã‚°ã¯ä¿æŒã—ãŸã¾ã¾ãƒ«ãƒ¼ãƒ—ã—ã¦æ¬¡ãƒ•ãƒ¬ãƒ¼ãƒ ã‚‚ãƒã‚§ãƒƒã‚¯
                 yield return null;
             }
         }
@@ -520,49 +541,78 @@ namespace StarterAssets
 
                     if (!Physics.Linecast(camPos, pos, wallMask))
                     {
-                        return true; // 1‚Â‚Å‚àŒ©‚¦‚ê‚Î true
+                        return true; // 1ã¤ã§ã‚‚è¦‹ãˆã‚Œã° true
                     }
                 }
             }
 
-            return false; // ‘S•”•Ç‰z‚µ‚È‚ç false
+            return false; // å…¨éƒ¨å£è¶Šã—ãªã‚‰ false
         }
 
 
 
 
+        // =========================================
+        // ã‚«ãƒ¡ãƒ©ã¸ã®ãƒ”ãƒƒãƒåæ˜ ï¼ˆã‚¯ãƒ©ã‚¹å¤‰æ•°ãªã—ï¼‰
+        // =========================================
+        public void CameraRecoil(float addPitch)
+        {
+            // ç¾åœ¨ã®å›è»¢ã‚’å–å¾—ï¼ˆ-180ã€œ180ã«æ­£è¦åŒ–ï¼‰
+            float currentPitch = head.localEulerAngles.x;
+            if (currentPitch > 180f) currentPitch -= 360f;
+
+            float newPitch = Mathf.Clamp(currentPitch + addPitch, -90f, 90f);
+
+            // Pitch ã ã‘æ›´æ–°ï¼ˆYaw/Z ã¯ã„ã˜ã‚‰ãªã„ï¼‰
+            Vector3 e = head.localEulerAngles;
+            e.x = newPitch;
+            head.localRotation = Quaternion.Euler(e);
+        }
 
 
-        // ƒŠƒRƒCƒ‹ˆ—‚ÌƒRƒ‹[ƒ`ƒ“
+        // =========================================
+        // ãƒªã‚³ã‚¤ãƒ«ï¼ˆPitch + Yawï¼‰
+        // =========================================
         public IEnumerator RecoilCoroutine(float duration, Vector3 targetRecoil)
         {
             if (IsZooming)
-            {
                 targetRecoil *= 0.5f;
-            }
 
-            float xRandomRot = UnityEngine.Random.Range(-targetRecoil.x, targetRecoil.x);
+            // ãƒ©ãƒ³ãƒ€ãƒ ãªãƒ¨ãƒ¼å›è»¢å¹…
+            float yawRandom = UnityEngine.Random.Range(-targetRecoil.x, targetRecoil.x);
 
-            for (int count = 0; count < 10; count++)
+            float step = duration / 9f;
+
+            for (int i = 0; i < 10; i++)
             {
-                transformNetwork.yaw += xRandomRot / (10 - count);
-                GetComponent<ThirdPersonController>().CameraRecoil(targetRecoil.y / (10 - count));
-                parentOfPlayer.transform.rotation = Quaternion.Euler(0, transformNetwork.yaw, 0);
-                //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
-                yield return new WaitForSeconds(duration / 9);
+                float div = (10 - i);
+
+                //--------- Pitchï¼ˆã‚«ãƒ¡ãƒ©ï¼‰ ----------
+                float addPitch = targetRecoil.y / div;
+                CameraRecoil(addPitch);
+
+                //--------- Yawï¼ˆä½“ï¼‰ ----------
+                float currentYaw = parentOfPlayer.transform.eulerAngles.y;
+                float newYaw = currentYaw + yawRandom / div;
+                parentOfPlayer.transform.rotation = Quaternion.Euler(0, newYaw, 0);
+
+                yield return new WaitForSeconds(step);
             }
         }
 
+        // =========================================
+        // ãƒªã‚³ã‚¤ãƒ«æˆ»ã—ï¼ˆãƒã‚¦ãƒ³ã‚¹ï¼‰
+        // =========================================
         private IEnumerator Recoilbounce(float duration, Vector3 targetRecoil)
         {
-
+            // æˆ»ã‚Šé–‹å§‹ã®é…å»¶
             yield return new WaitForSeconds((0.3f - duration) * 1.5f);
 
+            // Pitch æˆ»ã—ï¼ˆYaw æˆ»ã—ã¯ä¸è¦ï¼‰
             StartCoroutine(RecoilCoroutine(duration, new Vector3(0, -targetRecoil.y, 0)));
-            
         }
 
-        // Œ»İ‚ÌƒŠƒRƒCƒ‹’l‚ğæ“¾
+        // ç¾åœ¨ã®ãƒªã‚³ã‚¤ãƒ«å€¤ã‚’å–å¾—
         public Vector3 GetCurrentRecoil()
         {
             return currentRecoilPosition;

@@ -33,8 +33,8 @@ public class TriggerSpawner : NetworkBehaviour
             Vector3 spawnPos = transform.position -transform.forward;
             Quaternion spawnRot = Quaternion.identity;
 
-            GameObject limeInstance = Instantiate(Lime, spawnPos, spawnRot);
-            NetworkServer.Spawn(limeInstance);
+            GameObject instance = RoundManager.rm.ObjectSpawn(Lime, spawnPos, spawnRot);
+            instance.GetComponent<SpawnOwner>().ownerNetId = netId;
 
             NetworkServer.Destroy(gameObject);
         }

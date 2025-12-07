@@ -22,7 +22,7 @@ MonoBehaviour:
     moveVector: -1
     moveAsScriptTime: 0.7
     movingAsScript: 1
-    foundDelayTime: 0.4
+    foundDelayTime: 0.5
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -3.754, y: -0.00000071525574, z: -2.7727792}
@@ -32,7 +32,7 @@ MonoBehaviour:
     moveVector: -1
     moveAsScriptTime: 0.5
     movingAsScript: 1
-    foundDelayTime: 0.4
+    foundDelayTime: 0.5
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -4.754, y: -0.00000071525574, z: -2.7727792}
@@ -42,7 +42,7 @@ MonoBehaviour:
     moveVector: -1
     moveAsScriptTime: 0.3
     movingAsScript: 1
-    foundDelayTime: 0.4
+    foundDelayTime: 0.5
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: 5.751, y: 0.79999876, z: -2.6594303}
@@ -52,7 +52,7 @@ MonoBehaviour:
     moveVector: -1
     moveAsScriptTime: 0.5
     movingAsScript: 1
-    foundDelayTime: 0.4
+    foundDelayTime: 0.5
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: 7.536619, y: -0.0000009536743, z: -1.83}
@@ -62,7 +62,7 @@ MonoBehaviour:
     moveVector: -1
     moveAsScriptTime: 0.7
     movingAsScript: 1
-    foundDelayTime: 0.4
+    foundDelayTime: 0.5
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -34.325, y: 1.1656914, z: -2.0305667}
@@ -72,7 +72,7 @@ MonoBehaviour:
     moveVector: -1
     moveAsScriptTime: 0.7
     movingAsScript: 1
-    foundDelayTime: 0.4
+    foundDelayTime: 0.5
   gimmicksWithBot: []
   standingGimmicks: []
   attackerPos: {x: -51.691204, y: -0.19356489, z: -3.1673105}

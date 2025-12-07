@@ -21,6 +21,7 @@ public class ServerCheckShoot : NetworkBehaviour
     public static float bodyShot;
 
     public GameObject Blood;
+    public GameObject HeadBlood;
     public GameObject Fragment;
     [SyncVar]
     public bool isDarkness;
@@ -136,18 +137,31 @@ public class ServerCheckShoot : NetworkBehaviour
                     HpMaster hpMaster = hitObject.GetComponentInParent<HpMaster>();
                     if (hpMaster != null && playerObject.GetComponent<NetworkIdentity>().netId != hitObject.GetComponentInParent<NetworkIdentity>().netId)
                     {
-                        GameObject blood = Instantiate(Blood, hitpoint.point, Quaternion.identity);
-                        NetworkServer.Spawn(blood);
+                        bool isHeadShot = hitpoint.collider.tag == "Head";
+                       
                         if (!hitList.Contains(hpMaster.gameObject))
                         {
-                            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f, 15);
-                            int finalDamage = (int)((hitpoint.collider.tag == "Head" ? originalHeadDamage : originalDamage) * currentDamageRate);
+                            if (isHeadShot)
+                            {
+                                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HEADBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f, 15);
 
+                                GameObject bloodObj = Instantiate(HeadBlood, hitpoint.point, Quaternion.identity);
+                                NetworkServer.Spawn(bloodObj);
+                            }
+                            else
+                            {
+                                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f, 15);
+
+                                GameObject bloodObj = Instantiate(Blood, hitpoint.point, Quaternion.identity);
+                                NetworkServer.Spawn(bloodObj);
+                            }
+
+                            int finalDamage = (int)((isHeadShot ? originalHeadDamage : originalDamage) * currentDamageRate);
                             bool headshot = false;
 
                             if (GetComponentInParent<BotManager>() == null)
                             {
-                                if (hitpoint.collider.tag == "Head")
+                                if (isHeadShot)
                                 {
                                     headshot = true;
                                     headShot++;
@@ -230,7 +244,7 @@ public class ServerCheckShoot : NetworkBehaviour
                 GameObject darkOrbPrefab = Instantiate(darkOrb, spawnPos, Quaternion.identity);                
                 darkOrbPrefab.transform.localScale = new Vector3(scale, scale, scale);
                 // íNÇ™ê∂ê¨àÀóäÇµÇΩÇ©ÇãLò^
-                var ownerTag = darkOrbPrefab.AddComponent<SpawnOwner>();
+                var ownerTag = darkOrbPrefab.GetComponent<SpawnOwner>();
                 // àÀóäé“ÇÃnetIdÇãLò^
                 ownerTag.ownerNetId = playerObject.GetComponent<NetworkIdentity>().netId; 
                 NetworkServer.Spawn(darkOrbPrefab);

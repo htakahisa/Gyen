@@ -1,4 +1,4 @@
-using Mirror;
+ï»¿using Mirror;
 using UnityEngine;
 
 
@@ -13,10 +13,10 @@ public class YellowController : NetworkBehaviour
     public CharacterController characterController;
     public AudioManager audioManager;
 
-    public float smoothSpeed = 4f;     // •Ï‰»‚ÌŠŠ‚ç‚©‚³i‘å‚«‚¢‚Ù‚Ç‘¬‚­’Ç]j
+    public float smoothSpeed = 4f;     // å¤‰åŒ–ã®æ»‘ã‚‰ã‹ã•ï¼ˆå¤§ãã„ã»ã©é€Ÿãè¿½å¾“ï¼‰
 
-    private float targetValue = 0f;    // –Ú•W’l
-    private float currentValue = 0f;   // Œ»Ý’liŠŠ‚ç‚©‚É•Ï‰»‚·‚éj
+    private float targetValue = 0f;    // ç›®æ¨™å€¤
+    private float currentValue = 0f;   // ç¾åœ¨å€¤ï¼ˆæ»‘ã‚‰ã‹ã«å¤‰åŒ–ã™ã‚‹ï¼‰
     private float _sensitivity = 1f;
 
     public GameObject mainCamera;
@@ -71,38 +71,45 @@ public class YellowController : NetworkBehaviour
 
     }
 
+
     private void CharacterRotation()
     {
-
         if (!RoundManager.rm.hasLoaded) return;
 
-
-
-
-        // ƒ}ƒEƒX“ü—Í
+        // ãƒžã‚¦ã‚¹å…¥åŠ›
         float mouseX = Input.GetAxis("Mouse X");
         float mouseY = Input.GetAxis("Mouse Y");
 
-        // --- ¶‰E‰ñ“](Yaw) ---
-        // ƒ}ƒEƒXˆÚ“®‚©‚ç–Ú•W’l‚ðŒvŽZ
-        targetValue = mouseX * _sensitivity;
-        targetValue = Mathf.Clamp(targetValue, -90, 90);
+        // ==========================================================
+        // â˜… Yawï¼ˆå·¦å³ï¼‰: 360Â°ç„¡é™å›žè»¢ â†’ Transform ã‹ã‚‰æ¯Žå›žå–å¾—
+        // ==========================================================
+        float currentYaw = parentOfPlayer.transform.eulerAngles.y;
 
-        // Œ»Ý’l‚ðŠŠ‚ç‚©‚É•âŠÔ
-        currentValue = Mathf.Lerp(currentValue, targetValue, Time.deltaTime * smoothSpeed);
+        float targetYawDelta = mouseX * _sensitivity * 10;
+        float smoothedYawDelta = Mathf.Lerp(0, targetYawDelta, Time.deltaTime * smoothSpeed);
 
-        // ƒvƒŒƒCƒ„[–{‘Ì‚ð‰ñ“]
-        transformNetwork.yaw += currentValue;
-        parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
-        //transformNetwork.CmdRotate(parentOfPlayer.transform.rotation);
+        float newYaw = currentYaw + smoothedYawDelta;
 
-        // --- ã‰º‰ñ“](Pitch) ---
-        xRotation -= mouseY * _sensitivity;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        parentOfPlayer.transform.rotation = Quaternion.Euler(0, newYaw, 0);
 
-        // ƒJƒƒ‰‚Éã‰º‰ñ“]‚ð“K—pi *= ‚Å‚Í‚È‚­ = j
-        mainCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+        // ==========================================================
+        // â˜… Pitchï¼ˆä¸Šä¸‹ï¼‰: -90ã€œ90Â° â†’ localEulerAngles ã‹ã‚‰å–å¾—
+        // ==========================================================
+        float currentPitch = mainCamera.transform.localEulerAngles.x;
+
+        // Unity ã®è§’åº¦ä»•æ§˜è£œæ­£ï¼ˆ181ã€œ360Â° â†’ -179ã€œ0Â°ï¼‰
+        if (currentPitch > 180f) currentPitch -= 360f;
+
+        float targetPitchDelta = mouseY * _sensitivity * 10;
+        float smoothedPitchDelta = Mathf.Lerp(0, targetPitchDelta, Time.deltaTime * smoothSpeed);
+
+        float newPitch = Mathf.Clamp(currentPitch - smoothedPitchDelta, -90f, 90f);
+
+        mainCamera.transform.localRotation = Quaternion.Euler(newPitch, 0, 0);
     }
+
+
 
     public void CharacterMove()
     {

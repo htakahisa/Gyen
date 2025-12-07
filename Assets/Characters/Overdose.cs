@@ -105,6 +105,15 @@ public class Overdose : CharacterSkills
             }
         }
 
+        if (shootManager.IsZooming && isMirror)
+        {
+            ChangeMirror();
+        }
+        if (shootManager.IsZooming && isTweaks)
+        {
+            ChangeTweaks();
+        }
+
 
     }
 
@@ -155,11 +164,11 @@ public class Overdose : CharacterSkills
 
 
     [Command]
-    public void CmdTweaks(Vector3 spawnPos, Quaternion spawnRot, NetworkConnectionToClient conn = null)
+    public void CmdTweaks(Vector3 spawnPos, Quaternion spawnRot)
     {
 
         currentCharacter.skill1Energy--;
-        TweaksSpawn(spawnPos, spawnRot, conn);
+        TweaksSpawn(spawnPos, spawnRot);
 
     }
 
@@ -194,19 +203,10 @@ public class Overdose : CharacterSkills
         }
     }
 
-    public void TweaksSpawn(Vector3 spawnPos, Quaternion dir, NetworkConnectionToClient conn = null)
+    public void TweaksSpawn(Vector3 spawnPos, Quaternion dir)
     {
-
-
-        GameObject tweaksPrefab = Instantiate(tweaks, spawnPos, dir);
-
-        // ’N‚ª¶¬ˆË—Š‚µ‚½‚©‚ğ‹L˜^
-        var ownerTag = tweaksPrefab.AddComponent<SpawnOwner>();
-        ownerTag.ownerNetId = conn.identity.netId; // ˆË—ŠÒ‚ÌnetId‚ğ‹L˜^
-
-        NetworkServer.Spawn(tweaksPrefab, conn);
-        RoundManager.spawns.Add(tweaksPrefab);
-
+        var instance = RoundManager.rm.ObjectSpawn(tweaks, spawnPos, dir, true, false, connectionToClient);
+        instance.GetComponent<SpawnOwner>().ownerNetId = netId;
         RpcChangeTweaks(connectionToClient);
     }
 
@@ -238,11 +238,11 @@ public class Overdose : CharacterSkills
     }
 
     [Command]
-    public void CmdMirror(Vector3 pos, Vector3 dir, NetworkConnectionToClient conn = null)
+    public void CmdMirror(Vector3 pos, Vector3 dir)
     {
 
         currentCharacter.skill2Energy--;
-        MirrorSpawn(pos, dir, conn);
+        MirrorSpawn(pos, dir);
 
     }
     public void ChangeMirror()
@@ -262,18 +262,10 @@ public class Overdose : CharacterSkills
         }
     }
 
-    public void MirrorSpawn(Vector3 pos, Vector3 dir, NetworkConnectionToClient conn = null)
+    public void MirrorSpawn(Vector3 pos, Vector3 dir)
     {
-
-        GameObject mirrorPrefab = Instantiate(mirror, pos, Quaternion.LookRotation(dir));
-
-        // ’N‚ª¶¬ˆË—Š‚µ‚½‚©‚ğ‹L˜^
-        var ownerTag = mirrorPrefab.AddComponent<SpawnOwner>();
-        ownerTag.ownerNetId = conn.identity.netId; // ˆË—ŠÒ‚ÌnetId‚ğ‹L˜^
-
-        NetworkServer.Spawn(mirrorPrefab, conn);
-        RoundManager.spawns.Add(mirrorPrefab);
-
+        var instance = RoundManager.rm.ObjectSpawn(mirror, pos, Quaternion.LookRotation(dir), true, false, connectionToClient);
+        instance.GetComponent<SpawnOwner>().ownerNetId = netId;
         RpcChangeMirror(connectionToClient);
     }
 

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6263716634230212011}
   - component: {fileID: 486971953508703495}
   - component: {fileID: 3128669974034632371}
+  - component: {fileID: -3757976390828728102}
   m_Layer: 10
   m_Name: Mentum
   m_TagString: Untagged
@@ -63,6 +64,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -84,6 +87,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -104,6 +108,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   time: 15
+  onTimeOut: 0
 --- !u!114 &3128669974034632371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,3 +126,19 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!114 &-3757976390828728102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8571021629717422302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753fb406a9ff89743a6a114ee73f78d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnOwner
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  ownerNetId: 0

@@ -20,27 +20,27 @@ MonoBehaviour:
     weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 0.3
+    moveAsScriptTime: 0.4
     movingAsScript: 1
     foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -17.694256, y: 4.800001, z: 20.395424}
+    position: {x: -17.694256, y: 4.800001, z: 21.274}
     rotation: {x: 0, y: -90, z: 0}
     weapon: 7
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.5
+    moveAsScriptTime: 0.7
     movingAsScript: 1
     foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -19.377, y: 4.8000026, z: 26.153225}
+    position: {x: -19.3, y: 4.8000026, z: 26.153225}
     rotation: {x: 0, y: -180, z: 0}
     weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 0.5
+    moveAsScriptTime: 0.7
     movingAsScript: 1
     foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
@@ -50,27 +50,27 @@ MonoBehaviour:
     weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 0.5
+    moveAsScriptTime: 0.7
     movingAsScript: 1
     foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -17.77, y: 4.800001, z: 19.65}
+    position: {x: -16.96, y: 4.800001, z: 20.61}
     rotation: {x: 0, y: -90, z: 0}
     weapon: 7
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.5
+    moveAsScriptTime: 0.7
     movingAsScript: 1
     foundDelayTime: 0.25
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
-    position: {x: -17.411575, y: 4.800001, z: 19.65}
+    position: {x: -17.411575, y: 4.800001, z: 20.53}
     rotation: {x: 0, y: -90, z: 0}
     weapon: 7
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.3
+    moveAsScriptTime: 0.6
     movingAsScript: 1
     foundDelayTime: 0.25
   gimmicksWithBot:

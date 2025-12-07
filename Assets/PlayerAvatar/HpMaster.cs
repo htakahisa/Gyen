@@ -55,7 +55,19 @@ public class HpMaster : NetworkBehaviour
         {
             onDeath = EventOnDeath.DUELLANDRETRY;
         }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP && GetComponent<PlayerManager>() != null)
+        {
+            onDeath = EventOnDeath.PLAYERDEAD;
+        }
 
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP && RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY)
+        {
+            hp = 100;
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE && RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY)
+        {
+            hp = 100;
+        }
     }
     
 
@@ -190,10 +202,7 @@ public class HpMaster : NetworkBehaviour
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
             GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
             RoundManager.rm.Finisher(gameObject, headshot);
-            if(RoundManager.rm.defender == gameObject)
-            {
-                RoundManager.rm.RoundEnd(gameObject);
-            }
+            RoundManager.rm.PlayerDead(RoundManager.rm.attackers.Contains(gameObject), gameObject);
         }
         if (onDeath == EventOnDeath.PLAYERRESPAWN)
         {

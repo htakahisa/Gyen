@@ -12,10 +12,18 @@ public class SpawnOwner : NetworkBehaviour
 
     public NetworkIdentity WhoseThis()
     {
-        if (NetworkServer.spawned.TryGetValue(ownerNetId, out NetworkIdentity ownerIdentity))
+        // サーバー側の辞書
+        if (NetworkServer.active)
         {
-            return ownerIdentity;
+            if (NetworkServer.spawned.TryGetValue(ownerNetId, out NetworkIdentity id))
+                return id;
         }
+
+        // クライアント側の辞書
+        if (NetworkClient.spawned.TryGetValue(ownerNetId, out NetworkIdentity id2))
+            return id2;
+
         return null;
     }
+
 }

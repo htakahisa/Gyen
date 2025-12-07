@@ -32,6 +32,7 @@ public class CustomNetworkManager : NetworkManager
         ONEVSONE,
         PRACTICE,
         DUELLAND,
+        DOUBLETAP,
     }
 
     #region Initialization
@@ -149,6 +150,13 @@ public class CustomNetworkManager : NetworkManager
         Connect();
     }
 
+    public void DoubleTapConnect()
+    {
+        requiredPlayers = 2;
+        selectedMode = Mode.DOUBLETAP;
+        Connect();
+    }
+
     private void AssignRoles()
     {
         if (pendingConnections.Count > 1)
@@ -236,7 +244,6 @@ public class CustomNetworkManager : NetworkManager
 
         // プレイヤー生成
         GameObject player = Instantiate(characterPrefab, spawnPos, Quaternion.identity);
-
         // 置き換え（この時点でクライアントに権限が付く）
         NetworkServer.ReplacePlayerForConnection(conn, player, true);
 
@@ -248,7 +255,7 @@ public class CustomNetworkManager : NetworkManager
         RpcRelay relay = player.GetComponent<RpcRelay>();
         relay.RpcSetPlayersRole(isAttacker, player);
         relay.RpcSetCharacter(index, player);
-        RoundManager.rm.currentMode = (RoundManager.Mode)(int)selectedMode;
+        RoundManager.rm.SetMode((int)selectedMode);
         RoundManager.rm.isFanatics = isFanatics;
 
         Debug.Log($"Spawned player for connection {conn.connectionId} at {spawnPos}");

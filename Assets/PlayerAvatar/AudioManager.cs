@@ -13,6 +13,7 @@ public class AudioManager : NetworkBehaviour
     public AudioClip yellow;
     public AudioClip laser;
     public AudioClip hitBlood;
+    public AudioClip headBlood;
     public AudioClip horusDestroyed;
     public AudioClip ITweakDestroyed;
     public AudioClip IMirrorDestroyed;
@@ -41,6 +42,7 @@ public class AudioManager : NetworkBehaviour
         YELLOW,
         LASER,
         HITBLOOD,
+        HEADBLOOD,
         HORUSDESTROYED,
         ITWEAKSDESTROYED,
         IMIRRORDESTROYED,
@@ -129,6 +131,10 @@ public class AudioManager : NetworkBehaviour
 
             case Sounds.HITBLOOD:
                 soundClip = hitBlood;
+                break;
+
+            case Sounds.HEADBLOOD:
+                soundClip = headBlood;
                 break;
 
             case Sounds.HORUSDESTROYED:

@@ -54,6 +54,15 @@ public class BuyArmer : NetworkBehaviour, IPointerClickHandler
                 CmdBuy(RoundManager.rm.GetMyPlayer());
             }
         }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
+        {
+
+            if (RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CanBuy(cost, CreditManager.PurchaseSlot.Armor))
+            {
+                RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>().CmdBuy(cost, CreditManager.PurchaseSlot.Armor);
+                CmdBuy(RoundManager.rm.GetMyPlayer());
+            }
+        }
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
 
@@ -74,11 +83,20 @@ public class BuyArmer : NetworkBehaviour, IPointerClickHandler
 
         }
     }
-        
+
     [Command(requiresAuthority = false)]
     public void CmdBuy(GameObject player)
     {
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
+        {
+            foreach (var bot in RoundManager.rm.GetMyBots(player.GetComponent<NetworkIdentity>()))
+            {
+                bot.GetComponent<HpMaster>().armer = armer;
+            }
+        }
         player.GetComponent<HpMaster>().armer = armer;
     }
 
 }
+
+

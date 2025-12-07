@@ -520,7 +520,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1701225623898509953}
   - component: {fileID: 239917992878177271}
-  - component: {fileID: 1353135463020073453}
   m_Layer: 0
   m_Name: PlayerObject
   m_TagString: Untagged
@@ -561,23 +560,6 @@ MonoBehaviour:
   syncInterval: 0
   geometry: {fileID: 799851667630623740}
   camera: {fileID: 3587143367143688788}
---- !u!114 &1353135463020073453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 474762193064990969}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f6f3bf89aa97405989c802ba270f815, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 1
-  syncMode: 0
-  syncInterval: 0
-  clientAuthority: 1
-  animator: {fileID: 3878592368671364376}
 --- !u!1 &580306253309000471
 GameObject:
   m_ObjectHideFlags: 0
@@ -870,6 +852,7 @@ MonoBehaviour:
   canMove: 1
   lockManager: {fileID: 728472207448528687}
   footStepTime: 0
+  jumpBot: 0
 --- !u!114 &8334744245603090709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -899,6 +882,7 @@ MonoBehaviour:
   parentOfPlayer: {fileID: 3543936278411775571}
   hazardScope: {fileID: 2517295520851128215}
   hasFound: 0
+  head: {fileID: 3627787299491913062}
 --- !u!114 &1470853562863111889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1031,6 +1015,7 @@ MonoBehaviour:
     isOwned: 0
   magazine: 0
   isReloading: 0
+  currentWeaponIndex: -1
   mainWeaponType: 0
   subWeaponType: 0
   abilityWeaponType: 0
@@ -1056,6 +1041,8 @@ MonoBehaviour:
   lineDuration: 0.05
   lineRenderer: {fileID: 6959269338981759375}
   Blood: {fileID: 4178278509775477463, guid: 3d0463f291d0351418a22c3bcd66ccdd, type: 3}
+  HeadBlood: {fileID: 4178278509775477463, guid: 6857828e714bf094eb1f7ea47c2d8100,
+    type: 3}
   Fragment: {fileID: 6236630861130584601, guid: a87e483792b9d194b8616c7e2be9bdca,
     type: 3}
   isDarkness: 0
@@ -2849,6 +2836,7 @@ GameObject:
   - component: {fileID: 1641871602304337997}
   - component: {fileID: 124543901704949302}
   - component: {fileID: 7535765861924788460}
+  - component: {fileID: 4506195584585262550}
   m_Layer: 0
   m_Name: BattleBotAvatar
   m_TagString: Untagged
@@ -2910,8 +2898,10 @@ MonoBehaviour:
   pitchLerpFactor: 0.2
   controller: {fileID: 1112727817626628774}
   cameraRoot: {fileID: 3627787299491913062}
-  isSynchronize: 0
-  yaw: 0
+  posThreshold: 0.005
+  rotThreshold: 0.2
+  pitchThreshold: 0.2
+  isSynchronize: 1
 --- !u!114 &8825841003792857049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2942,6 +2932,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentCharacter: {fileID: 0}
+  shootManager: {fileID: 0}
 --- !u!114 &3159636760548436729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3333,6 +3324,22 @@ MonoBehaviour:
   moveAsScriptTime: 0
   movingAsScript: 0
   foundDelayTime: 0.3
+--- !u!114 &4506195584585262550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753fb406a9ff89743a6a114ee73f78d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnOwner
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  ownerNetId: 0
 --- !u!1 &3561717742706190703
 GameObject:
   m_ObjectHideFlags: 0

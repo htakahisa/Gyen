@@ -39,5 +39,6 @@ public class BotBuy : NetworkBehaviour
     {
         bot.GetComponent<BotManager>().ResetPos();
         bot.GetComponent<HpMaster>().armer = RoundManager.rm.GetMyPlayer().GetComponent<HpMaster>().armer;
+        bot.GetComponent<SpawnOwner>().ownerNetId = 12345;
     }
 }

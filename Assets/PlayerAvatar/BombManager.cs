@@ -239,6 +239,10 @@ public class BombManager : NetworkBehaviour
         {
             RoundManager.rm.RoundEnd(RoundManager.rm.defender);
         }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
+        {
+            RoundManager.rm.RoundEnd(RoundManager.rm.defender);
+        }
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
             RoundManager.rm.DuelLandRetry(false);
@@ -251,6 +255,10 @@ public class BombManager : NetworkBehaviour
     {
         Debug.Log("Bomb disarmed! Counter-Terrorists win.");
         if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
+        {
+            RoundManager.rm.RoundEnd(RoundManager.rm.attacker);
+        }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
         {
             RoundManager.rm.RoundEnd(RoundManager.rm.attacker);
         }
