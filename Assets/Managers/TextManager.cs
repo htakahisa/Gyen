@@ -42,6 +42,11 @@ public class TextManager : MonoBehaviour
                 myRoundText.text = RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>()?.rounds.ToString();
                 enemyRountText.text = RoundManager.rm.GetOtherPlayer().GetComponent<CreditManager>()?.rounds.ToString();
             }
+            if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
+            {
+                myRoundText.text = RoundManager.rm.GetMyPlayer().GetComponent<CreditManager>()?.rounds.ToString();
+                enemyRountText.text = RoundManager.rm.GetOtherPlayer().GetComponent<CreditManager>()?.rounds.ToString();
+            }
             if (RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>() != null)
             {
                 magazineText.text = RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>()?.magazine.ToString();
