@@ -3323,7 +3323,7 @@ MonoBehaviour:
   moveVector: 0
   moveAsScriptTime: 0
   movingAsScript: 0
-  foundDelayTime: 0.3
+  foundDelayTime: 0.5
 --- !u!114 &4506195584585262550
 MonoBehaviour:
   m_ObjectHideFlags: 0

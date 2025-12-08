@@ -317,6 +317,7 @@ namespace StarterAssets
                 foreach (var bot in RoundManager.rm.GetOtherBots())
                 {
                     targets.Add(bot);
+                    Debug.Log(bot);
                 }
             }
 
@@ -324,11 +325,13 @@ namespace StarterAssets
             foreach (var target in targets)
             {
                 if (target == null) continue;
+                if (target.GetComponent<HpMaster>().isDead) continue;
 
                 // 子オブジェクトから Body と Head を探す
                 Transform[] children = target.GetComponentsInChildren<Transform>(true);
                 foreach (Transform child in children)
                 {
+
                     if (child.CompareTag("Body") || child.CompareTag("Head"))
                     {
                         enemiesForBot.Add(child);
@@ -348,7 +351,7 @@ namespace StarterAssets
 #else
 			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif
-
+            Debug.Log("start",transform);
             AssignAnimationIDs();
 
             // reset our timeouts on start
@@ -486,7 +489,7 @@ namespace StarterAssets
                 {
                     _animator.SetFloat(_animIDSpeed, _speed);
                     _animator.SetFloat(_animIDMotionSpeed, _animationBlend);
-                    _animator.SetBool(_animCrouching, isCrouching);
+                    _animator.SetBool("_animCrouching", isCrouching);
                 }
             }
             if (GetComponentInParent<BotManager>() != null)
@@ -498,29 +501,33 @@ namespace StarterAssets
                     {
                         if (GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance != null)
                         {
-                            Vector3 conductorPos = GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance.transform.position;
-                            Vector3 camToTarget = conductorPos - _mainCamera.transform.position;
-                            if (camToTarget.sqrMagnitude > 0.0001f)
+                            float distance = Vector3.Distance(transform.position, GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance.transform.position);
+                            if (distance > 1)
                             {
-                                // 水平方向の距離
-                                float flatDist = new Vector2(camToTarget.x, camToTarget.z).magnitude;
+                                Vector3 conductorPos = GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance.transform.position;
+                                Vector3 camToTarget = conductorPos - _mainCamera.transform.position;
+                                if (camToTarget.sqrMagnitude > 0.0001f)
+                                {
+                                    // 水平方向の距離
+                                    float flatDist = new Vector2(camToTarget.x, camToTarget.z).magnitude;
 
-                                // ピッチ角度 = atan2(高さ, 水平方向距離)
-                                float desiredPitch = Mathf.Atan2(camToTarget.y, flatDist) * Mathf.Rad2Deg;
+                                    // ピッチ角度 = atan2(高さ, 水平方向距離)
+                                    float desiredPitch = Mathf.Atan2(camToTarget.y, flatDist) * Mathf.Rad2Deg;
 
-                                // ここで直接「絶対角度」として渡す
-                                GetComponent<ThirdPersonController>().CameraParticularRotaion(desiredPitch);
+                                    // ここで直接「絶対角度」として渡す
+                                    GetComponent<ThirdPersonController>().CameraParticularRotaion(desiredPitch);
+                                }
+
+
+                                Vector3 bodyDir = new Vector3(camToTarget.x, 0, camToTarget.z);
+
+                                if (bodyDir.sqrMagnitude > 0.0001f)
+                                {
+                                    Quaternion bodyRot = Quaternion.LookRotation(bodyDir, Vector3.up);
+                                    parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
+                                }
+                                BotMove(0, 1, false, false);
                             }
-
-
-                            Vector3 bodyDir = new Vector3(camToTarget.x, 0, camToTarget.z);
-
-                            if (bodyDir.sqrMagnitude > 0.0001f)
-                            {
-                                Quaternion bodyRot = Quaternion.LookRotation(bodyDir, Vector3.up);
-                                parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
-                            }
-                            BotMove(0, 1, false, false);
                         }
                     }
                 }
@@ -604,13 +611,9 @@ namespace StarterAssets
 
         public void ReportAnimState(float speed, float blend, bool crouch)
         {
-            if (GetComponentInParent<BotManager>() != null)
-            {
-                if (GetComponentInParent<SpawnOwner>().IsMine())
-                {
-                    CmdUpdateAnimState(speed, blend, crouch);
-                }
-            }
+
+            CmdUpdateAnimState(speed, blend, crouch);
+                            
         }
 
         [Command]
@@ -1020,8 +1023,8 @@ namespace StarterAssets
                 _speed = 0f;
                 _animationBlend = 0f;
 
-                if (isLocalPlayer)
-                    CmdReportSpeed(_speed);
+                ReportAnimState(_speed, _animationBlend, isCrouching);
+                CmdReportSpeed(_speed);
 
                 return;
             }
@@ -1146,6 +1149,7 @@ namespace StarterAssets
                     footStepInTimer = 0f;
                 }
             }
+            ReportAnimState(_speed, _animationBlend, isCrouching);
 
         }
 
@@ -1359,6 +1363,7 @@ namespace StarterAssets
 
         public void BotMove(float horiMove, float verMove, bool isWalk, bool isCrouch)
         {
+            if (GetComponentInParent<SpawnOwner>() == null || !GetComponentInParent<SpawnOwner>().IsMine()) return;
             if (!canMove) return;
             isWalking = isWalk;
             isCrouching = isCrouch;
@@ -1378,9 +1383,8 @@ namespace StarterAssets
                 _speed = 0f;
                 _animationBlend = 0f;
 
-                if (isLocalPlayer)
-                    CmdReportSpeed(_speed);
-                ReportAnimState(_speed, _animationBlend, isCrouching);
+                CmdReportSpeed(_speed);
+                ReportAnimState(_speed, _animationBlend, isCrouching);              
 
                 return;
             }

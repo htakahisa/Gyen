@@ -207,12 +207,11 @@ public class RoundManager : NetworkBehaviour
 
     public void Finisher(GameObject loser, bool headshot)
     {
-        //if (currentMode == Mode.ONEVSONE || currentMode == Mode.PRACTICE)
-        {
-            GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
-            FinisherManager.instance.PlayPlayerKillBanner(loser, headshot);
-            FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
-        }
+
+        GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
+        FinisherManager.instance.PlayPlayerKillBanner(loser, headshot);
+        FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
+        
     }
 
     [ClientRpc]
@@ -1014,20 +1013,26 @@ public class RoundManager : NetworkBehaviour
 
         foreach (var bot in FindObjectsByType<BotManager>(FindObjectsSortMode.None))
         {
-            if (!bot.GetComponent<SpawnOwner>().WhoseThis() == identity) break;
+            if (bot.GetComponent<SpawnOwner>().WhoseThis() != identity) break;
 
             botsList.Add(bot.gameObject);
         }
 
         return botsList;
     }
-    public List<GameObject> GetOtherBots()
+    public List<GameObject> GetOtherBots(NetworkIdentity player = null)
     {
         List<GameObject> botsList = new List<GameObject>();
 
+        NetworkIdentity identity = player;
+        if (identity == null)
+        {
+            identity = GetMyPlayer().GetComponent<NetworkIdentity>();
+        }
+
         foreach (var bot in FindObjectsByType<BotManager>(FindObjectsSortMode.None))
         {
-            if (bot.GetComponent<SpawnOwner>().IsMine()) break;
+            if (bot.GetComponent<SpawnOwner>().WhoseThis() == identity) break;
 
             botsList.Add(bot.gameObject);
         }
@@ -1064,7 +1069,7 @@ public class RoundManager : NetworkBehaviour
     public void PlayerDead(bool attacker, GameObject obj)
     {
         dead.Add(obj);
-        if (defender)
+        if (!attacker)
         {
             if (IsDefendersAllDead())
             {

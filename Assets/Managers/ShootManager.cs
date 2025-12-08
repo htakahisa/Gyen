@@ -533,6 +533,8 @@ namespace StarterAssets
 
             foreach (var target in tpc.enemiesForBot)
             {
+                if (target.GetComponentInParent<HpMaster>().isDead) continue;
+
                 var cols = target.GetComponentsInChildren<Collider>();
 
                 foreach (var col in cols)

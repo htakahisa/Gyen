@@ -35,7 +35,7 @@ public class FinisherManager : NetworkBehaviour
         }
 
         GameObject winnerPlayer;
-        if(losePlayer == RoundManager.rm.GetMyPlayer())
+        if(losePlayer.GetComponent<SpawnOwner>().IsMine())
         {
             winnerPlayer = RoundManager.rm.GetOtherPlayer();
         }
