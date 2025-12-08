@@ -29,6 +29,8 @@ export const systems: System[] = [
       { version: "1.0.8", change: "デュエルランドモードに、普段のサイド「Fanatics」に、もう一つ「Heretics」を追加。「Heretics」サイドではサイトに向かって攻めてくるボット達のピークを抑えきるというのが目標のモードです。現在「Heretics」サイドで使用できる難易度は、EliteとTheDualだけですが、今後のアップデートに合わせて随時追加予定です。", type: "buff" as const },
       { version: "1.0.8", change: "デュエルランドモード中に、ボットの所持する武器、アーマー、反応速度値が難易度によって強くなるよう仕様変更しました", type: "buff" as const },
       { version: "1.0.8", change: "ボットがしゃがみ込む際、プレイヤーが見えている場合にしゃがみ込み、それ以外の時は止まっているように変更", type: "buff" as const },
+      { version: "1.0.9", change: "新しいゲームモード「ダブルタップ」を追加しました。普段のバトルモードに加えて、それぞれのプレイヤーはパートナーのボットを所持しています。", type: "buff" as const },
+      
     ],
   },
     {

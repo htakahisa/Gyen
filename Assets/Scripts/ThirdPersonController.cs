@@ -528,7 +528,19 @@ namespace StarterAssets
                                 }
                                 BotMove(0, 1, false, false);
                             }
+                            else
+                            {
+                                BotMove(0, 0, false, true);
+                            }
                         }
+                        else
+                        {
+                            BotMove(0, 0, false, true);
+                        }
+                    }
+                    else
+                    {
+                        BotMove(0, 0, false, true);
                     }
                 }
                 else

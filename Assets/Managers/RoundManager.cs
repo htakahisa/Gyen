@@ -891,8 +891,8 @@ public class RoundManager : NetworkBehaviour
     {
         winner.GetComponent<CreditManager>().ResetCurrentPaying();
         loser.GetComponent<CreditManager>().ResetCurrentPaying();
-        winner.GetComponent<CreditManager>().AddCredit(1500 + Round * 300);
-        loser.GetComponent<CreditManager>().AddCredit(1000 + Round * 100);
+        winner.GetComponent<CreditManager>().AddCredit(1000 + Round * 1000);
+        loser.GetComponent<CreditManager>().AddCredit(1000 + Round * 500);
 
     }
 
@@ -1013,7 +1013,8 @@ public class RoundManager : NetworkBehaviour
 
         foreach (var bot in FindObjectsByType<BotManager>(FindObjectsSortMode.None))
         {
-            if (bot.GetComponent<SpawnOwner>().WhoseThis() != identity) break;
+            if (bot.GetComponent<SpawnOwner>().WhoseThis() != identity)
+                continue;
 
             botsList.Add(bot.gameObject);
         }
@@ -1032,13 +1033,15 @@ public class RoundManager : NetworkBehaviour
 
         foreach (var bot in FindObjectsByType<BotManager>(FindObjectsSortMode.None))
         {
-            if (bot.GetComponent<SpawnOwner>().WhoseThis() == identity) break;
+            if (bot.GetComponent<SpawnOwner>().WhoseThis() == identity)
+                continue; // break → continue に変更（マジで重要）
 
             botsList.Add(bot.gameObject);
         }
 
         return botsList;
     }
+
 
     [Command]
     public void CmdCallDance()
