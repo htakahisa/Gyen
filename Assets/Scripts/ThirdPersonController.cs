@@ -991,7 +991,6 @@ namespace StarterAssets
         private void CameraRotation()
         {
 
-            if (!RoundManager.rm.hasLoaded || !RoundManager.rm.hasMapLoad) return;
 
             Vector2 lookInput = playerInput.actions.FindAction("Look").ReadValue<Vector2>();
 
@@ -1294,7 +1293,7 @@ namespace StarterAssets
 
         private void JumpAndGravity()
         {
-            if (!RoundManager.rm.hasMapLoad) return;
+
             if (Grounded)
             {
                 // 空中に0.7秒以上いた場合にOnLand()を呼び出す
@@ -1739,7 +1738,7 @@ namespace StarterAssets
         {
             if (Grounded)
             {
-                if (!isLocalPlayer) return;
+
                 AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume, 30);
                     
                 
@@ -1748,7 +1747,7 @@ namespace StarterAssets
 
         private void OnLand()
         {
-            if (!isLocalPlayer) return;
+
             AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume, 30);
             
         }
