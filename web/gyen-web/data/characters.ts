@@ -40,6 +40,7 @@ export const characters: Character[] = [
       { version: "1.0.4", change: "Yellowには専用のHPがあり、100HP削れると人間アバターに強制的に切り替わる仕様に変更" , type: "neutral" as const },
       { version: "1.0.4", change: "Yellow後解除されたときに、慣性に関わらず必ず真下に落ちる仕様に変更" , type: "neutral" as const },
       { version: "1.0.6", change: "Yellowの上昇、下降速度を1から3に増加" , type: "buff" as const },
+      { version: "1.0.9", change: "Yellowの前進スピードを5から6に上昇" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : Lime", description: "半透明なオーブを飛ばし、着地地点で爆発してライム色のスモークが生成される。" },
@@ -56,7 +57,7 @@ export const characters: Character[] = [
    {
     name: "Ejah",
         rank: "2",
-    description: "エジプトから導かれるままにエリヤは、古代の超技術を使い空中に土を舞い上げ、レーザー付きナノマシンを操る。",
+    description: "古代エジプトから導かれるままにエリヤは、その手一つでで空中に土を舞い上げ、とある王の命令を数千年ぶりに果たす",
     history: [
       { version: "1.0.3", change: "エリヤ参戦！" , type: "neutral" as const },
       { version: "1.0.4", change: "Horusが検知する条件として、壁によって射線が遮られていないことを追加" , type: "debuff" as const },
@@ -71,7 +72,7 @@ export const characters: Character[] = [
            type: "Manipulator",
     difficulty: "普通",
     features: ["スモークが強い", "エリアマネージメントに優れる", "スキルを使い切るとシンプルに撃ち合うしかない"],
-    from: "エジプト",
+    from: "古代エジプト",
     details:
       "スモークの炊き方が独特で、エリアを保持する際にはTier1を超える適正を持つ。アタッカーだと難しいのが弱点。",
   },
@@ -82,29 +83,31 @@ export const characters: Character[] = [
     history: [
       { version: "1.0.4", change: "ルシファー参戦！" , type: "neutral" as const },
       { version: "1.0.6", change: "Rebelliousnessを構えた時に発生する炎のエフェクトと効果音を抑えるよう変更" , type: "buff" as const },
+      { version: "1.0.9", change: "Rebelliousnessの射撃レートを1/0.5から1/0.4へ向上" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : Rebelliousness", description: "ルシファー専用のリボルバー（のような武器。炎をまとっているためよく分からない）" },
-      { name: "Ability : LighhtLoad", description: "ダークオーブを回収し、敵の位置を1秒間透視できる。" },
+      { name: "Ability : LighhtLoad", description: "ダークオーブを一つ回収し、敵の位置を1秒間透視できる。" },
       { name: "Passive : Darkness", description: "相手に与えたダメージに応じてダークオーブが生成される。それを射撃で破壊すると与えたダメージに応じて回復する。" },  
     ],
            type: "Barbarian",
     difficulty: "難しい",
     from: "生まれたのは天国、育ったのは地獄",
-    features: ["相手にダメージを与えてスキルが発動", "撃ち合うまではスキルが役に立たない"],
+    features: ["相手にダメージを与えてスキルが発動", "撃ち合うまではスキルが役に立たない", "連射速度が高い武器とも相性がいい"],
     details:
-      "デフォルトで強力なリボルバーを持っているため、ファーストからサードくらいにかけては最強と言える。ただその後のラウンドでどうしてもスキルが役に立たなくなっていく",
+      "デフォルトで強力なリボルバーを持っているため、ファーストからサードくらいにかけては最強と言える。ただその後のラウンドでだんだん使いにくさが目立っていく",
   },
     {
     name: "Overdose",
         rank: "2",
-    description: "アメリカ合衆国から来たオーバードーズは、科学が武力に勝ること、100%が存在すること証明する。",
+    description: "アメリカ合衆国から来たオーバードーズは、科学が武力に勝ること、100%が存在することを証明する。",
     history: [
       { version: "1.0.4", change: "オーバードーズ参戦！" , type: "neutral" as const },
       { version: "1.0.6", change: "ITweaksを設置する際のプレイヤーからの最大距離が3mから5mに増加" , type: "buff" as const },
       { version: "1.0.6", change: "IMirrorをクライアントが発動したときに発射する向きが正しくない場合があった不具合を修正" , type: "buff" as const },
       { version: "1.0.7", change: "IMirrorの投擲から爆発までの時間を1秒から0.5秒に短縮" , type: "neutral" as const },
-      { version: "1.0.6", change: "IMirrorの爆発からフラッシュ効果が飛び散るまでの時間を0.2秒から0.15秒に短縮" , type: "buff" as const },
+      { version: "1.0.8", change: "IMirrorの爆発からフラッシュ効果が飛び散るまでの時間を0.2秒から0.15秒に短縮" , type: "buff" as const },
+      { version: "1.0.9", change: "ITweaksの初期所持数が2つに増加しました" , type: "buff" as const },
     ],
     skills: [
       { name: "Ability : ITweaks", description: "半透明のナノセンサーで、相手を検知しX線を発射する。それには弱い目眩の効果もある。" },

@@ -26,6 +26,7 @@ public class CustomNetworkManager : NetworkManager
     public Mode selectedMode = Mode.ONEVSONE;
     public bool isFanatics;
 
+    public float yaw;
 
     public enum Mode
     {

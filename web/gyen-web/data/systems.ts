@@ -40,6 +40,7 @@ export const systems: System[] = [
     history: [
       { version: "1.0.6", change: "効果音が聞こえる最大範囲を30?から15へ狭めました", type: "buff" as const },
       { version: "1.0.6", change: "足音の鳴るインターバルを0.4sから1sに変更しました", type: "neutral" as const },
+      { version: "1.0.9", change: "頭に弾がヒットした場合、効果音が頭以外にヒットしたときよりも金属音に近い専用のサウンドが出るようになりました。", type: "buff" as const },
     ],
   },
     {
@@ -63,7 +64,20 @@ export const systems: System[] = [
   },
     {
     name: "System_CharacterControl",
-    rank: "A", 
+    rank: "S", 
+    description: "一般的な、キャラクターに依存しない共通のキャラクターコントロールについて。",
+    history: [
+      { version: "1.0.5", change: "ジャンプ力の低下", type: "debuff" as const },
+      { version: "1.0.5", change: "移動速度の上昇", type: "buff" as const },
+      { version: "1.0.7", change: "移動速度の上昇", type: "buff" as const },
+      { version: "1.0.7", change: "滞空時に、ジャンプ時の慣性に直前の入力を考慮して角度を計算するように変更", type: "buff" as const },
+      { version: "1.0.7", change: "しゃがむアニメーション速度を減速", type: "buff" as const },
+      { version: "1.0.7", change: "キャラクターが視点を回転させるとき、頭も一緒に回転して見えるように変更しました", type: "buff" as const },
+    ],
+  },
+      {
+    name: "System_Shooting",
+    rank: "S", 
     description: "一般的な、キャラクターに依存しない共通のキャラクターコントロールについて。",
     history: [
       { version: "1.0.5", change: "ジャンプ力の低下", type: "debuff" as const },
@@ -93,6 +107,7 @@ export const systems: System[] = [
     history: [
       { version: "1.0.5", change: "武器を持っているとき、右手部分に武器を持っている見た目を追加しました", type: "buff" as const },
       { version: "1.0.7", change: "一部の武器の右手に持つ見た目を調整しました", type: "buff" as const },
+      { version: "1.0.9", change: "頭に弾がヒットした場合、ブラッドエフェクトが頭以外にヒットしたときが赤色なのに対して紫色のエフェクトが出るようになりました。", type: "buff" as const },
     ],
   },
     {

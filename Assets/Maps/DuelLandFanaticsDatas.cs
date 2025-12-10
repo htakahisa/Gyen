@@ -31,6 +31,7 @@ public class DuelLandFanaticsDatas : ScriptableObject
     public List<ObjectAndPosition> gimmicks = new List<ObjectAndPosition>();
     public List<ObjectAndPosition> standingGimmicks = new List<ObjectAndPosition>();
     public Vector3 defenderPos;
+    public Vector3 defenderRot;
     public Vector3 spikePos;
     public GameObject mapPrefab;
     public string mapName;

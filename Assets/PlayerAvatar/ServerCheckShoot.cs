@@ -57,39 +57,49 @@ public class ServerCheckShoot : NetworkBehaviour
     };
 
     [Command(requiresAuthority = false)]
-    public void CmdGetShoot(GameObject playerObject, Vector3 position, Vector3 direction, int damage, int headDamage, Vector3 weaponPos)
+    public void CmdGetShoot(
+      GameObject playerObject,
+      Vector3 cameraPos,          // ← クライアントのカメラ位置
+      Vector3 cameraForward,      // ← クライアントのカメラ forward（方向）
+      Vector3 weaponPos,          // ← クライアント側の銃口位置
+      int damage,
+      int headDamage
+  )
     {
         Debug.Log("shoot");
 
         ThirdPersonController tpc = playerObject.GetComponentInChildren<ThirdPersonController>();
-        Vector3 dir = direction.normalized; // ← 正規化する
-        Ray ray = new Ray(tpc.GetCamera().transform.position, dir);
-        Vector3 targetPoint;
 
+        // ====== ここが最重要：サーバーの Transform を使わず、クライアントの送信値を使う ======
+        Vector3 dir = cameraForward.normalized;
+        Ray ray = new Ray(cameraPos, dir);
+
+        Vector3 targetPoint;
         RaycastHit hit;
 
+        // 命中点を取得
         if (Physics.Raycast(ray, out hit, 100, hitMask))
         {
             targetPoint = hit.point;
         }
         else
         {
-            // 何にも当たらなかった場合は、射程の先端を目標にする
-            targetPoint = tpc.GetCamera().transform.position + tpc.GetCamera().transform.forward * 100;
+            targetPoint = cameraPos + dir * 100;
         }
 
-        // 2. 銃口から命中点に向けて弾を撃つ
+        // ② 銃口位置 → 命中点への方向で弾を可視化（元の挙動100%維持）
         Vector3 shootDir = (targetPoint - weaponPos).normalized;
         DrawBulletLine(weaponPos, shootDir, playerObject);
 
-        if (tpc.GetSpeed() <= 0.7f && tpc.Grounded)
+        // 移動速度による射撃可否（元の挙動そのまま）
+        if (tpc.GetSpeed() <= 1f && tpc.Grounded)
         {
             float originalDamage = damage;
             float originalHeadDamage = headDamage;
             float currentDamageRate = 1f;
             List<GameObject> hitList = new List<GameObject>();
 
-            // --- RaycastAll のみを使う（RaycastNonAlloc は使わない） ---
+            // RaycastAll による貫通処理（完全維持）
             RaycastHit[] results = Physics.RaycastAll(ray, 100f, hitMask);
             Array.Sort(results, (a, b) => a.distance.CompareTo(b.distance));
 
@@ -101,17 +111,14 @@ public class ServerCheckShoot : NetworkBehaviour
 
                 Debug.Log($"HitOrder: [{i}] {hitpoint.collider.name} (Dist: {hitpoint.distance:F3}) Layer:{hitLayer}");
 
-                // ★「レイヤーごとの減衰」扱いがあるならここで処理
+                // ■ 壁貫通の減衰（機能完全維持）
                 if (layerAttenuation != null && layerAttenuation.ContainsKey(hitLayer))
                 {
-                    float k = layerAttenuation[hitLayer]; // 1mあたりの減衰係数と仮定
-
-                    // 入力: entryHit, 発射方向 dir, 射程 100f
+                    float k = layerAttenuation[hitLayer];
                     float thickness = GetWallThickness(hitpoint, dir, 100f);
 
-                    if (k >= 999f) // 貫通不可フラグの扱い（例）
+                    if (k >= 999f)
                     {
-                        // 元コードでやっていた Fragment 生成を再現
                         GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
                         NetworkServer.Spawn(fragment);
 
@@ -121,60 +128,54 @@ public class ServerCheckShoot : NetworkBehaviour
                     }
                     else if (thickness > 0f)
                     {
-                        // 元コードでやっていた Fragment 生成を再現
                         GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
                         NetworkServer.Spawn(fragment);
+
                         currentDamageRate *= Mathf.Exp(-k * thickness);
                         Debug.Log($"{hitObject.gameObject.name} thickness {thickness:F3}m, k={k:F3} => damageRate={currentDamageRate:F4}");
                     }
 
-                    continue; // 壁自体にはダメージを与えない
+                    continue;
                 }
 
-                // ★ 敵へのダメージ処理（既存のロジックを維持）
+                // ■ プレイヤーへのダメージ処理（完全維持）
                 if (hitLayer == 6)
                 {
                     HpMaster hpMaster = hitObject.GetComponentInParent<HpMaster>();
-                    if (hpMaster != null && playerObject.GetComponent<NetworkIdentity>().netId != hitObject.GetComponentInParent<NetworkIdentity>().netId)
+                    if (hpMaster != null &&
+                        playerObject.GetComponent<NetworkIdentity>().netId
+                        != hitObject.GetComponentInParent<NetworkIdentity>().netId)
                     {
-                        bool isHeadShot = hitpoint.collider.tag == "Head";
-                       
+                        bool isHeadShot = hitpoint.collider.CompareTag("Head");
+
                         if (!hitList.Contains(hpMaster.gameObject))
                         {
+                            // 血のエフェクト（完全維持）
                             if (isHeadShot)
                             {
                                 AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HEADBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f, 15);
-
                                 GameObject bloodObj = Instantiate(HeadBlood, hitpoint.point, Quaternion.identity);
                                 NetworkServer.Spawn(bloodObj);
                             }
                             else
                             {
                                 AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f, 15);
-
                                 GameObject bloodObj = Instantiate(Blood, hitpoint.point, Quaternion.identity);
                                 NetworkServer.Spawn(bloodObj);
                             }
 
                             int finalDamage = (int)((isHeadShot ? originalHeadDamage : originalDamage) * currentDamageRate);
-                            bool headshot = false;
 
+                            bool headshot = false;
                             if (GetComponentInParent<BotManager>() == null)
                             {
-                                if (isHeadShot)
-                                {
-                                    headshot = true;
-                                    headShot++;
-                                }
-                                else
-                                {
-                                    headshot = false;
-                                    bodyShot++;
-                                }
+                                headshot = isHeadShot;
+                                if (isHeadShot) headShot++; else bodyShot++;
                             }
 
                             hpMaster.TakeDamage(finalDamage, headshot);
                             hitList.Add(hpMaster.gameObject);
+
                             Debug.Log($"ヒット: {hitpoint.collider.tag}, ダメージ {finalDamage}");
 
                             if (isDarkness)
@@ -184,9 +185,10 @@ public class ServerCheckShoot : NetworkBehaviour
                         }
                     }
                 }
-            } // for results
-        } // if can shoot
+            } // for
+        } // if shootable
     }
+
 
     // --- 入口から同じ方向にわずかに inside して出口を探す関数 ---
     float GetWallThickness(RaycastHit entryHit, Vector3 dir, float maxDistance)

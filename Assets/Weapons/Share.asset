@@ -21,7 +21,7 @@ MonoBehaviour:
   rate: 0.11
   Xrecoil: 0.25
   Yrecoil: 0.55
-  magazineSize: 24
+  magazineSize: 18
   reloadTime: 1.5
   zoomable: 1
   isNeedZoom: 0

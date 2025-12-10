@@ -171,13 +171,12 @@ namespace StarterAssets
 
         private float botAssistRangee = 200f;       // 敵を補正対象とする最大距離
         private float botMaxAssistAngle = 400f;       // 補正が入る最大角度（広すぎるとズレを補正してしまう）
-        private float botAssistStrength = 400f;      // 補正の強さ（回転スピード）
+        private float botAssistStrength = 10000f;      // 補正の強さ（回転スピード）
 
         public List<Transform> enemies = new List<Transform>();   // 敵のキャッシュリスト
         public List<Transform> enemiesForBot = new List<Transform>();   // 敵のキャッシュリスト
         private Transform targetEnemy;
 
-        private float currentPitch = 0f;    // カメラの上下角度
         private PlayerInput playerInput;
 
         private bool controllerEnabled;
@@ -484,6 +483,9 @@ namespace StarterAssets
                 _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
                 _hasAnimator = TryGetComponent(out _animator);
 
+            }
+            if (GetComponentInParent<BotManager>() != null)
+            {
                 // **アニメーター更新**
                 if (_hasAnimator)
                 {
@@ -491,42 +493,46 @@ namespace StarterAssets
                     _animator.SetFloat(_animIDMotionSpeed, _animationBlend);
                     _animator.SetBool("_animCrouching", isCrouching);
                 }
-            }
-            if (GetComponentInParent<BotManager>() != null)
-            {
                 BotJumpAndGravity();
-                if (!_shootManager.hasFound)
+                if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
                 {
-                    if (GetComponentInParent<SpawnOwner>().WhoseThis() != null)
+                    if (!_shootManager.hasFound)
                     {
-                        if (GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance != null)
+                        if (GetComponentInParent<SpawnOwner>().WhoseThis() != null)
                         {
-                            float distance = Vector3.Distance(transform.position, GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance.transform.position);
-                            if (distance > 1)
+                            if (GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance != null)
                             {
-                                Vector3 conductorPos = GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance.transform.position;
-                                Vector3 camToTarget = conductorPos - _mainCamera.transform.position;
-                                if (camToTarget.sqrMagnitude > 0.0001f)
+                                float distance = Vector3.Distance(transform.position, GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance.transform.position);
+                                if (distance > 1)
                                 {
-                                    // 水平方向の距離
-                                    float flatDist = new Vector2(camToTarget.x, camToTarget.z).magnitude;
+                                    Vector3 conductorPos = GetComponentInParent<SpawnOwner>().WhoseThis().GetComponent<ConductController>().conductorInstance.transform.position;
+                                    Vector3 camToTarget = conductorPos - _mainCamera.transform.position;
+                                    if (camToTarget.sqrMagnitude > 0.0001f)
+                                    {
+                                        // 水平方向の距離
+                                        float flatDist = new Vector2(camToTarget.x, camToTarget.z).magnitude;
 
-                                    // ピッチ角度 = atan2(高さ, 水平方向距離)
-                                    float desiredPitch = Mathf.Atan2(camToTarget.y, flatDist) * Mathf.Rad2Deg;
+                                        // ピッチ角度 = atan2(高さ, 水平方向距離)
+                                        float desiredPitch = Mathf.Atan2(camToTarget.y, flatDist) * Mathf.Rad2Deg;
 
-                                    // ここで直接「絶対角度」として渡す
-                                    GetComponent<ThirdPersonController>().CameraParticularRotaion(desiredPitch);
+                                        // ここで直接「絶対角度」として渡す
+                                        GetComponent<ThirdPersonController>().CameraParticularRotaion(desiredPitch);
+                                    }
+
+
+                                    Vector3 bodyDir = new Vector3(camToTarget.x, 0, camToTarget.z);
+
+                                    if (bodyDir.sqrMagnitude > 0.0001f)
+                                    {
+                                        Quaternion bodyRot = Quaternion.LookRotation(bodyDir, Vector3.up);
+                                        parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
+                                    }
+                                    BotMove(0, 1, false, false);
                                 }
-
-
-                                Vector3 bodyDir = new Vector3(camToTarget.x, 0, camToTarget.z);
-
-                                if (bodyDir.sqrMagnitude > 0.0001f)
+                                else
                                 {
-                                    Quaternion bodyRot = Quaternion.LookRotation(bodyDir, Vector3.up);
-                                    parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
+                                    BotMove(0, 0, false, true);
                                 }
-                                BotMove(0, 1, false, false);
                             }
                             else
                             {
@@ -542,10 +548,6 @@ namespace StarterAssets
                     {
                         BotMove(0, 0, false, true);
                     }
-                }
-                else
-                {
-                    BotMove(0, 0, false, true);
                 }
             }
             //if (Input.GetKeyDown(KeyCode.U))
@@ -801,9 +803,9 @@ namespace StarterAssets
             Quaternion finalRot = Quaternion.RotateTowards(currentRot, targetRot, amount);
 
             Vector3 euler = finalRot.eulerAngles;
-            currentPitch = euler.x > 180f ? euler.x - 360f : euler.x;
+            transformNetwork.pitch = euler.x > 180f ? euler.x - 360f : euler.x;
 
-            CameraParticularRotaion(-currentPitch);
+            CameraParticularRotaion(-transformNetwork.pitch);
         }
 
         private void BotApplyAimAssist()
@@ -817,10 +819,34 @@ namespace StarterAssets
 
             Transform best = null;
             float bestScore = float.MaxValue;
+            float bestSpeed = 0f;
+            float bestDist = 0f;
+            Vector3 bestPoint = Vector3.zero;
 
+            // ==============================
+            // 初期化（1回だけ）
+            // ==============================
+            if (!transformNetwork.initializedRotation)
+            {
+                Vector3 camAngles = _mainCamera.transform.localEulerAngles;
+                transformNetwork.pitch = (camAngles.x > 180f) ? camAngles.x - 360f : camAngles.x;
+
+                Vector3 bodyAngles = parentOfPlayer.transform.eulerAngles;
+                transformNetwork.yaw = bodyAngles.y;
+
+                transformNetwork.initializedRotation = true;
+            }
+
+            // ==============================
+            // 目標探索（そのまま）
+            // ==============================
             foreach (var enemy in enemiesForBot)
             {
                 if (enemy == null) continue;
+
+                float enemySpeed = 0f;
+                var cc = enemy.GetComponent<CharacterController>();
+                if (cc != null) enemySpeed = cc.velocity.magnitude;
 
                 foreach (var col in enemy.GetComponentsInChildren<Collider>())
                 {
@@ -833,39 +859,94 @@ namespace StarterAssets
                     if (angle > botMaxAssistAngle) continue;
 
                     float dist = to.magnitude;
-                    float score = angle + dist * 0.015f;
+                    float distancePenalty = dist * 0.03f;
+                    float speedPenalty = enemySpeed * 0.4f;
+
+                    float score = angle + dist * 0.015f + speedPenalty + distancePenalty;
 
                     if (score < bestScore)
                     {
                         bestScore = score;
                         best = col.transform;
+                        bestSpeed = enemySpeed;
+                        bestDist = dist;
+                        bestPoint = point;
                     }
                 }
             }
 
             if (best == null) return;
 
-            // --- カメラ回転（Pitch + Yaw） ---
-            Vector3 dir = best.position - camPos;
+            // ==============================
+            // Micro Shake（揺れ）
+            // ==============================
+            {
+                float shake = (bestSpeed * 0.015f) + (bestDist * 0.0008f);
+                bestPoint += new Vector3(
+                    Random.Range(-shake, shake),
+                    Random.Range(-shake, shake),
+                    0f
+                );
+            }
+
+            Vector3 dir = bestPoint - camPos;
             Quaternion targetRot = Quaternion.LookRotation(dir);
 
-            // ---- Slerp 使用：安定 & 実在のFPS風に ----
-            Quaternion camRot = Quaternion.Slerp(
-                _mainCamera.transform.rotation,
-                targetRot,
-                botAssistStrength * Time.deltaTime
-            );
+            // ==============================
+            // 角度差による高速補正（そのまま）
+            // ==============================
+            float angleDiff = Quaternion.Angle(_mainCamera.transform.rotation, targetRot);
+            float fastLerp = Mathf.InverseLerp(10f, 5f, angleDiff);
 
-            // --- Pitch は CameraParticularRotation() 経由でセット ---
-            float pitch = camRot.eulerAngles.x;
-            pitch = (pitch > 180f) ? pitch - 360f : pitch;
+            // ==============================
+            // Yaw 距離ペナルティ（そのまま）
+            // ==============================
+            float distSlow = Mathf.Clamp01(bestDist / 40f);
+            float speedSlow = Mathf.Clamp01(bestSpeed / 8f);
 
-            CameraParticularRotaion(pitch);
+            float yawBaseStrength =
+                botAssistStrength * (1f - distSlow) * (1f - speedSlow);
+            float yawStrength = Mathf.Lerp(yawBaseStrength, 12f, fastLerp);
 
-            // --- Yaw は体の向き ---
-            float yaw = camRot.eulerAngles.y;
-            parentOfPlayer.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            // ==============================
+            // Pitch 距離ペナルティ無し（そのまま）
+            // ==============================
+            float pitchBaseStrength = botAssistStrength * 1.8f;
+            float pitchStrength = Mathf.Lerp(pitchBaseStrength, 16f, fastLerp);
+
+            // ==============================
+            // 角度を分解
+            // ==============================
+            Vector3 targetAngles = targetRot.eulerAngles;
+            float targetPitch = targetAngles.x > 180f ? targetAngles.x - 360f : targetAngles.x;
+            float targetYaw = targetAngles.y;
+
+            // ==============================
+            // ピッチ更新（フィールド使用 → 安定化）
+            // ==============================
+            transformNetwork.pitch = Mathf.Lerp(transformNetwork.pitch, targetPitch, pitchStrength * Time.deltaTime);
+            transformNetwork.pitch = Mathf.Clamp(transformNetwork.pitch, -90f, 90f);
+
+            CameraParticularRotaion(transformNetwork.pitch);
+
+            // ==============================
+            // ヤー更新（フィールド使用 → 安定化）
+            // ==============================
+            transformNetwork.yaw = Mathf.LerpAngle(transformNetwork.yaw, targetYaw, yawStrength * Time.deltaTime);
+
+            parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
         }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -906,10 +987,26 @@ namespace StarterAssets
 
         private void CameraRotation()
         {
+
+            if (!RoundManager.rm.hasLoaded || !RoundManager.rm.hasMapLoad) return;
+
             Vector2 lookInput = playerInput.actions.FindAction("Look").ReadValue<Vector2>();
 
-            Vector2 look = Mouse.current.delta.ReadValue();
-            if (look.sqrMagnitude > 0.001f)
+
+            // カメラ回転値の初期化（初回ループでのみ）
+            if (!transformNetwork.initializedRotation)
+            {
+                Vector3 headAngles = head.localEulerAngles;
+                transformNetwork.pitch = (headAngles.x > 180f) ? headAngles.x - 360f : headAngles.x;
+
+                Vector3 bodyAngles = parentOfPlayer.transform.eulerAngles;
+                transformNetwork.yaw = bodyAngles.y;
+
+                transformNetwork.initializedRotation = true;
+            }
+
+            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+            if (mouseDelta.sqrMagnitude > 0.001f)
             {
                 SwitchScheme("Keyboard&Mouse", Keyboard.current, Mouse.current);
             }
@@ -919,27 +1016,21 @@ namespace StarterAssets
             float mouseX = lookInput.x * magnification;
             float mouseY = lookInput.y * magnification;
 
-            //========= 現在角度 =========
-            // Pitch
-            float pitch = head.localEulerAngles.x;
-            if (pitch > 180f) pitch -= 360f;
+            // ==== pitch 計算（上向き下向き） ====
+            transformNetwork.pitch -= mouseY * _sensitivity;
+            transformNetwork.pitch = Mathf.Clamp(transformNetwork.pitch, -90f, 90f); // 元の仕様そのまま
 
-            // Yaw
-            float yaw = parentOfPlayer.transform.eulerAngles.y;
+            // head に適用
+            head.localRotation = Quaternion.Euler(transformNetwork.pitch, 0f, 0f);
 
-            //========= Pitch（上下） =========
-            pitch -= mouseY * _sensitivity;
-            pitch = Mathf.Clamp(pitch, -90f, 90f);
+            // ==== yaw 計算（左右回転） ====
+            transformNetwork.yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
 
-            // ※ X だけ上書き。Y と Z は既存を保持
-            Vector3 e = head.localEulerAngles;
-            e.x = pitch;
-            head.localEulerAngles = e;
-
-            //========= Yaw（左右） =========
-            yaw += mouseX * _sensitivity * (_CameraComponent.fieldOfView / 74.03f);
-            parentOfPlayer.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            // プレイヤー root オブジェクトに適用
+            parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
         }
+
+
 
 
         public void CameraParticularRotaion(float absolutePitch)
@@ -1375,7 +1466,8 @@ namespace StarterAssets
 
         public void BotMove(float horiMove, float verMove, bool isWalk, bool isCrouch)
         {
-            if (GetComponentInParent<SpawnOwner>() == null || !GetComponentInParent<SpawnOwner>().IsMine()) return;
+            if (GetComponentInParent<SpawnOwner>() == null) return;
+            if (GetComponentInParent<SpawnOwner>().ownerNetId != 12345 && !GetComponentInParent<SpawnOwner>().IsMine()) return;
             if (!canMove) return;
             isWalking = isWalk;
             isCrouching = isCrouch;
@@ -1383,12 +1475,10 @@ namespace StarterAssets
             bool crouch = stateInfo.IsName("Crouch");
             bool sneak = _shootManager.IsZooming;
 
-            // 入力
-            moveInput = playerInput.actions.FindAction("Move").ReadValue<Vector2>();
             bool isMove = (horiMove != 0 || verMove != 0);
 
             // しゃがみ・遷移中は慣性を消す（滑り出し防止）
-            if ((_animator.IsInTransition(0) || crouch || _shootManager.hasFound) && Grounded)
+            if (_animator.IsInTransition(0) || crouch || (_shootManager.hasFound && RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP) && Grounded)
             {
                 _lastMoveDirection = Vector3.zero;
                 moveDirection = Vector3.zero;
@@ -1481,8 +1571,7 @@ namespace StarterAssets
             // 実速度 = ベクトル長
             _speed = _lastMoveDirection.magnitude;
 
-            if (isLocalPlayer)
-                CmdReportSpeed(_speed);
+            CmdReportSpeed(_speed);
 
             // 移動
             if (controller.enabled)
@@ -1648,7 +1737,7 @@ namespace StarterAssets
             if (Grounded)
             {
                 if (!isLocalPlayer) return;
-                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume, 15);
+                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.FOOTSTEP, transform.TransformPoint(controller.center), FootstepAudioVolume, 30);
                     
                 
             }
@@ -1657,7 +1746,7 @@ namespace StarterAssets
         private void OnLand()
         {
             if (!isLocalPlayer) return;
-            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume, 15);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.LAND, transform.TransformPoint(controller.center), FootstepAudioVolume, 30);
             
         }
 
@@ -1717,10 +1806,10 @@ namespace StarterAssets
         }
 
         [Server]
-        public void ResetPos(Vector3 pos)
+        public void ResetPos(Vector3 pos, Vector3 rot)
         {
 
-            ServerUpdateAllPositions(pos);
+            ServerUpdateAllPositions(pos, rot);
             
         }
 
@@ -1782,13 +1871,13 @@ namespace StarterAssets
 
 
         [Server]
-        public void ServerUpdateAllPositions(Vector3 newPos)
+        public void ServerUpdateAllPositions(Vector3 newPos, Vector3 newRot)
         {
-            StartCoroutine(StopMove(newPos));
+            StartCoroutine(StopMove(newPos, newRot));
         }
 
         [Server]
-        public IEnumerator StopMove(Vector3 newPos)
+        public IEnumerator StopMove(Vector3 newPos, Vector3 newRot)
         {
             NetworkIdentity ni = parentOfPlayer.GetComponent<NetworkIdentity>();
             var ct = ni.GetComponent<CharacterTransfromNetwork>();
@@ -1803,7 +1892,7 @@ namespace StarterAssets
             ct.SetSynchronize(false);
 
             // ③ サーバー主導で強制セット（RPCで全クライアントも補間無しで強制セットされる）
-            ct.ForceSetPosition(newPos, 0);
+            ct.ForceSetPosition(newPos, newRot.y);
 
             // 位置が確実に反映されるまで待つ
             yield return new WaitForSeconds(0.05f);

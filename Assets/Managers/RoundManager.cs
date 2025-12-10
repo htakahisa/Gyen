@@ -153,26 +153,31 @@ public class RoundManager : NetworkBehaviour
         {
             DuelLandLoad(0);
             ServerResetAllObjects();
+            ResetStatus();
         }
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             DuelLandLoad(1);
             ServerResetAllObjects();
+            ResetStatus();
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             DuelLandLoad(2);
             ServerResetAllObjects();
+            ResetStatus();
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             DuelLandLoad(3);
             ServerResetAllObjects();
+            ResetStatus();
         }
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             DuelLandLoad(4);
             ServerResetAllObjects();
+            ResetStatus();
         }
 
     }
@@ -184,7 +189,6 @@ public class RoundManager : NetworkBehaviour
         Round++;
 
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
-        dead.Clear();
 
         RpcSwitchBuyPhase();
         StartCoroutine(ResetRound(winner == myPlayer));
@@ -255,6 +259,7 @@ public class RoundManager : NetworkBehaviour
     public void RpcSwitchBattlePhase()
     {
         CurrentPhase = Phase.BATTLE;
+        dead.Clear();
     }
 
     public IEnumerator ResetPractice()
@@ -429,14 +434,19 @@ public class RoundManager : NetworkBehaviour
         }
 
 
-        StartCoroutine(BombArmCoroutine());
-
         if (!Application.isEditor)
         {
             StartCoroutine(RecordRoutine());
         }
 
+        StartCoroutine(WaitMapLoad());
 
+    }
+
+    public IEnumerator WaitMapLoad()
+    {
+        yield return new WaitForSeconds(0.1f);
+        hasMapLoad = true;
     }
 
     public IEnumerator SpawnBotCoroutine(int gimmicks)
@@ -468,6 +478,7 @@ public class RoundManager : NetworkBehaviour
                     {
                         item.prefab.transform.rotation = item.rotation;
                         item.prefab.GetComponent<SpawnOwner>().ownerNetId = 12345;
+                        item.prefab.GetComponent<CharacterTransfromNetwork>().SetRotation(item.rotation.y);
                     }
 
                 }
@@ -488,6 +499,7 @@ public class RoundManager : NetworkBehaviour
                     prefab.GetComponent<BotManager>().weapon = standing.weapon;
                     prefab.GetComponent<BotManager>().armer = standing.armer;
                     prefab.GetComponent<BotManager>().foundDelayTime = standing.foundDelayTime;
+                    standing.prefab.GetComponent<CharacterTransfromNetwork>().SetRotation(standing.rotation.y);
                 }
                 if (prefab.GetComponent<DestroyTimer>() != null)
                 {
@@ -506,6 +518,7 @@ public class RoundManager : NetworkBehaviour
             bot.GetComponent<BotManager>().moveAsScriptTime = gimmickData.moveAsScriptTime;
             bot.GetComponent<BotManager>().movingAsScript = gimmickData.movingAsScript;
             bot.GetComponent<BotManager>().foundDelayTime = gimmickData.foundDelayTime;
+            bot.GetComponent<CharacterTransfromNetwork>().SetRotation(gimmickData.rotation.y);
             bot.GetComponent<SpawnOwner>().ownerNetId = 12345;
             NetworkServer.Spawn(bot);
             spawnedGimmicks.Add(bot);
@@ -544,6 +557,7 @@ public class RoundManager : NetworkBehaviour
                 if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
                 {
                     item.prefab.transform.rotation = item.rotation;
+                    item.prefab.GetComponent<CharacterTransfromNetwork>().SetRotation(item.rotation.y);
                 }
 
             }
@@ -784,10 +798,9 @@ public class RoundManager : NetworkBehaviour
             ServerResetAllObjects();
             hasReset = false;
             ResetStatus();
-
+            
         }
 
-        hasMapLoad = true;
         hasLoaded = true;
     }
 
@@ -839,11 +852,11 @@ public class RoundManager : NetworkBehaviour
                     spawnPos.y += 30;
                     attacker.GetComponentInChildren<ShootManager>().hasFound = false;
                 }
-                attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(spawnPos);
-                attacker.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = false;
-                attacker.transform.rotation = Quaternion.Euler(attackSpawnRot);
-                attacker.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
-            
+                attacker.GetComponentInParent<CharacterTransfromNetwork>().SetSynchronize(false);
+                attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(spawnPos, attackSpawnRot);
+                yield return new WaitWhile(() => attacker.transform.rotation != Quaternion.Euler(attackSpawnRot));
+                attacker.GetComponentInParent<CharacterTransfromNetwork>().SetSynchronize(true);
+
             }
         }
         foreach (var defender in defenders)
@@ -864,10 +877,10 @@ public class RoundManager : NetworkBehaviour
                     spawnPos.y += 30;
                     defender.GetComponentInChildren<ShootManager>().hasFound = false;
                 }
-                defender.GetComponentInChildren<ThirdPersonController>().ResetPos(spawnPos);
-                defender.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = false;
-                defender.transform.rotation = Quaternion.Euler(defenceSpawnRot);
-                defender.GetComponentInParent<CharacterTransfromNetwork>().isSynchronize = true;
+                defender.GetComponentInParent<CharacterTransfromNetwork>().SetSynchronize(false);
+                defender.GetComponentInChildren<ThirdPersonController>().ResetPos(spawnPos, defenceSpawnRot);
+                yield return new WaitWhile(() => defender.transform.rotation != Quaternion.Euler(defenceSpawnRot));
+                defender.GetComponentInParent<CharacterTransfromNetwork>().SetSynchronize(true);
             }
         }
 
@@ -891,7 +904,7 @@ public class RoundManager : NetworkBehaviour
     {
         winner.GetComponent<CreditManager>().ResetCurrentPaying();
         loser.GetComponent<CreditManager>().ResetCurrentPaying();
-        winner.GetComponent<CreditManager>().AddCredit(1000 + Round * 1000);
+        winner.GetComponent<CreditManager>().AddCredit(1000 + Round * 700);
         loser.GetComponent<CreditManager>().AddCredit(1000 + Round * 500);
 
     }
@@ -936,6 +949,7 @@ public class RoundManager : NetworkBehaviour
             player.GetComponentInChildren<ThirdPersonController>().RpcResetAllParameters();
             player.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
             player.GetComponent<HpMaster>().ResetHp();
+            player.GetComponentInChildren<ShootManager>().StopFoundDelay();
 
             if (currentMode == Mode.ONEVSONE || currentMode == Mode.DOUBLETAP || player.GetComponentInChildren<WeaponManager>().GetCurrentWeaponSlot() == null)
             {
@@ -948,6 +962,8 @@ public class RoundManager : NetworkBehaviour
                 StartCoroutine(ResetMagazine(player));
             }
         }
+
+        StartCoroutine(BombArmCoroutine());
 
     }
 

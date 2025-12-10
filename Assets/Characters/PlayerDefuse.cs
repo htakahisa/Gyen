@@ -49,13 +49,6 @@ public class PlayerDefuse : NetworkBehaviour
 ;       }
 
 
-        // 押下中
-        if (interactAction.IsPressed())
-        {
-            
-        }
-
-
         // 放したとき
         if (interactAction.WasReleasedThisFrame())
         {

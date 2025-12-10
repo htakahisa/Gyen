@@ -284,56 +284,61 @@ namespace StarterAssets
 
         private void ShootWeapon()
         {
-            // 弾がある、または PRACTICE なら撃てる
+            // 弾がない & PRACTICE 以外なら撃てない
             if (weaponManager.magazine < 1 && RoundManager.rm.currentMode != RoundManager.Mode.PRACTICE)
                 return;
 
-            // リコイル中断
+            // リコイル停止
             if (recoilBounce != null)
                 StopCoroutine(recoilBounce);
 
             bool isPlayerNotBot = (GetComponentInParent<BotManager>() == null);
 
-            // ======================
-            //  ★ サードボタンで AIM 補正
-            // ======================
+            // ========== ★ エイム補正（サードボタン） ==========
             if (isPlayerNotBot && Input.GetMouseButton(3))
             {
                 Transform myHead = RoundManager.rm.GetMyPlayer().GetComponentInChildren<Camera>().transform;
                 Transform enemyHead = SelectAimTarget();
 
-                // --- Pitch（上下角度）計算 ---
-                Vector3 camPos = _mainCamera.transform.position;
-                Vector3 camToTarget = enemyHead.position - camPos;
-
-                if (camToTarget.sqrMagnitude > 0.0001f)
+                if (enemyHead != null)
                 {
-                    float flatDist = new Vector2(camToTarget.x, camToTarget.z).magnitude;
-                    float desiredPitch = Mathf.Atan2(camToTarget.y, flatDist) * Mathf.Rad2Deg;
+                    Vector3 camPos = _mainCamera.transform.position;
+                    Vector3 toTarget = enemyHead.position - camPos;
 
-                    // カメラの上下回転を絶対角度で反映
-                    GetComponent<ThirdPersonController>().CameraParticularRotaion(desiredPitch);
-                }
+                    // ---- Pitch（上下） ----
+                    if (toTarget.sqrMagnitude > 0.0001f)
+                    {
+                        float flatDist = new Vector2(toTarget.x, toTarget.z).magnitude;
+                        float desiredPitch = Mathf.Atan2(toTarget.y, flatDist) * Mathf.Rad2Deg;
 
-                // --- Yaw（水平角度） ---
-                Vector3 bodyDir = enemyHead.position - myHead.position;
-                bodyDir.y = 0f;
+                        // transformNetwork へ書き込み
+                        transformNetwork.pitch = Mathf.Clamp(desiredPitch, -90f, 90f);
+                    }
 
-                if (bodyDir.sqrMagnitude > 0.0001f)
-                {
-                    float yaw = Quaternion.LookRotation(bodyDir, Vector3.up).eulerAngles.y;
-                    parentOfPlayer.transform.rotation = Quaternion.Euler(0, yaw, 0);
+                    // ---- Yaw（水平） ----
+                    Vector3 bodyDir = enemyHead.position - myHead.position;
+                    bodyDir.y = 0;
+
+                    if (bodyDir.sqrMagnitude > 0.0001f)
+                    {
+                        float yaw = Quaternion.LookRotation(bodyDir, Vector3.up).eulerAngles.y;
+                        transformNetwork.yaw = yaw;
+                    }
+
+                    // head に適用
+                    head.localRotation = Quaternion.Euler(transformNetwork.pitch, 0f, 0f);
+
+                    // プレイヤー root オブジェクトに適用
+                    parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
                 }
             }
 
-            // ======================
-            //  ★ 発射音 & 弾消費
-            // ======================
+            // ========== ★ 発射音 & 弾消費 ==========
             AudioManager.Instance.CmdPlaySoundAtPoint(
                 AudioManager.Sounds.SHOOT,
                 transform.TransformPoint(GetComponentInParent<CharacterController>().center),
                 0.06f,
-                15
+                30
             );
 
             if (weaponManager.magazine >= 1)
@@ -341,9 +346,7 @@ namespace StarterAssets
 
             lastAttackTime = Time.time;
 
-            // ======================
-            //  ★ 弾のRPC処理
-            // ======================
+            // ========== ★ 弾発射の RPC ==========
             WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
             if (currentWeapon != null)
             {
@@ -358,9 +361,9 @@ namespace StarterAssets
                         parentOfPlayer,
                         _mainCamera.transform.position,
                         shootDir,
+                        weaponPos.transform.position,
                         currentWeapon.damage,
-                        currentWeapon.headDamage,
-                        weaponPos.transform.position
+                        currentWeapon.headDamage
                     );
                 }
 
@@ -369,6 +372,7 @@ namespace StarterAssets
                 recoilBounce = StartCoroutine(Recoilbounce(0.1f, new Vector3(0, -currentWeapon.Yrecoil, 0f)));
             }
         }
+
 
 
         // =======================================
@@ -533,7 +537,6 @@ namespace StarterAssets
 
             foreach (var target in tpc.enemiesForBot)
             {
-                if (target.GetComponentInParent<HpMaster>().isDead) continue;
 
                 var cols = target.GetComponentsInChildren<Collider>();
 
@@ -554,22 +557,20 @@ namespace StarterAssets
 
 
 
-        // =========================================
-        // カメラへのピッチ反映（クラス変数なし）
-        // =========================================
         public void CameraRecoil(float addPitch)
         {
-            // 現在の回転を取得（-180〜180に正規化）
-            float currentPitch = head.localEulerAngles.x;
-            if (currentPitch > 180f) currentPitch -= 360f;
+            // transformNetwork.pitch を直接操作
+            float newPitch = transformNetwork.pitch + addPitch;
 
-            float newPitch = Mathf.Clamp(currentPitch + addPitch, -90f, 90f);
+            // 正常範囲に制限
+            newPitch = Mathf.Clamp(newPitch, -90f, 90f);
 
-            // Pitch だけ更新（Yaw/Z はいじらない）
-            Vector3 e = head.localEulerAngles;
-            e.x = newPitch;
-            head.localRotation = Quaternion.Euler(e);
+            transformNetwork.pitch = newPitch;
+            // head に適用
+            head.localRotation = Quaternion.Euler(transformNetwork.pitch, 0f, 0f);
+
         }
+
 
 
         // =========================================
@@ -580,27 +581,30 @@ namespace StarterAssets
             if (IsZooming)
                 targetRecoil *= 0.5f;
 
-            // ランダムなヨー回転幅
             float yawRandom = UnityEngine.Random.Range(-targetRecoil.x, targetRecoil.x);
-
             float step = duration / 9f;
 
             for (int i = 0; i < 10; i++)
             {
                 float div = (10 - i);
 
-                //--------- Pitch（カメラ） ----------
+                // -------- Pitch（カメラ） --------
                 float addPitch = targetRecoil.y / div;
-                CameraRecoil(addPitch);
+                transformNetwork.pitch = Mathf.Clamp(transformNetwork.pitch + addPitch, -90f, 90f);
 
-                //--------- Yaw（体） ----------
-                float currentYaw = parentOfPlayer.transform.eulerAngles.y;
-                float newYaw = currentYaw + yawRandom / div;
-                parentOfPlayer.transform.rotation = Quaternion.Euler(0, newYaw, 0);
+                // -------- Yaw（体） --------
+                float addYaw = yawRandom / div;
+                transformNetwork.yaw += addYaw;
+                // head に適用
+                head.localRotation = Quaternion.Euler(transformNetwork.pitch, 0f, 0f);
+
+                // プレイヤー root オブジェクトに適用
+                parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
 
                 yield return new WaitForSeconds(step);
             }
         }
+
 
         // =========================================
         // リコイル戻し（バウンス）

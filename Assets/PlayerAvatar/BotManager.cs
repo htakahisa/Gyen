@@ -44,14 +44,7 @@ public class BotManager : NetworkBehaviour
     {
         Debug.Log("Before wait, active=" + gameObject.activeInHierarchy);
 
-        float timer = 0;
-
-        while (timer <= moveAsScriptTime)
-        {
-            timer += Time.deltaTime;
-            tpc.BotMove(moveVector, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, false);
-            yield return null;
-        }
+        yield return new WaitForSeconds(moveAsScriptTime);
         
         movingAsScript = false;
     }
@@ -72,7 +65,7 @@ public class BotManager : NetworkBehaviour
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
             sm.StartFoundDelay(foundDelayTime);
-            if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() <= 0.7f && tpc.Grounded)
+            if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() <= 1f && tpc.Grounded)
             {
                 sm.BotShoot();
             }
@@ -83,7 +76,7 @@ public class BotManager : NetworkBehaviour
             {
                 sm.StartFoundDelay(foundDelayTime); 
             }
-            if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() <= 0.7f && tpc.Grounded)
+            if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() <= 1f && tpc.Grounded)
             {
                 if (RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE)
                 {
@@ -92,8 +85,14 @@ public class BotManager : NetworkBehaviour
             }
         }
         if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP) return;
-        if (!movingAsScript)
+
+        if (movingAsScript)
         {
+            tpc.BotMove(moveVector, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, false);
+        }
+        else
+        {
+        
             if (RoundManager.rm.currentBotMove != RoundManager.BotMove.STOP)
             {
                 if (RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK || RoundManager.rm.currentBotMove == RoundManager.BotMove.RUN)
@@ -164,6 +163,6 @@ public class BotManager : NetworkBehaviour
     public void ResetPos()
     {
         transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
-        GetComponentInChildren<ThirdPersonController>().ServerUpdateAllPositions(new Vector3(Random.Range(-8.53f, 2.77f), -0.02000034f, Random.Range(1.20f, 3.27f)));
+        GetComponentInChildren<ThirdPersonController>().ServerUpdateAllPositions(new Vector3(Random.Range(-8.53f, 2.77f), -0.02000034f, Random.Range(1.20f, 3.27f)), Vector3.zero);
     }
 }

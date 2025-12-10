@@ -63,10 +63,12 @@ public class HpMaster : NetworkBehaviour
         if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP && RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY)
         {
             hp = 100;
+            isDead = false;
         }
         if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE && RoundManager.rm.CurrentPhase == RoundManager.Phase.BUY)
         {
             hp = 100;
+            isDead = false;
         }
     }
     
@@ -200,6 +202,7 @@ public class HpMaster : NetworkBehaviour
         {
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Ability, "Dead");
             GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
             RoundManager.rm.Finisher(gameObject, headshot);
             RoundManager.rm.PlayerDead(RoundManager.rm.attackers.Contains(gameObject), gameObject);
@@ -208,6 +211,7 @@ public class HpMaster : NetworkBehaviour
         {
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Ability, "Dead");
             GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
             StartCoroutine(RoundManager.rm.ResetPractice());
         }
@@ -215,6 +219,7 @@ public class HpMaster : NetworkBehaviour
         {
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Move, "Dead");
             GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Shoot, "Dead");
+            GetComponent<PlayerActionLockManager>().AddLock(PlayerAction.Ability, "Dead");
             GetComponentInChildren<ThirdPersonController>().RpcResetSpeed();
             RoundManager.rm.DuelLandRetry(false);
         }

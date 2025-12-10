@@ -41,13 +41,16 @@ export const weapons: Item[] = [
   
    {
     name: "Leo",
-        rank: "3",
+        rank: "2",
     description: "値段に対してハイスペックなマシンピストル",
     history: [
       { version: "1.0.2", change: "胴体ダメージを35から30へ低下", type: "debuff" as const },
       { version: "1.0.2", change: "頭ダメージを60から70へ増加", type: "buff" as const },
       { version: "1.0.2", change: "リロード時間を1sから1.2sへ増加", type: "debuff" as const },
       { version: "1.0.5", change: "射撃レートを1/0.11sから1/0.1sへ向上", type: "buff" as const },
+      { version: "1.0.9", change: "射撃レートを1/0.1sから1/0.11sへ低下", type: "debuff" as const },
+      { version: "1.0.9", change: "横リコイルを0.1から0.25へ増加", type: "debuff" as const },
+      { version: "1.0.9", change: "マガジンサイズを12から9へ減少", type: "debuff" as const },
     ],
         type: "マシンピストル",
     difficulty: "簡単",
@@ -64,6 +67,7 @@ export const weapons: Item[] = [
     history: [
       { version: "1.0.2", change: "射撃レートを1/0.16sから1/0.15sへ向上", type: "buff" as const },
       { version: "1.0.4", change: "頭ダメージを120から125へ増加", type: "buff" as const },
+      { version: "1.0.9", change: "マガジンサイズを9から10へ拡張", type: "buff" as const },
     ],
     type: "サイレンサーピストル",
     difficulty: "普通",
@@ -83,7 +87,7 @@ export const weapons: Item[] = [
     ],
     type: "リボルバー",
     difficulty: "とても難しい",
-    cost: "1200",
+    cost: "1100",
     features: ["初心者にはオススメできない", "難しいが使いこなせれば破格の性能", "ヘッドショットの癖がないと使えない"],
     details:
       "ヘッドショットに自信がある人以外は使わないほうがいい。ヘッドショット前提で作られた性能といっていいほど、火力以外がお粗末な性能。",
@@ -110,6 +114,7 @@ export const weapons: Item[] = [
       { version: "1.0.1", change: "胴体ダメージを65から70へ増加",  type: "buff" as const },
       { version: "1.0.1", change: "スコープ視野角を60から45へ減少", type: "neutral" as const },
       { version: "1.0.2", change: "値段を2000creditから1800creditへ減少", type: "buff" as const },
+      { version: "1.0.9", change: "ロスターから保管庫へ移動", type: "buff" as const },
     ],
     type: "ヘビーライフル",
     difficulty: "難しい",
@@ -117,6 +122,20 @@ export const weapons: Item[] = [
     features: ["火力がとにかく高い", "置きエイムに向いている", "遠距離も得意"],
     details:
       "ヘッドショットに自信がある人が使うべき。一応ボディーショットで倒し切るのも可能。スコープ倍率が高いため、遠くの敵を倒すのが得意な武器。",
+  },
+    {
+    name: "Share",
+        rank: "2",
+    description: "シェアー",
+    history: [
+      { version: "1.0.9", change: "保管庫からロスターへ移動", type: "buff" as const },
+    ],
+    type: "アサルトライフル",
+    difficulty: "普通",
+    cost: "2000",
+    features: ["3点バースト付き", "置きエイムに向いている", "安定感が高い"],
+    details:
+      "KasMiやReiNeが買えないときに妥協で買う武器。全体的にステータスが高いので、それらにも勝てる可能性がある。",
   },
     {
     name: "kasMi",
@@ -185,7 +204,7 @@ export const weapons: Item[] = [
   },
     {
     name: "Violets",
-        rank: "2",
+        rank: "3",
     description: "超重量ライトマシンガン",
     history: [
       { version: "1.0.2", change: "連射レートを1/0.06sから1/0.045sへ向上" , type: "buff" as const },

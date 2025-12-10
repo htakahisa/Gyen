@@ -14,12 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunType: Ability
   weaponName: Rebelliousness
+  description: 
+  cost: 0
   damage: 70
   headDamage: 400
-  rate: 0.5
+  rate: 0.4
   Xrecoil: 0
   Yrecoil: 0.6
-  magazineSize: 3
+  magazineSize: 2
   reloadTime: 1
   zoomable: 1
   isNeedZoom: 0

@@ -351,6 +351,7 @@ MonoBehaviour:
   audioTimer: 0
   parentOfPlayer: {fileID: 3543936278411775571}
   audioListener: {fileID: 4081695471351277210}
+  currentControlScheme: Keyboard&Mouse
 --- !u!1 &240431042956649238
 GameObject:
   m_ObjectHideFlags: 0
@@ -2899,8 +2900,8 @@ MonoBehaviour:
   controller: {fileID: 1112727817626628774}
   cameraRoot: {fileID: 3627787299491913062}
   posThreshold: 0.005
-  rotThreshold: 0.2
-  pitchThreshold: 0.2
+  rotThreshold: 0.05
+  pitchThreshold: 0.1
   isSynchronize: 1
 --- !u!114 &8825841003792857049
 MonoBehaviour:
@@ -3245,10 +3246,10 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  skill1Energy: 1
+  skill1Energy: 2
   skill2Energy: 1
   skill3Energy: 0
-  default1Energy: 1
+  default1Energy: 2
   default2Energy: 1
   default3Energy: 0
   ultimateEnergy: 0
@@ -3323,7 +3324,7 @@ MonoBehaviour:
   moveVector: 0
   moveAsScriptTime: 0
   movingAsScript: 0
-  foundDelayTime: 0.5
+  foundDelayTime: 1
 --- !u!114 &4506195584585262550
 MonoBehaviour:
   m_ObjectHideFlags: 0

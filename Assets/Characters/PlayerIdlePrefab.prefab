@@ -299,7 +299,7 @@ GameObject:
   - component: {fileID: 5084248572001244903}
   - component: {fileID: 4816852106047062227}
   m_Layer: 0
-  m_Name: YelloqAll
+  m_Name: YellowAll
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -337,7 +337,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  MoveSpeed: 5
+  MoveSpeed: 6
   UpSpeed: 3
   TurnSpeed: 0.3
   characterController: {fileID: 1112727817626628774}
@@ -351,6 +351,7 @@ MonoBehaviour:
   audioTimer: 0
   parentOfPlayer: {fileID: 3543936278411775571}
   audioListener: {fileID: 4081695471351277210}
+  currentControlScheme: Keyboard&Mouse
 --- !u!1 &240431042956649238
 GameObject:
   m_ObjectHideFlags: 0
@@ -2718,6 +2719,8 @@ GameObject:
   - component: {fileID: 124543901704949302}
   - component: {fileID: -5529438648694075618}
   - component: {fileID: -8875152168310219667}
+  - component: {fileID: 8322252875399731011}
+  - component: {fileID: 2217360579817641447}
   m_Layer: 0
   m_Name: PlayerIdlePrefab
   m_TagString: Untagged
@@ -2779,7 +2782,13 @@ MonoBehaviour:
   pitchLerpFactor: 0.2
   controller: {fileID: 1112727817626628774}
   cameraRoot: {fileID: 3627787299491913062}
+  posThreshold: 0.005
+  rotThreshold: 0.2
+  pitchThreshold: 0.2
   isSynchronize: 1
+  pitch: 0
+  yaw: 0
+  initializedRotation: 0
 --- !u!114 &8825841003792857049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3123,10 +3132,10 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  skill1Energy: 1
+  skill1Energy: 2
   skill2Energy: 1
   skill3Energy: 0
-  default1Energy: 1
+  default1Energy: 2
   default2Energy: 1
   default3Energy: 0
   ultimateEnergy: 0
@@ -3206,6 +3215,44 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   ownerNetId: 0
+--- !u!95 &8322252875399731011
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2217360579817641447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543936278411775571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fff0960ef4ea6e04eac66b4a7fd2189d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Animation.Rigging::UnityEngine.Animations.Rigging.RigBuilder
+  m_RigLayers:
+  - m_Rig: {fileID: 0}
+    m_Active: 1
+  m_Effectors: []
 --- !u!1 &3561717742706190703
 GameObject:
   m_ObjectHideFlags: 0
@@ -4773,6 +4820,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3627787299491913062}
   - component: {fileID: 6613144470693979195}
+  - component: {fileID: 7098816728361527366}
   m_Layer: 6
   m_Name: Head
   m_TagString: Head
@@ -4823,6 +4871,57 @@ CapsuleCollider:
   m_Height: 0.2852302
   m_Direction: 1
   m_Center: {x: 0.0017110407, y: 0.02158046, z: 0.014567586}
+--- !u!114 &7098816728361527366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6516565160721937548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8935e03361a14ec4b8edc872f76bc822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Animation.Rigging::UnityEngine.Animations.Rigging.MultiParentConstraint
+  m_Weight: 1
+  m_Data:
+    m_ConstrainedObject: {fileID: 4549604650611393894}
+    m_SourceObjects:
+      m_Length: 1
+      m_Item0:
+        transform: {fileID: 3627787299491913062}
+        weight: 1
+      m_Item1:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item2:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item3:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item4:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item5:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item6:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item7:
+        transform: {fileID: 0}
+        weight: 0
+    m_ConstrainedPositionAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_ConstrainedRotationAxes:
+      x: 1
+      y: 1
+      z: 1
+    m_MaintainPositionOffset: 0
+    m_MaintainRotationOffset: 0
 --- !u!1 &6560613119075213154
 GameObject:
   m_ObjectHideFlags: 0

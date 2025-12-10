@@ -20,9 +20,9 @@ MonoBehaviour:
     weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 0.4
+    moveAsScriptTime: 0.8
     movingAsScript: 1
-    foundDelayTime: 0.25
+    foundDelayTime: 0.3
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -17.694256, y: 4.800001, z: 21.274}
@@ -30,9 +30,9 @@ MonoBehaviour:
     weapon: 7
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.7
+    moveAsScriptTime: 1.1
     movingAsScript: 1
-    foundDelayTime: 0.25
+    foundDelayTime: 0.3
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -19.3, y: 4.8000026, z: 26.153225}
@@ -40,9 +40,9 @@ MonoBehaviour:
     weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 0.7
+    moveAsScriptTime: 1.1
     movingAsScript: 1
-    foundDelayTime: 0.25
+    foundDelayTime: 0.3
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -19.282, y: 4.800001, z: 26.314}
@@ -50,9 +50,9 @@ MonoBehaviour:
     weapon: 7
     armer: 0.5
     moveVector: 1
-    moveAsScriptTime: 0.7
+    moveAsScriptTime: 1.1
     movingAsScript: 1
-    foundDelayTime: 0.25
+    foundDelayTime: 0.3
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -16.96, y: 4.800001, z: 20.61}
@@ -60,9 +60,9 @@ MonoBehaviour:
     weapon: 7
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.7
+    moveAsScriptTime: 1.1
     movingAsScript: 1
-    foundDelayTime: 0.25
+    foundDelayTime: 0.3
   - prefab: {fileID: 3543936278411775571, guid: f9f2ed827e6ae2d4aba7374631b2f11e,
       type: 3}
     position: {x: -17.411575, y: 4.800001, z: 20.53}
@@ -70,9 +70,9 @@ MonoBehaviour:
     weapon: 7
     armer: 0.5
     moveVector: -1
-    moveAsScriptTime: 0.6
+    moveAsScriptTime: 1
     movingAsScript: 1
-    foundDelayTime: 0.25
+    foundDelayTime: 0.3
   gimmicksWithBot:
   - prefab: {fileID: 3539715179979286606, guid: aa368046966557e49892aa3252f4ac9b,
       type: 3}

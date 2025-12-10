@@ -18,10 +18,10 @@ MonoBehaviour:
   cost: 300
   damage: 30
   headDamage: 70
-  rate: 0.1
-  Xrecoil: 0.1
+  rate: 0.11
+  Xrecoil: 0.25
   Yrecoil: 0.35
-  magazineSize: 12
+  magazineSize: 9
   reloadTime: 1.2
   zoomable: 0
   isNeedZoom: 0

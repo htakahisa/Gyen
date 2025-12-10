@@ -28,6 +28,10 @@ public class CharacterTransfromNetwork : NetworkBehaviour
     private double lastRecvTime;
     public bool isSynchronize;
 
+    public float pitch;   // カメラの上下角度
+    public float yaw;     // プレイヤーの左右角度
+    public bool initializedRotation = false;
+
     //--------------------------------------------------------------------
     // ここが超重要：プレイヤーもボットも同じ扱いで、所有者(isOwned)だけ送信
     //--------------------------------------------------------------------
@@ -48,6 +52,9 @@ public class CharacterTransfromNetwork : NetworkBehaviour
 
     void Update()
     {
+        //これがないと、スポーン時の強制セットが失敗する可能性がある
+        if (!isSynchronize) return;
+
         //----------------------------------------------------------
         // 自分が所有しているキャラ（プレイヤー or ボット）
         //----------------------------------------------------------
@@ -155,12 +162,23 @@ public class CharacterTransfromNetwork : NetworkBehaviour
             controller.enabled = false;
 
         transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
+        SetRotation(yaw);
 
         if (controller)
             controller.enabled = true;
 
         targetPos = pos;
         targetYaw = yaw;
+    }
+
+    public void SetRotation(float newYaw)
+    {
+        // 外側の Transform を更新
+        transform.rotation = Quaternion.Euler(0, newYaw, 0);
+
+        // 内部変数を更新（次のフレームで戻らないように）
+        this.yaw = newYaw;
+
     }
 
     [Server]
