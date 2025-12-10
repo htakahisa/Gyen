@@ -26,7 +26,10 @@ public class Lucifer : CharacterSkills
         serverCheckShoot.isDarkness = true;
     }
 
-
+    private void OnDisable()
+    {
+        Debug.Log("Dont hurt me!");
+    }
 
 
     public void Rebelliousness()

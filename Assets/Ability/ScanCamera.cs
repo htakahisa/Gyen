@@ -6,61 +6,38 @@ public class ScanCamera : NetworkBehaviour
 {
     public Camera scanCamera;
 
-    private Coroutine timerCoroutine;
-
     [SyncVar(hook = nameof(OnCameraStateChanged))]
     private bool isCameraOn = false;
 
-    // Camera.enabled をフレーム末に反映する
-    private bool pendingStateChange = false;
-    private bool targetState = false;
+    private Coroutine serverTimer;
 
+    // クライアントが呼ぶ
     public void CameraTimeOn(float time)
     {
-        // コルーチン管理はクライアント側だけでOK
-        if (timerCoroutine != null)
-        {
-            StopCoroutine(timerCoroutine);
-            timerCoroutine = null;
-        }
-        timerCoroutine = StartCoroutine(OnTimer(time));
+        if (!isLocalPlayer) return;
+
+        CmdRequestCameraOn(time);
     }
 
-    private IEnumerator OnTimer(float time)
-    {
-        // 状態が同じなら送らない（無駄なCmdを防止）
-        CmdSetCameraState(true);
-
-        yield return new WaitForSeconds(time);
-
-        CmdSetCameraState(false);
-    }
-
+    // サーバーだけが状態を管理する
     [Command(requiresAuthority = false)]
-    private void CmdSetCameraState(bool state)
+    private void CmdRequestCameraOn(float time)
     {
-        if (isCameraOn == state) return; // 無駄な更新を防ぐ
-        isCameraOn = state;
+        if (serverTimer != null)
+            StopCoroutine(serverTimer);
+
+        serverTimer = StartCoroutine(ServerTimer(time));
+    }
+
+    private IEnumerator ServerTimer(float time)
+    {
+        isCameraOn = true;
+        yield return new WaitForSeconds(time);
+        isCameraOn = false;
     }
 
     private void OnCameraStateChanged(bool oldValue, bool newValue)
     {
-        // ここで長い処理をしない
-        targetState = newValue;
-        pendingStateChange = true;
-    }
-
-    private void LateUpdate()
-    {
-        // Camera.enabled 切替はフレーム末に実行 → 固まり防止
-        if (pendingStateChange)
-        {
-            pendingStateChange = false;
-
-            if (scanCamera != null)
-            {
-                scanCamera.enabled = targetState;
-            }
-        }
+        scanCamera.enabled = newValue;
     }
 }
