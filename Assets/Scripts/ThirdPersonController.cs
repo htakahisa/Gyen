@@ -824,7 +824,7 @@ namespace StarterAssets
             Vector3 bestPoint = Vector3.zero;
 
             // ==============================
-            // 初期化（1回だけ）
+            // 初期化
             // ==============================
             if (!transformNetwork.initializedRotation)
             {
@@ -838,7 +838,7 @@ namespace StarterAssets
             }
 
             // ==============================
-            // 目標探索（そのまま）
+            // 目標探索
             // ==============================
             foreach (var enemy in enemiesForBot)
             {
@@ -878,7 +878,7 @@ namespace StarterAssets
             if (best == null) return;
 
             // ==============================
-            // Micro Shake（揺れ）
+            // Shake
             // ==============================
             {
                 float shake = (bestSpeed * 0.015f) + (bestDist * 0.0008f);
@@ -893,49 +893,52 @@ namespace StarterAssets
             Quaternion targetRot = Quaternion.LookRotation(dir);
 
             // ==============================
-            // 角度差による高速補正（そのまま）
+            // 🔥 高速補正：大ズレほど一気に戻す
             // ==============================
             float angleDiff = Quaternion.Angle(_mainCamera.transform.rotation, targetRot);
-            float fastLerp = Mathf.InverseLerp(10f, 5f, angleDiff);
+
+            // 60°以上 → 完全高速
+            // 8° → 通常補正
+            float fastLerp = Mathf.InverseLerp(60f, 8f, angleDiff);
 
             // ==============================
-            // Yaw 距離ペナルティ（そのまま）
+            // Yaw（横）は距離で弱る
             // ==============================
             float distSlow = Mathf.Clamp01(bestDist / 40f);
             float speedSlow = Mathf.Clamp01(bestSpeed / 8f);
 
             float yawBaseStrength =
                 botAssistStrength * (1f - distSlow) * (1f - speedSlow);
-            float yawStrength = Mathf.Lerp(yawBaseStrength, 12f, fastLerp);
+
+            // 大ズレほど最大 18 まで強化
+            float yawStrength =
+                Mathf.Lerp(yawBaseStrength, 18f, fastLerp);
 
             // ==============================
-            // Pitch 距離ペナルティ無し（そのまま）
+            // Pitch（縦）は距離ペナルティなし
             // ==============================
             float pitchBaseStrength = botAssistStrength * 1.8f;
-            float pitchStrength = Mathf.Lerp(pitchBaseStrength, 16f, fastLerp);
 
-            // ==============================
-            // 角度を分解
-            // ==============================
+            // 大ズレほど最大 22 まで強化
+            float pitchStrength =
+                Mathf.Lerp(pitchBaseStrength, 22f, fastLerp);
+
             Vector3 targetAngles = targetRot.eulerAngles;
             float targetPitch = targetAngles.x > 180f ? targetAngles.x - 360f : targetAngles.x;
             float targetYaw = targetAngles.y;
 
-            // ==============================
-            // ピッチ更新（フィールド使用 → 安定化）
-            // ==============================
+            // ===== Pitch 更新（縦は強め固定 + 大ズレ高速）=====
             transformNetwork.pitch = Mathf.Lerp(transformNetwork.pitch, targetPitch, pitchStrength * Time.deltaTime);
             transformNetwork.pitch = Mathf.Clamp(transformNetwork.pitch, -90f, 90f);
 
             CameraParticularRotaion(transformNetwork.pitch);
 
-            // ==============================
-            // ヤー更新（フィールド使用 → 安定化）
-            // ==============================
+            // ===== Yaw 更新（距離弱体化 + 大ズレ高速）=====
             transformNetwork.yaw = Mathf.LerpAngle(transformNetwork.yaw, targetYaw, yawStrength * Time.deltaTime);
 
             parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
         }
+
 
 
 
@@ -1232,7 +1235,7 @@ namespace StarterAssets
                 if (_animationBlend < 0.01f) _animationBlend = 0f;
             }
 
-            if (isMove && Grounded)
+            if (isMove && Grounded && _speed >= 1)
             {
                 footStepInTimer += Time.deltaTime;
             }
@@ -1244,7 +1247,7 @@ namespace StarterAssets
                 }
             }
 
-            if (!isWalking)
+            if (!isWalking && isMove && Grounded && _speed >= 1)
             {
                 if (footStepInTimer >= footStepTime)
                 {
@@ -1294,8 +1297,8 @@ namespace StarterAssets
             if (!RoundManager.rm.hasMapLoad) return;
             if (Grounded)
             {
-                // 空中に0.5秒以上いた場合にOnLand()を呼び出す
-                if (_airTime >= 0.5f)
+                // 空中に0.7秒以上いた場合にOnLand()を呼び出す
+                if (_airTime >= 0.7f)
                 {
                     OnLand();
                 }

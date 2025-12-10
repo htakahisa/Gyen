@@ -19,7 +19,7 @@ public class BombManager : NetworkBehaviour
 
 
     [SyncVar(hook = nameof(OnArmedChanged))]
-    private bool isArmed = false;
+    public bool isArmed = false;
 
 
     [SyncVar(hook = nameof(OnDefuseProgressChanged))]
@@ -121,6 +121,7 @@ public class BombManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdStartDefuse(NetworkIdentity playerIdentity)
     {
+        if (RoundManager.rm.hasRoundEnded) return;
         if (!isArmed) CmdStopDefuse(playerIdentity);
         if (RoundManager.rm.attacker == playerIdentity.gameObject) return;
 

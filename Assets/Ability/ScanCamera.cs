@@ -4,60 +4,63 @@ using UnityEngine;
 
 public class ScanCamera : NetworkBehaviour
 {
-
     public Camera scanCamera;
-    public Coroutine timerCoroutine;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    private Coroutine timerCoroutine;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [SyncVar(hook = nameof(OnCameraStateChanged))]
+    private bool isCameraOn = false;
+
+    // Camera.enabled をフレーム末に反映する
+    private bool pendingStateChange = false;
+    private bool targetState = false;
 
     public void CameraTimeOn(float time)
     {
-        if(timerCoroutine != null)
+        // コルーチン管理はクライアント側だけでOK
+        if (timerCoroutine != null)
         {
             StopCoroutine(timerCoroutine);
+            timerCoroutine = null;
         }
         timerCoroutine = StartCoroutine(OnTimer(time));
     }
 
-    public IEnumerator OnTimer(float time)
+    private IEnumerator OnTimer(float time)
     {
-        CmdCameraOn();
+        // 状態が同じなら送らない（無駄なCmdを防止）
+        CmdSetCameraState(true);
+
         yield return new WaitForSeconds(time);
-        CmdCameraOff();
+
+        CmdSetCameraState(false);
     }
 
     [Command(requiresAuthority = false)]
-    public void CmdCameraOn()
+    private void CmdSetCameraState(bool state)
     {
-        RpcCameraOn();
+        if (isCameraOn == state) return; // 無駄な更新を防ぐ
+        isCameraOn = state;
     }
 
-    [Command(requiresAuthority = false)]
-    public void CmdCameraOff()
+    private void OnCameraStateChanged(bool oldValue, bool newValue)
     {
-        RpcCameraOff();
+        // ここで長い処理をしない
+        targetState = newValue;
+        pendingStateChange = true;
     }
 
-    [ClientRpc]
-    public void RpcCameraOn()
+    private void LateUpdate()
     {
-        scanCamera.enabled = true;
-    }
+        // Camera.enabled 切替はフレーム末に実行 → 固まり防止
+        if (pendingStateChange)
+        {
+            pendingStateChange = false;
 
-    [ClientRpc]
-    public void RpcCameraOff()
-    {
-        scanCamera.enabled = false;
+            if (scanCamera != null)
+            {
+                scanCamera.enabled = targetState;
+            }
+        }
     }
-
 }

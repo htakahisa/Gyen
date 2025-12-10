@@ -33,10 +33,6 @@ public class YellowController : NetworkBehaviour
 
     public string currentControlScheme = "Keyboard&Mouse";
 
-    // ★★★ 回転スムージング用 ★★★
-    private float yawCurrent = 0f;
-    private float pitchCurrent = 0f;
-
     private float yawVelocity = 0f;
     private float pitchVelocity = 0f;
 
@@ -119,15 +115,11 @@ public class YellowController : NetworkBehaviour
         // ------------------------------------------------------
         if (!rotationInitialized)
         {
-            // --- Yaw（水平） ---
-            float startYaw = parentOfPlayer.transform.eulerAngles.y;
-            if (startYaw > 180f) startYaw -= 360f;   // 正規化
-            yawCurrent = startYaw;
+            transformNetwork.yaw = parentOfPlayer.transform.eulerAngles.y;
 
-            // --- Pitch（上下） ---
             float startPitch = mainCamera.transform.localEulerAngles.x;
-            if (startPitch > 180f) startPitch -= 360f; // 正規化 (-180〜180)
-            pitchCurrent = Mathf.Clamp(startPitch, -90f, 90f);
+            if (startPitch > 180f) startPitch -= 360f;
+            transformNetwork.pitch = Mathf.Clamp(startPitch, -90f, 90f);
 
             rotationInitialized = true;
         }
@@ -137,6 +129,7 @@ public class YellowController : NetworkBehaviour
         // ------------------------------------------------------
         Vector2 lookInput = playerInput.actions["Look"].ReadValue<Vector2>();
 
+        // デバイス判定
         if (lookInput.sqrMagnitude > 0.01f)
         {
             if (Mouse.current != null && Mouse.current.delta.ReadValue().sqrMagnitude > 0.01f)
@@ -146,41 +139,26 @@ public class YellowController : NetworkBehaviour
         }
 
         float magnification = (currentControlScheme == "Keyboard&Mouse") ? 1f : 100f;
-        float mouseX = lookInput.x * _sensitivity * magnification;
-        float mouseY = lookInput.y * _sensitivity * magnification;
+
+        float mouseX = lookInput.x * _sensitivity * magnification * 0.1f;
+        float mouseY = lookInput.y * _sensitivity * magnification * 0.1f;
 
         // ------------------------------------------------------
-        // Yaw（水平回転）
+        // ★ Yaw（水平回転） → 無限回転OK、正規化も不要
         // ------------------------------------------------------
-        float yawTarget = yawCurrent + mouseX;
+        transformNetwork.yaw += mouseX;
 
-        // ★ ここも正規化してズレを防ぐ
-        if (yawTarget > 180f) yawTarget -= 360f;
-        else if (yawTarget < -180f) yawTarget += 360f;
-
-        yawCurrent = Mathf.SmoothDamp(
-            yawCurrent,
-            yawTarget,
-            ref yawVelocity,
-            1f / smoothSpeed
-        );
-
-        parentOfPlayer.transform.rotation = Quaternion.Euler(0f, yawCurrent, 0f);
+        parentOfPlayer.transform.rotation = Quaternion.Euler(0f, transformNetwork.yaw, 0f);
 
         // ------------------------------------------------------
-        // Pitch（上下回転）
+        // ★ Pitch（上下回転） → -90～90 の制限のみ
         // ------------------------------------------------------
-        float pitchTarget = Mathf.Clamp(pitchCurrent - mouseY, -90f, 90f);
+        transformNetwork.pitch -= mouseY;
+        transformNetwork.pitch = Mathf.Clamp(transformNetwork.pitch, -90f, 90f);
 
-        pitchCurrent = Mathf.SmoothDamp(
-            pitchCurrent,
-            pitchTarget,
-            ref pitchVelocity,
-            1f / smoothSpeed
-        );
-
-        mainCamera.transform.localRotation = Quaternion.Euler(pitchCurrent, 0f, 0f);
+        mainCamera.transform.localRotation = Quaternion.Euler(transformNetwork.pitch, 0f, 0f);
     }
+
 
 
 

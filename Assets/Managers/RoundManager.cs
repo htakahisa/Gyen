@@ -96,6 +96,8 @@ public class RoundManager : NetworkBehaviour
 
     public GameObject botPrefab;
 
+    // --- 追加: ボムアーム中フラグ（重複実行防止） ---
+    private bool isArmingBomb = false;
 
     public enum Mode
     {
@@ -110,10 +112,10 @@ public class RoundManager : NetworkBehaviour
     void Awake()
     {
         rm = this;
-       
+
     }
 
-    public enum BotMove 
+    public enum BotMove
     {
         STOP,
         WALK,
@@ -136,7 +138,7 @@ public class RoundManager : NetworkBehaviour
                         playerManager = NetworkClient.localPlayer.gameObject.GetComponent<PlayerManager>();
                         startGetting = StartCoroutine(StartGetPlayers());
                     }
-                    
+
                 }
             }
 
@@ -215,7 +217,7 @@ public class RoundManager : NetworkBehaviour
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
         FinisherManager.instance.PlayPlayerKillBanner(loser, headshot);
         FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
-        
+
     }
 
     [ClientRpc]
@@ -281,7 +283,7 @@ public class RoundManager : NetworkBehaviour
         {
             if (isFanatics)
             {
-                if (win) 
+                if (win)
                 {
                     GetComponent<BadgeManager>().ConfirmBadge(duelLandFanaticsData);
                 }
@@ -295,7 +297,7 @@ public class RoundManager : NetworkBehaviour
                 }
                 DuelLandLoad(Random.Range(0, duelLandHereticsMaps.Count));
             }
-            
+
         }
         StartCoroutine(ResetPlayers());
 
@@ -322,7 +324,7 @@ public class RoundManager : NetworkBehaviour
                 duelLandHereticsData = duelLandHereticsMaps[index];
                 mapName = duelLandHereticsData.mapName;
             }
-            
+
         }
     }
 
@@ -393,7 +395,7 @@ public class RoundManager : NetworkBehaviour
                         prefab.GetComponent<BotManager>().foundDelayTime = standing.foundDelayTime;
                         prefab.GetComponent<SpawnOwner>().ownerNetId = 12345;
                     }
-                    if(prefab.GetComponent<DestroyTimer>() != null)
+                    if (prefab.GetComponent<DestroyTimer>() != null)
                     {
                         prefab.GetComponent<DestroyTimer>().time = 0;
                     }
@@ -440,6 +442,7 @@ public class RoundManager : NetworkBehaviour
         }
 
         StartCoroutine(WaitMapLoad());
+        StartCoroutine(BombArmCoroutine());
 
     }
 
@@ -537,7 +540,7 @@ public class RoundManager : NetworkBehaviour
                 with.GetComponent<SpawnOwner>().ownerNetId = 12345;
                 NetworkServer.Spawn(with);
                 spawnedGimmicks.Add(with);
-                spawns.Add(with); 
+                spawns.Add(with);
             }
 
         }
@@ -570,29 +573,52 @@ public class RoundManager : NetworkBehaviour
     }
 
 
+    // --- 改良: ボムアーム処理を堅牢化 ---
+    [Server]
     public IEnumerator BombArmCoroutine()
     {
-        if (currentMode == Mode.ONEVSONE)
-        {
-            yield return new WaitWhile(() => CurrentPhase == Phase.BUY); 
-        }
+        // 重複実行防止
+        if (isArmingBomb) yield break;
+        isArmingBomb = true;
 
-        if (currentMode == Mode.DOUBLETAP)
+        // BUYフェーズが終わるまで待つ（ONEVSONE / DOUBLETAP 時）
+        if (currentMode == Mode.ONEVSONE || currentMode == Mode.DOUBLETAP)
         {
             yield return new WaitWhile(() => CurrentPhase == Phase.BUY);
         }
 
-        var bombs = FindObjectsOfType<BombManager>();
-
-        if (bombs == null || bombs.Length == 0) {
-
-            yield return new WaitWhile(() => FindObjectsOfType<BombManager>() == null);
-
+        // ボムが生成されるまで待つ（タイムアウト付き）
+        const int maxAttempts = 60; // 60 * 0.2s = 12秒の猶予
+        int attempts = 0;
+        BombManager[] bombs = null;
+        while (attempts < maxAttempts)
+        {
             bombs = FindObjectsOfType<BombManager>();
-            yield return new WaitWhile(() => bombs == null);
-            yield return new WaitWhile(() => bombs.Length == 0);
+            if (bombs != null && bombs.Length > 0 && bombs[0] != null)
+            {
+                break;
+            }
+            attempts++;
+            yield return new WaitForSeconds(0.2f);
         }
-        bombs[0].ArmBomb();
+
+        if (bombs == null || bombs.Length == 0 || bombs[0] == null)
+        {
+            Debug.LogWarning("[RoundManager] BombArmCoroutine: BombManager not found within timeout.");
+            isArmingBomb = false;
+            yield break;
+        }
+
+        // 安全に最初のボムを起動（必要なら他の処理を追加）
+        try
+        {
+            bombs[0].ArmBomb();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("[RoundManager] BombArmCoroutine: Exception while arming bomb: " + ex);
+        }
+        isArmingBomb = false;
     }
 
     public GameObject ObjectSpawn(GameObject prefab, Vector3 pos = default(Vector3), Quaternion rot = default(Quaternion), bool AddToSpawns = true, bool instantiated = false, NetworkConnectionToClient conn = null)
@@ -652,8 +678,6 @@ public class RoundManager : NetworkBehaviour
 
         yield return new WaitForSeconds(4f);
 
-
-
         SetConditions();
 
     }
@@ -695,9 +719,9 @@ public class RoundManager : NetworkBehaviour
             spikePos = mapData.spikePos;
             mapName = mapData.mapName;
             if (isServer)
-            {                
+            {
                 respawns.Add(new ObjectAndPosition(mapData.mapPrefab, new Vector3(0, 0, 0), Quaternion.identity));
-                respawns.Add(new ObjectAndPosition(spike, spikePos, Quaternion.identity));                
+                respawns.Add(new ObjectAndPosition(spike, spikePos, Quaternion.identity));
             }
         }
 
@@ -710,8 +734,8 @@ public class RoundManager : NetworkBehaviour
             currentBotMove = BotMove.CROUCH;
             if (isServer)
             {
-                if (currentMode == Mode.DUELLAND) 
-                { 
+                if (currentMode == Mode.DUELLAND)
+                {
 
                     respawns.Add(new ObjectAndPosition(duelLandFanaticsData.mapPrefab, new Vector3(0, 0, 0), Quaternion.identity));
                     respawns.Add(new ObjectAndPosition(spike, spikePos, Quaternion.identity));
@@ -771,7 +795,7 @@ public class RoundManager : NetworkBehaviour
         {
             foreach (var attack in attackers)
             {
-                attack.GetComponent<SpawnOwner>().ownerNetId = attacker.GetComponent<NetworkIdentity>().netId; 
+                attack.GetComponent<SpawnOwner>().ownerNetId = attacker.GetComponent<NetworkIdentity>().netId;
             }
             foreach (var defence in defenders)
             {
@@ -781,8 +805,8 @@ public class RoundManager : NetworkBehaviour
 
         if (isServer)
         {
-            if (currentMode == Mode.PRACTICE) 
-            { 
+            if (currentMode == Mode.PRACTICE)
+            {
                 myPlayer.GetComponentInChildren<CreditManager>().credit = 0;
                 myPlayer.GetComponentInChildren<CreditManager>().AddCredit(99999);
             }
@@ -798,7 +822,7 @@ public class RoundManager : NetworkBehaviour
             ServerResetAllObjects();
             hasReset = false;
             ResetStatus();
-            
+
         }
 
         hasLoaded = true;
@@ -821,7 +845,8 @@ public class RoundManager : NetworkBehaviour
             currentMode = Mode.DUELLAND;
             mapName = duelLandHereticsData.mapName;
             currentBotMove = BotMove.CROUCH;
-            if (!hasMapLoad) {
+            if (!hasMapLoad)
+            {
 
                 if (isServer)
                 {
@@ -830,7 +855,7 @@ public class RoundManager : NetworkBehaviour
                         respawns.Add(new ObjectAndPosition(duelLandHereticsData.mapPrefab, new Vector3(0, 0, 0), Quaternion.identity));
                         respawns.Add(new ObjectAndPosition(spike, spikePos, Quaternion.identity));
                     }
-                } 
+                }
             }
         }
 
@@ -847,7 +872,7 @@ public class RoundManager : NetworkBehaviour
                 attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
                 attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
                 Vector3 spawnPos = attackSpawnPos;
-                if(attacker.GetComponent<BotManager>() != null)
+                if (attacker.GetComponent<BotManager>() != null)
                 {
                     spawnPos.y += 30;
                     attacker.GetComponentInChildren<ShootManager>().hasFound = false;
@@ -899,7 +924,7 @@ public class RoundManager : NetworkBehaviour
     }
 
 
-        [Server]
+    [Server]
     public void GiveCredits(GameObject winner, GameObject loser)
     {
         winner.GetComponent<CreditManager>().ResetCurrentPaying();
@@ -963,8 +988,6 @@ public class RoundManager : NetworkBehaviour
             }
         }
 
-        StartCoroutine(BombArmCoroutine());
-
     }
 
     public void SetMode(int index)
@@ -989,7 +1012,7 @@ public class RoundManager : NetworkBehaviour
     }
 
 
-    [Command (requiresAuthority = false)]
+    [Command(requiresAuthority = false)]
     public void CmdHasReset()
     {
         hasReset = true;
@@ -1022,7 +1045,7 @@ public class RoundManager : NetworkBehaviour
         List<GameObject> botsList = new List<GameObject>();
 
         NetworkIdentity identity = player;
-        if(identity == null)
+        if (identity == null)
         {
             identity = GetMyPlayer().GetComponent<NetworkIdentity>();
         }
@@ -1074,7 +1097,7 @@ public class RoundManager : NetworkBehaviour
     public void AddBotCount(int i)
     {
         botCount += i;
-        if(botCount <= 0)
+        if (botCount <= 0)
         {
             DuelLandRetry(true);
         }
@@ -1082,7 +1105,7 @@ public class RoundManager : NetworkBehaviour
 
     public bool IsGameObjectSpawnedAsGimmick(GameObject obj)
     {
-        return spawnedGimmicks.Contains(obj);    
+        return spawnedGimmicks.Contains(obj);
     }
 
     public void PlayerDead(bool attacker, GameObject obj)
