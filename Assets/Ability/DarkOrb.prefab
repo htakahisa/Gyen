@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 4325082964722403587}
   - component: {fileID: 2406217616670742984}
   - component: {fileID: -2899854151729868647}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: DarkOrb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -170,7 +170,9 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
+  penetrationRate: 0
   onDeath: 5
+  destroyObject: []
   lightLoadEffect: {fileID: 2944396702758532163, guid: cba92c89d5cb90942837088b7b03065d,
     type: 3}
 --- !u!114 &2406217616670742984

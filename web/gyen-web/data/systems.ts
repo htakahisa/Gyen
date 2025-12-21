@@ -38,9 +38,10 @@ export const systems: System[] = [
     rank: "B", 
     description: "効果音や、BGMについて。",
     history: [
-      { version: "1.0.6", change: "効果音が聞こえる最大範囲を30?から15へ狭めました", type: "buff" as const },
+      { version: "1.0.6", change: "効果音が聞こえる最大範囲を30?から15へ狭めました", type: "debuff" as const },
       { version: "1.0.6", change: "足音の鳴るインターバルを0.4sから1sに変更しました", type: "neutral" as const },
       { version: "1.0.9", change: "頭に弾がヒットした場合、効果音が頭以外にヒットしたときよりも金属音に近い専用のサウンドが出るようになりました。", type: "buff" as const },
+      { version: "1.0.6", change: "効果音が聞こえる最大範囲を15から30へ広げました", type: "buff" as const },
     ],
   },
     {
@@ -50,6 +51,8 @@ export const systems: System[] = [
     history: [
       { version: "1.0.6", change: "マップ「Discipline」を追加しました", type: "buff" as const },
       { version: "1.0.7", change: "1VS1モードを開始したときに、ランダムなマップが選択されるように変更", type: "buff" as const },
+      { version: "1.0.9", change: "Disciplineのディフェンダースポーンにくぼみを加えました", type: "buff" as const },
+      { version: "1.0.9", change: "Disciplineのロングにある壁の一部をガラスに変更しました。ガラスは当然向こう側が見え、銃弾の威力を僅かに軽減させつつ、弾が貫通します。ダメージによる破壊も可能です。", type: "neutral" as const },
     ],
   },
     {
@@ -60,6 +63,8 @@ export const systems: System[] = [
       { version: "1.0.6", change: "”スパイク”を追加しました。ラウンド開始から一定の時間で爆発し、爆発すればアタッカー、解除すればディフェンダーの勝利です", type: "buff" as const },
       { version: "1.0.6", change: "購入画面で、左クリックで購入に対して、右クリックで売却という対応を追加しました", type: "buff" as const },
       { version: "1.0.8", change: "DuelLandモードにて、自動でボットの画面のリプレイを保存するようになりました", type: "buff" as const },
+      { version: "1.0.9", change: "特定のオブジェクト（Darknessなど）を除いて、基本的に自分が生成したオブジェクトは自分で射撃してもダメージが入らないようになりました。", type: "buff" as const },
+      { version: "1.0.9", change: "DuelLandモードのリプレイ機能について、Backspaceキーを押した場合のみ、そのラウンドのリプレイを生成するようになりました。気に入ったプレイだけラウンド終了前に保存するようにすると、無駄なファイルによるディスク圧迫を防げます。", type: "buff" as const },
     ],
   },
     {
@@ -98,6 +103,7 @@ export const systems: System[] = [
       { version: "1.0.5", change: "購入画面を開いたとき、入力デバイスにかかわらず専用のカーソルが表示されるように仕様を変更しました", type: "neutral" as const },
       { version: "1.0.6", change: "ロビーでキーコンフィグを変更できるようにしました", type: "neutral" as const },
     　{ version: "1.0.8", change: "エイムアシストのシステムの微調整と、それに応じて、ボットのプレイヤーへのエイムのシステムも微調整しました。特定の状況でボットが外しすぎる場合をなくしただけなので、大幅に強化・弱体化したわけではありません。", type: "neutral" as const },
+      { version: "1.0.9", change: "マウスホイールにジャンプを設定すると、ジャンプが複数回呼ばれてしまい、ジャンプ力がわずかに上昇する不具合を修正しました", type: "neutral" as const },
     ],
   },
     {
@@ -107,7 +113,7 @@ export const systems: System[] = [
     history: [
       { version: "1.0.5", change: "武器を持っているとき、右手部分に武器を持っている見た目を追加しました", type: "buff" as const },
       { version: "1.0.7", change: "一部の武器の右手に持つ見た目を調整しました", type: "buff" as const },
-      { version: "1.0.9", change: "頭に弾がヒットした場合、ブラッドエフェクトが頭以外にヒットしたときが赤色なのに対して紫色のエフェクトが出るようになりました。", type: "buff" as const },
+      { version: "1.0.9", change: "頭に弾がヒットした場合、ブラッドエフェクトが頭以外にヒットしたときが赤色なのに対して紫色のエフェクトが出るようになりました", type: "buff" as const },
     ],
   },
     {
@@ -118,6 +124,7 @@ export const systems: System[] = [
       { version: "1.0.5", change: "購入画面と、ラウンド表示パネルのUIを変更しました", type: "buff" as const },
       { version: "1.0.6", change: "購入画面と、ラウンド表示パネルのUIを変更しました", type: "buff" as const },
       { version: "1.0.6", change: "画面左上に、ミニマップを表示しました", type: "buff" as const },
+      { version: "1.0.9", change: "クロスヘアを設定画面から選択できるようになりました", type: "buff" as const },
     ],
   },
       {
@@ -125,7 +132,8 @@ export const systems: System[] = [
     rank: "C", 
     description: "そこまでゲームプレイに影響しない程度の小ネタや試合中以外の要素などについて。",
     history: [
-      { version: "1.0.8", change: "新要素「バッジ」を追加しました。ミッション達成に応じて入手でき、入手したバッジはキャラクター選択画面で一覧表示されるほか、マッチング相手の持っているバッジを確認することもできます。", type: "buff" as const },
+      { version: "1.0.8", change: "新要素「バッジ」を追加しました。ミッション達成に応じて入手でき、入手したバッジはキャラクター選択画面で一覧表示されるほか、マッチング相手の持っているバッジを確認することもできます", type: "buff" as const },
+      { version: "1.0.9", change: "リコイルが、連射しているうちにちょっとずつ増えていくようになりました", type: "buff" as const },
     ],
   },
 ];

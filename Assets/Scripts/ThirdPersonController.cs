@@ -90,6 +90,9 @@ namespace StarterAssets
         private float groundDeceleration = 18f;
         private float airControl = 0.3f; // 0〜1。0なら慣性固定
         private float maxAirSpeedMultiplier = 0.9f;
+        public float recoverSpeed = 0.5f;  // 1秒あたりの回復量
+
+        public float statusSpeed = 1;
 
         [SyncVar(hook = nameof(OnSpeedChanged))]
         private float syncedSpeed;
@@ -190,6 +193,9 @@ namespace StarterAssets
 
         public bool jumpBot;
 
+        public bool jumpRequested;
+
+
         public void SetMovementEnabled(bool enabled)
         {
             canMove = enabled;
@@ -197,12 +203,7 @@ namespace StarterAssets
 
         public void Awake()
         {
-            if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
-            {
-                RoundManager.rm.GetComponent<MatchRecorder>().AddCamera(recordCamera);
-                RoundManager.rm.GetComponent<MatchRecorder>().AddHiddenObject(recordCamera, parentOfPlayer);
-            }
-
+            RoundManager.rm.recordGuys.Add(this);
             _CameraComponent = GetComponentInChildren<Camera>();
              _mainCamera = _CameraComponent.gameObject;
             _UiCameraComponent = _mainCamera.transform.GetChild(0).GetComponent<Camera>();
@@ -350,7 +351,6 @@ namespace StarterAssets
 #else
 			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif
-            Debug.Log("start",transform);
             AssignAnimationIDs();
 
             // reset our timeouts on start
@@ -370,6 +370,7 @@ namespace StarterAssets
             airControl = characterStats.defaultAirControl;
             maxAirSpeedMultiplier = characterStats.defaultMaxAirSpeedMultiplier;
             counterStrafeStrength = characterStats.defaultCounterStrafeStrength;
+            recoverSpeed = characterStats.defaultRecoverSpeed;
 
     }
         private IEnumerator InitializeControlScheme()
@@ -448,8 +449,6 @@ namespace StarterAssets
     {
 
             GroundedCheck();
-
-            head.position = middleBrow.position;
             
 
             if (_audioListener == null)
@@ -482,6 +481,12 @@ namespace StarterAssets
             {
                 _sensitivity = PlayerPrefs.GetFloat("Sensitivity");
                 _hasAnimator = TryGetComponent(out _animator);
+                // 一定速度で baseValue に戻す
+                statusSpeed = Mathf.MoveTowards(
+                    statusSpeed,
+                    1,
+                    recoverSpeed * Time.deltaTime
+                );
 
             }
             if (GetComponentInParent<BotManager>() != null)
@@ -584,6 +589,7 @@ namespace StarterAssets
             {
                 return;
             }
+
 
             JumpAndGravity();
 
@@ -944,18 +950,11 @@ namespace StarterAssets
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+        // 0.8倍にする処理
+        public void ApplyPenalty()
+        {
+            statusSpeed *= 0.8f;
+        }
 
 
 
@@ -1110,6 +1109,7 @@ namespace StarterAssets
 
         private void Move()
         {
+            if (!RoundManager.rm.hasMapLoad) return;
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
             bool crouch = stateInfo.IsName("Crouch");
             bool sneak = _shootManager.IsZooming;
@@ -1224,7 +1224,7 @@ namespace StarterAssets
             // ---- アニメーション ----
             if (_hasAnimator)
             {
-                float targetAnim = _speed * 0.3f; // 実速度の1/3
+                float targetAnim = _speed * 0.1f; // 実速度の1/10
 
                 _animationBlend = Mathf.Lerp(
                     _animationBlend,
@@ -1234,7 +1234,7 @@ namespace StarterAssets
                 if (_animationBlend < 0.01f) _animationBlend = 0f;
             }
 
-            if (isMove && Grounded && _speed >= 1)
+            if (isMove && Grounded && _speed >= 1 && footStepInTimer < footStepTime)
             {
                 footStepInTimer += Time.deltaTime;
             }
@@ -1242,7 +1242,7 @@ namespace StarterAssets
             {
                 if (footStepInTimer >= 0)
                 {
-                    footStepInTimer -= Time.deltaTime;
+                    footStepInTimer -= Time.deltaTime * 2;
                 }
             }
 
@@ -1293,11 +1293,12 @@ namespace StarterAssets
 
         private void JumpAndGravity()
         {
+            if (!RoundManager.rm.hasMapLoad) return;
 
             if (Grounded)
             {
-                // 空中に0.7秒以上いた場合にOnLand()を呼び出す
-                if (_airTime >= 0.7f)
+                // 空中に0.55秒以上いた場合にOnLand()を呼び出す
+                if (_airTime >= 0.55f)
                 {
                     OnLand();
                 }
@@ -1361,6 +1362,7 @@ namespace StarterAssets
                     }
                 }
 
+
                 // if we are not grounded, do not jump
                 jump = false;
             }
@@ -1386,11 +1388,21 @@ namespace StarterAssets
         {
             if (!Grounded) return;
             if (!canMove) return;
+            if (jumpRequested) return;
 
-            // ジャンプ開始
-            jump = true;
+            StartCoroutine(JumpCoroutine());
+
         }
 
+
+        public IEnumerator JumpCoroutine()
+        {
+            // ジャンプ開始
+            jump = true;
+            jumpRequested = true;
+            yield return new WaitForSeconds(0.05f);
+            jumpRequested = false;
+        }
 
         public void Reloading() 
         {
@@ -1500,6 +1512,7 @@ namespace StarterAssets
 
             // 最大速度
             float maxSpeed = isWalking ? MoveSpeed : SprintSpeed;
+            maxSpeed *= statusSpeed;
             if (sneak) maxSpeed *= 0.5f;
 
             if (Grounded)
@@ -1582,7 +1595,7 @@ namespace StarterAssets
             // ---- アニメーション ----
             if (_hasAnimator)
             {
-                float targetAnim = _speed * 0.3f; // 実速度の1/3
+                float targetAnim = _speed * 0.1f; // 実速度の1/10
 
                 _animationBlend = Mathf.Lerp(
                     _animationBlend,
@@ -1618,10 +1631,11 @@ namespace StarterAssets
         public void BotJumpAndGravity()
         {
             jump = jumpBot;
+            
             if (Grounded)
             {
-                // 空中に0.5秒以上いた場合にOnLand()を呼び出す
-                if (_airTime >= 0.5f)
+                // 空中に0.55秒以上いた場合にOnLand()を呼び出す
+                if (_airTime >= 0.55f)
                 {
                     OnLand();
                 }
@@ -1946,6 +1960,15 @@ namespace StarterAssets
             if (isLocalPlayer)
             {
                 CmdRequestDestroy(sceneObjNetId);
+            }
+        }
+
+        public void SetRecordCamera()
+        {
+            if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
+            {
+                RoundManager.rm.GetComponent<MatchRecorder>().AddCamera(recordCamera);
+                RoundManager.rm.GetComponent<MatchRecorder>().AddHiddenObject(recordCamera, parentOfPlayer);
             }
         }
 

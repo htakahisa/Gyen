@@ -234,7 +234,7 @@ public class CustomNetworkManager : NetworkManager
 
         if (sceneName == "Practice")
         {
-            index = 0;
+            index = 3;
         }
 
             // スポーン位置決定

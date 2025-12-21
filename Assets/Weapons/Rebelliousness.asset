@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fe551f6c63e700449543cf46d06cac1, type: 3}
   m_Name: Rebelliousness
   m_EditorClassIdentifier: 
-  gunType: Ability
+  gunType: AbilityGun
+  logic: {fileID: 0}
   weaponName: Rebelliousness
   description: 
   cost: 0

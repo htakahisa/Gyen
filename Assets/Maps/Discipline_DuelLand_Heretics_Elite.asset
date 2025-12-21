@@ -17,7 +17,7 @@ MonoBehaviour:
       type: 3}
     position: {x: -25, y: 4.8000007, z: 22.97}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 5
     armer: 0.87
     moveVector: 1
     moveAsScriptTime: 0.7
@@ -27,7 +27,7 @@ MonoBehaviour:
       type: 3}
     position: {x: -24.5, y: 4.8000007, z: 22.97}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 5
     armer: 0.87
     moveVector: 1
     moveAsScriptTime: 0.7
@@ -37,7 +37,7 @@ MonoBehaviour:
       type: 3}
     position: {x: -21.64, y: 4.8000026, z: 26.153225}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 5
     armer: 0.87
     moveVector: 1
     moveAsScriptTime: 0.7
@@ -47,7 +47,7 @@ MonoBehaviour:
       type: 3}
     position: {x: -23.5, y: 4.8000007, z: 22.97}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 5
     armer: 0.87
     moveVector: 1
     moveAsScriptTime: 0.7
@@ -57,7 +57,7 @@ MonoBehaviour:
       type: 3}
     position: {x: -24, y: 4.8000007, z: 22.97}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 5
     armer: 0.87
     moveVector: 1
     moveAsScriptTime: 0.7
@@ -67,7 +67,7 @@ MonoBehaviour:
       type: 3}
     position: {x: -22.5, y: 4.8000007, z: 22.97}
     rotation: {x: 0, y: -90, z: 0}
-    weapon: 8
+    weapon: 5
     armer: 0.87
     moveVector: 1
     moveAsScriptTime: 0.7

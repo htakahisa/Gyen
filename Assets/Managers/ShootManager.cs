@@ -59,6 +59,9 @@ namespace StarterAssets
         private Animator _animator;
         public Transform head;
 
+        public float recoilRate = 0.3f;
+        public float lastShootTimer = 0;
+
         private void Start()
         {
             _animator = GetComponentInParent<Animator>();
@@ -120,12 +123,15 @@ namespace StarterAssets
 
             if (RoundManager.rm.hasLoaded && GetComponentInParent<PlayerManager>().hasLoaded && !hasLoaded)
             {
-                    StartGetTpc();
-                    hasLoaded = true;
+                StartGetTpc();
+                hasLoaded = true;
             }
 
-
-
+            lastShootTimer += Time.deltaTime;
+            if(lastShootTimer >= 1)
+            {
+                recoilRate = 0.3f;
+            }
 
             if (BuyPanel.buyPanel.isCursorLocked && isLocalPlayer)
             {
@@ -176,23 +182,41 @@ namespace StarterAssets
         {
             WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
 
-            if (currentWeapon != null && !isBursting)
+            if (currentWeapon == null) return;
+
+            if (currentWeapon.gunType == "Ability")
             {
-                if (IsZooming && currentWeapon.burst != 0)
+                if(AbilityShoot(currentWeapon.isAuto))
+                UseAbility(weaponManager.GetCurrentWeaponSlot());
+                shootInputAhead = true;
+            }
+            else
+            {
+                if(!isBursting)
                 {
-                    if (CanShoot(false))
+                    if (IsZooming && currentWeapon.burst != 0)
                     {
-                        StartCoroutine(BurstFire());
+                        if (CanShoot(false))
+                        {
+                            StartCoroutine(BurstFire());
+                        }
+                    }
+                    else if (CanShoot(currentWeapon.isAuto))
+                    {
+                        ShootWeapon();
                     }
                 }
-                else if (CanShoot(currentWeapon.isAuto))
-                {
-                    ShootWeapon();
-                }
             }
+        }
 
-
-
+        void UseAbility(WeaponStatus ability)
+        {
+            ability.dataBase.logic.Use(weaponManager);
+            if (!ability.dataBase.isAuto)
+            {
+                // ★ 使用後はメイン武器に戻す
+                weaponManager.CmdSwitchWeapon(weaponManager.mainWeaponType);
+            }
         }
 
         public void BotShoot()
@@ -205,18 +229,50 @@ namespace StarterAssets
                 {
                     if (BotCanShoot())
                     {
-                        StartCoroutine(BurstFire());
+                        if (currentWeapon.isNeedZoom)
+                        {
+                            StartCoroutine(ZoomThenShoot(true));
+                        }
+                        else
+                        {
+                            StartCoroutine(BurstFire());
+                        }
                     }
                 }
                 else if (BotCanShoot())
                 {
-                    ShootWeapon();
+                    if (currentWeapon.isNeedZoom)
+                    {
+                        StartCoroutine(ZoomThenShoot(false));
+                    }
+                    else
+                    {
+                        ShootWeapon();
+                    }
                 }
             }
 
 
 
         }
+
+
+        public IEnumerator ZoomThenShoot(bool burst)
+        {
+            TryZoom();
+
+            yield return new WaitWhile(() => IsZooming);
+
+            if (burst)
+            {
+                ShootWeapon();
+            }
+            else
+            {
+                StartCoroutine(BurstFire());
+            }
+        }
+
 
         public IEnumerator BurstFire()
         {
@@ -367,9 +423,22 @@ namespace StarterAssets
                     );
                 }
 
+
                 // リコイル
-                StartCoroutine(RecoilCoroutine(0.1f, new Vector3(currentWeapon.Xrecoil, -currentWeapon.Yrecoil, 0f)));
-                recoilBounce = StartCoroutine(Recoilbounce(0.1f, new Vector3(0, -currentWeapon.Yrecoil, 0f)));
+                StartCoroutine(RecoilCoroutine(0.1f, new Vector3(currentWeapon.Xrecoil * recoilRate, -currentWeapon.Yrecoil * recoilRate, 0f)));
+
+                if (recoilBounce != null)
+                {
+                    StopCoroutine(recoilBounce);
+                }
+                recoilBounce = StartCoroutine(Recoilbounce(0.1f, new Vector3(0, -currentWeapon.Yrecoil * 0.3f, 0f)));
+                
+                if (recoilRate < 2)
+                {
+                    recoilRate += 0.2f;
+                }
+
+                lastShootTimer = 0;
             }
         }
 
@@ -404,6 +473,46 @@ namespace StarterAssets
             // カメラの位置から指定方向にレイを描画
             Gizmos.color = Color.red;
             Gizmos.DrawRay(_mainCamera.transform.position, direction.normalized * 10);
+        }
+
+        public bool AbilityShoot(bool Auto)
+        {
+
+            if (!GetComponentInParent<AbilityController>().canUse) return false;
+
+            WeaponDatabase currentWeapon = weaponManager.GetCurrentWeaponStats();
+
+            if (currentWeapon == null) return false;
+
+            bool shoot;
+
+            if (Auto)
+            {
+                shoot = autoFireInput;
+            }
+            else
+            {
+                // ボタンが押されているか
+                bool currentFireState = inputActions.Player.Fire.ReadValue<float>() > 0.5f;
+
+                // 押された瞬間だけ true
+                bool pressedThisFrame = currentFireState && !lastFireState;
+
+                // 状態を更新
+                lastFireState = currentFireState;
+                shoot = pressedThisFrame;
+            }
+
+            if (!shoot) return false;
+
+            if (weaponManager.isReloading) return false;
+
+
+            // 現在時刻と最後の攻撃時刻を比較
+            float timeSinceLastAttack = Time.time - lastAttackTime;
+
+            return timeSinceLastAttack >= currentWeapon.rate;
+
         }
 
         public bool CanShoot(bool Auto)

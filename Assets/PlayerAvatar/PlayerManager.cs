@@ -37,6 +37,10 @@ public class PlayerManager : NetworkBehaviour
         {
             needPlayersCount = 2;
         }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP)
+        {
+            needPlayersCount = 2;
+        }
         if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
         {
             needPlayersCount = 1;

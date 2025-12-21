@@ -23,7 +23,7 @@ public class YellowManager : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
-            bodyRenderer.layer = 7;
+            bodyRenderer.layer = 13;
         }
         if (removeCoroutine != null && abilityController.currentForm != AbilityController.PlayerForm.Bird)
         {

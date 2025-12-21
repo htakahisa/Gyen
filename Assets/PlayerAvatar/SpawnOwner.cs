@@ -3,6 +3,7 @@ using Mirror;
 public class SpawnOwner : NetworkBehaviour
 {
     [SyncVar] public uint ownerNetId;
+    [SyncVar] public bool friendlyFire;
 
     public bool IsMine()
     {

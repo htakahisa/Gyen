@@ -126,7 +126,7 @@ public class WeaponManager : NetworkBehaviour
         {
             subWeaponType = type;
         }
-        else if (gunType == "Ability")
+        else if (gunType == "AbilityGun")
         {
             abilityWeaponType = type;
         }

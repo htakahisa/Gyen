@@ -40,7 +40,7 @@ public class YellowController : NetworkBehaviour
 
     public override void OnStartAuthority()
     {
-        gameObject.layer = 7;
+        gameObject.layer = 13;
         _sensitivity = PlayerPrefs.GetFloat("Sensitivity", 1f);
     }
 

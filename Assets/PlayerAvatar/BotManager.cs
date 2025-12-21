@@ -1,4 +1,4 @@
-using Mirror;
+﻿using Mirror;
 using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,6 +28,13 @@ public class BotManager : NetworkBehaviour
     public float moveAsScriptTime;
     public bool movingAsScript;
     public float foundDelayTime;
+    public float foundDelayTimeDelta;
+
+    // 速度による増分の最大値（0.2f → 合計0.5fまで）
+    public float maxSpeedBonus = 0.2f;
+
+    // 速度の最大想定値（走っている時の最大速度に合わせる）
+    public float maxSpeed = 10f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public void Start()
@@ -48,7 +55,16 @@ public class BotManager : NetworkBehaviour
         
         movingAsScript = false;
     }
+    public float GetFoundDelayTimeDelta()
+    {
+        float speed = cc.velocity.magnitude;
 
+        // speed(0〜maxSpeed) → bonus(0〜maxSpeedBonus) に変換
+        float bonus = Mathf.Lerp(0f, maxSpeedBonus, speed / maxSpeed);
+
+        // 基本値 + 増分
+        return foundDelayTime + bonus;
+    }
 
     // Update is called once per frame
     void Update()
@@ -61,10 +77,11 @@ public class BotManager : NetworkBehaviour
         }
         bool jump = false;
 
+        foundDelayTimeDelta = GetFoundDelayTimeDelta();
 
         if (RoundManager.rm.currentMode == RoundManager.Mode.DUELLAND)
         {
-            sm.StartFoundDelay(foundDelayTime);
+            sm.StartFoundDelay(foundDelayTimeDelta);
             if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() <= 1f && tpc.Grounded)
             {
                 sm.BotShoot();
@@ -74,7 +91,7 @@ public class BotManager : NetworkBehaviour
         {
             if (RoundManager.rm.CurrentPhase == RoundManager.Phase.BATTLE) 
             {
-                sm.StartFoundDelay(foundDelayTime); 
+                sm.StartFoundDelay(foundDelayTimeDelta); 
             }
             if (RoundManager.rm.doesBotShoot && tpc.GetSpeed() <= 1f && tpc.Grounded)
             {
@@ -109,11 +126,11 @@ public class BotManager : NetworkBehaviour
                     currentMoveDirection = 0;
                 }
 
-                // �ړ����s
+                // 移動実行
                 tpc.BotMove(currentMoveDirection, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchTime < crouchDuration && sm.hasFound);
                 moveTime += Time.deltaTime;
 
-                // �ړ����Ԃ��I�������烊�Z�b�g
+                // 移動時間が終了したらリセット
                 if (moveTime >= moveDuration)
                 {
                     moveTime = 0;

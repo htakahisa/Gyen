@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6885006484711419631}
   - component: {fileID: 4860152057952676415}
   - component: {fileID: 6102431286603773891}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 1266099980920821130}
   - component: {fileID: -1809848207890565621}
   - component: {fileID: 495309184100390865}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: Horus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -171,7 +171,9 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
+  penetrationRate: 0
   onDeath: 3
+  destroyObject: []
   lightLoadEffect: {fileID: 0}
 --- !u!114 &-607898583553318301
 MonoBehaviour:
@@ -188,7 +190,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  detectionRange: 30
+  detectionRange: 50
   damage: 15
   laserDuration: 0.2
   fireInterval: 1
@@ -312,7 +314,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3686285212251059756}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -57,7 +57,10 @@ public class TextManager : MonoBehaviour
                     headShotRate.text = "HS% : " + RoundManager.rm.GetMyPlayer().GetComponentInChildren<ServerCheckShoot>()?.GetHeadShotRate();
                 }
             }
-            mapNameText.text = RoundManager.rm.mapName;
+            if (RoundManager.rm.currentMode != RoundManager.Mode.PRACTICE)
+            {
+                mapNameText.text = RoundManager.rm.mapName;
+            }
 
         }
     }

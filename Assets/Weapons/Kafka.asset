@@ -25,7 +25,7 @@ MonoBehaviour:
   reloadTime: 1.5
   zoomable: 1
   isNeedZoom: 0
-  zoomRatio: 65
+  zoomRatio: 70
   zoomSpeed: 0.02
   burst: 5
   burstRate: 0.06

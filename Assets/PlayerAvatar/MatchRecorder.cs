@@ -11,48 +11,49 @@ using Debug = UnityEngine.Debug;
 public class MatchRecorder : MonoBehaviour
 {
     // =====================================================
-    // ▼ 自分だけ映さない機能用（Renderer.enabled方式で安全）
+    // ▼ 自分だけ映さない機能（Renderer.enabled方式）
     // =====================================================
-    private Dictionary<Camera, List<Renderer>> hiddenRenderers = new Dictionary<Camera, List<Renderer>>();
+    private Dictionary<Camera, List<Renderer>> hiddenRenderers = new();
 
     public void AddHiddenObject(Camera cam, GameObject obj)
     {
         if (!hiddenRenderers.ContainsKey(cam))
             hiddenRenderers[cam] = new List<Renderer>();
 
-        var renderers = obj.GetComponentsInChildren<Renderer>(true);
-        foreach (var r in renderers)
+        foreach (var r in obj.GetComponentsInChildren<Renderer>(true))
             if (!hiddenRenderers[cam].Contains(r))
                 hiddenRenderers[cam].Add(r);
     }
 
     void OnBeginCameraRendering(ScriptableRenderContext ctx, Camera cam)
     {
-        if (!hiddenRenderers.ContainsKey(cam)) return;
-        foreach (var r in hiddenRenderers[cam])
-            if (r != null)
-                r.enabled = false;
+        if (!hiddenRenderers.TryGetValue(cam, out var list)) return;
+        foreach (var r in list)
+            if (r != null) r.enabled = false;
     }
 
     void OnEndCameraRendering(ScriptableRenderContext ctx, Camera cam)
     {
-        if (!hiddenRenderers.ContainsKey(cam)) return;
-        foreach (var r in hiddenRenderers[cam])
-            if (r != null)
-                r.enabled = true;
+        if (!hiddenRenderers.TryGetValue(cam, out var list)) return;
+        foreach (var r in list)
+            if (r != null) r.enabled = true;
     }
 
     // =====================================================
-    // ▼ MatchRecorder 元の機能
+    // ▼ Recorder 本体
     // =====================================================
     public class CameraRecord
     {
         public Camera camera;
         public RenderTexture rt;
-        public ConcurrentQueue<byte[]> frameQueue = new ConcurrentQueue<byte[]>();
+        public ConcurrentQueue<byte[]> frameQueue = new();
         public string filePath;
-        public bool recording = false;
-        public bool writing = false;
+        public bool recording;
+        public bool writing;
+        public int pendingReadbacks;
+        public int pendingCaptures;
+
+        public bool cameraDestroyed; // ★ 追加
     }
 
     [Header("Recording Settings")]
@@ -60,13 +61,10 @@ public class MatchRecorder : MonoBehaviour
     public int height = 720;
     public int fps = 30;
 
-    private List<CameraRecord> records = new List<CameraRecord>();
-    private bool isRecording = false;
+    private List<CameraRecord> records = new();
+    private bool isRecording;
     private float nextFrameTime;
     private string ffmpegRuntimePath;
-
-    private struct PendingCapture { public CameraRecord record; public double captureTime; }
-    private List<PendingCapture> pendingCaptures = new List<PendingCapture>();
 
     void Awake()
     {
@@ -74,78 +72,132 @@ public class MatchRecorder : MonoBehaviour
         QualitySettings.vSyncCount = 0;
         PrepareFFmpeg();
 
-        RenderPipelineManager.endFrameRendering += OnEndFrameRendering;
         RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
         RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
+        RenderPipelineManager.endCameraRendering += OnEndCameraRendering_Record; // ★ FIX
     }
 
-    private void PrepareFFmpeg()
+    // =====================================================
+    // ▼ fps制御（そのまま）
+    // =====================================================
+    void LateUpdate()
     {
-#if UNITY_STANDALONE_WIN
-        string fileName = "ffmpeg.exe";
-#else
-        string fileName = "ffmpeg";
-#endif
-        string src = Path.Combine(Application.streamingAssetsPath, fileName);
-        string dst = Path.Combine(Application.persistentDataPath, fileName);
-        ffmpegRuntimePath = dst;
+        if (!isRecording) return;
 
-        if (File.Exists(dst)) return;
-        try { File.Copy(src, dst, true); } catch (Exception e) { Debug.LogError($"ffmpeg copy failed: {e}"); }
-
-#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
-        try
+        while (Time.unscaledTime >= nextFrameTime)
         {
-            var chmod = new Process
+            nextFrameTime += 1f / fps;
+
+            foreach (var r in records)
             {
-                StartInfo = new ProcessStartInfo
+                // ★ Camera が消えていたら完了扱い
+                if (r.camera == null)
                 {
-                    FileName = "/bin/chmod",
-                    Arguments = $"+x \"{dst}\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true
+                    r.cameraDestroyed = true;
+                    r.recording = false;
+                    r.pendingCaptures = 0;
+                    continue;
                 }
-            };
-            chmod.Start(); chmod.WaitForExit();
+
+                if (r.recording)
+                    r.pendingCaptures++;
+            }
         }
-        catch (Exception e) { Debug.LogError($"chmod failed: {e}"); }
-#endif
     }
 
-    private string GetFFmpegPath() => ffmpegRuntimePath;
+    // =====================================================
+    // ▼ Cameraごとに Readback（最重要修正）
+    // =====================================================
+    void OnEndCameraRendering_Record(ScriptableRenderContext ctx, Camera cam)
+    {
+        var r = records.Find(x => x.camera == cam);
+        if (r == null || r.cameraDestroyed || r.rt == null) return;
+        if (!r.recording || r.pendingCaptures <= 0) return;
 
+        r.pendingCaptures--;
+        r.pendingReadbacks++;
+
+        AsyncGPUReadback.Request(r.rt, 0, TextureFormat.RGBA32, req =>
+        {
+            r.pendingReadbacks--;
+
+            if (req.hasError || r.cameraDestroyed) return;
+
+            var data = req.GetData<byte>();
+            var frame = new byte[data.Length];
+            data.CopyTo(frame);
+            r.frameQueue.Enqueue(frame);
+        });
+    }
+
+
+    // =====================================================
+    // ▼ 録画制御
+    // =====================================================
     public void AddCamera(Camera cam)
     {
-        if (cam == null || records.Exists(r => r.camera == cam)) return;
+        if (records.Exists(r => r.camera == cam)) return;
 
-        var record = new CameraRecord();
-        record.camera = cam;
-        record.rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
-        record.rt.Create();
-        cam.targetTexture = record.rt;
+        var r = new CameraRecord
+        {
+            camera = cam,
+            rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32),
+            recording = isRecording
+        };
+        r.rt.Create();
+        cam.targetTexture = r.rt;
 
-        string name = cam.gameObject.name.Replace(" ", "_");
-        string date = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
-        record.filePath = Path.Combine(Application.persistentDataPath, $"{name}_{date}_{records.Count}.mp4");
+        r.filePath = Path.Combine(
+            Application.persistentDataPath,
+            $"{cam.name}_{DateTime.Now:yyyyMMdd_HHmmss_fff}_{(UnityEngine.Random.Range(0, 9999))}.mp4"
+        );
 
-        records.Add(record);
+        records.Add(r);
     }
 
-    public void ClearCamera()
+    public async Task ClearCamera()
     {
+        // ★ 録画は止める（セッション終了）
+        isRecording = false;
+        foreach (var r in records)
+            r.recording = false;
+
+        // ★ GPU Readback 完了待ち
         foreach (var r in records)
         {
-            if (r.camera != null)
-                r.camera.targetTexture = null;
-            if (r.rt != null)
-                r.rt.Release();
+            while (r.pendingReadbacks > 0)
+                await Task.Delay(10);
         }
+
+        // ★ Camera / RT を安全に解放
+        foreach (var r in records)
+        {
+            // Camera は Destroy 済みの可能性がある
+            if (r.camera != null)
+            {
+                // targetTexture を外す（重要）
+                if (r.camera.targetTexture == r.rt)
+                    r.camera.targetTexture = null;
+            }
+
+            if (r.rt != null)
+            {
+                if (r.rt.IsCreated())
+                    r.rt.Release();
+
+                Destroy(r.rt);
+            }
+
+            // 念のためキューもクリア
+            while (r.frameQueue.TryDequeue(out _)) { }
+        }
+
         records.Clear();
     }
 
+
     public void StartRecording()
     {
-        if (isRecording) return;
         isRecording = true;
         nextFrameTime = Time.unscaledTime;
         foreach (var r in records) r.recording = true;
@@ -153,10 +205,25 @@ public class MatchRecorder : MonoBehaviour
 
     public async Task StopRecordingAndWait()
     {
-        if (!isRecording) return;
         isRecording = false;
         foreach (var r in records) r.recording = false;
-        await Task.Delay(50);
+
+        foreach (var r in records)
+            while (r.pendingReadbacks > 0)
+                await Task.Delay(10);
+    }
+
+    public async Task WriteRecordingAndWait()
+    {
+        isRecording = false;
+        foreach (var r in records) r.recording = false;
+
+        // ★ Destroy 済み Camera は pendingReadbacks を無視
+        foreach (var r in records)
+        {
+            while (!r.cameraDestroyed && r.pendingReadbacks > 0)
+                await Task.Delay(10);
+        }
 
         foreach (var r in records)
         {
@@ -165,89 +232,50 @@ public class MatchRecorder : MonoBehaviour
         }
     }
 
-    void LateUpdate()
+
+    // =====================================================
+    // ▼ 書き込み（ほぼそのまま）
+    // =====================================================
+    async Task WriteToVideoAsync(CameraRecord r)
     {
-        if (!isRecording) return;
-
-        while (Time.unscaledTime >= nextFrameTime)
-        {
-            nextFrameTime += 1f / fps;
-            foreach (var r in records)
-                if (r.camera != null && r.recording)
-                    pendingCaptures.Add(new PendingCapture { record = r, captureTime = Time.unscaledTime });
-        }
-    }
-
-    private async Task WriteToVideoAsync(CameraRecord record)
-    {
-        if (record.frameQueue.IsEmpty) return;
-        record.writing = true;
-
-        string ffmpegPath = GetFFmpegPath();
-        if (!File.Exists(ffmpegPath)) { record.writing = false; return; }
+        if (r.frameQueue.IsEmpty) return;
+        r.writing = true;
 
         await Task.Run(async () =>
         {
-            try
+            var psi = new ProcessStartInfo
             {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = ffmpegPath,
-                    Arguments =
-                        $"-y -f rawvideo -pixel_format rgba -video_size {width}x{height} -framerate {fps} -i - " +
-                        $"-vf vflip -pix_fmt yuv420p -c:v libx264 -preset ultrafast \"{record.filePath}\"",
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    CreateNoWindow = true
-                };
+                FileName = ffmpegRuntimePath,
+                Arguments =
+                    $"-y -f rawvideo -pixel_format rgba -video_size {width}x{height} -framerate {fps} -i - " +
+                    $"-vf vflip -pix_fmt yuv420p -preset ultrafast \"{r.filePath}\"",
+                UseShellExecute = false,
+                RedirectStandardInput = true,
+                CreateNoWindow = true
+            };
 
-                using (var proc = new Process { StartInfo = psi })
-                {
-                    proc.Start();
-                    using (var stdin = proc.StandardInput.BaseStream)
-                    {
-                        while (record.frameQueue.TryDequeue(out var frame))
-                            await stdin.WriteAsync(frame, 0, frame.Length);
-                        await stdin.FlushAsync();
-                    }
-                    proc.WaitForExit();
-                }
-            }
-            catch (Exception e) { Debug.LogError($"Write failed: {e}"); }
-            finally { record.writing = false; }
+            using var proc = Process.Start(psi);
+            using var stdin = proc.StandardInput.BaseStream;
+
+            while (r.frameQueue.TryDequeue(out var frame))
+                await stdin.WriteAsync(frame, 0, frame.Length);
+
+            stdin.Close();
+            proc.WaitForExit();
+            r.writing = false;
+            Debug.Log("write success");
         });
     }
 
-    private void OnEndFrameRendering(ScriptableRenderContext context, Camera[] cameras)
+    // =====================================================
+    // ▼ FFmpeg準備（変更なし）
+    // =====================================================
+    void PrepareFFmpeg()
     {
-        if (pendingCaptures.Count == 0) return;
-
-        var camSet = new HashSet<Camera>(cameras);
-
-        for (int i = pendingCaptures.Count - 1; i >= 0; --i)
-        {
-            var pc = pendingCaptures[i];
-            var r = pc.record;
-
-            if (r == null || r.camera == null || !r.recording || r.rt == null)
-            {
-                pendingCaptures.RemoveAt(i);
-                continue;
-            }
-
-            if (!camSet.Contains(r.camera)) continue;
-
-            AsyncGPUReadback.Request(r.rt, 0, TextureFormat.RGBA32, (req) =>
-            {
-                if (req.hasError || !r.recording) return;
-
-                var data = req.GetData<byte>();
-                byte[] frame = new byte[data.Length];
-                data.CopyTo(frame);
-                r.frameQueue.Enqueue(frame);
-            });
-
-            pendingCaptures.RemoveAt(i);
-        }
+#if UNITY_STANDALONE_WIN
+        ffmpegRuntimePath = Path.Combine(Application.streamingAssetsPath, "ffmpeg.exe");
+#else
+        ffmpegRuntimePath = Path.Combine(Application.streamingAssetsPath, "ffmpeg");
+#endif
     }
 }

@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: -2188010503860952839}
   - component: {fileID: -4010491968622867233}
   - component: {fileID: 801232825667869841}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: IMirror
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -82,7 +82,9 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
+  penetrationRate: 0
   onDeath: 7
+  destroyObject: []
   lightLoadEffect: {fileID: 0}
 --- !u!33 &9023816951373079812
 MeshFilter:

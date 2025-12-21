@@ -50,6 +50,8 @@ public class HideScreenWhenVisible : NetworkBehaviour
     private float overlayAlpha = 0f;
     public static HideScreenWhenVisible instance;
 
+    public LayerMask blockLayer;
+
     void Awake()
     {
         instance = this;
@@ -194,7 +196,7 @@ public class HideScreenWhenVisible : NetworkBehaviour
             return false;
 
         Vector3 dir = rend.bounds.center - cam.transform.position;
-        if (Physics.Raycast(cam.transform.position, dir.normalized, out RaycastHit hit, dir.magnitude + 0.01f))
+        if (Physics.Raycast(cam.transform.position, dir.normalized, out RaycastHit hit, dir.magnitude + 0.01f, blockLayer))
         {
             if (!hit.collider.transform.IsChildOf(rend.transform))
                 return false;

@@ -22,7 +22,13 @@ public class WeaponStatus
         Violets,
         Rebelliousness,
         Share,
-
+        ITweaks,
+        IMirror,
+        IAm,
+        Terra,
+        Horus,
+        Mentum,
+        Sing,
     }
 
 

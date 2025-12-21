@@ -16,4 +16,5 @@ public class CharacterStats : ScriptableObject
     public float defaultAirControl = 0.3f;
     public float defaultMaxAirSpeedMultiplier = 0.9f;
     public float defaultCounterStrafeStrength = 2f;
+    public float defaultRecoverSpeed = 0.5f;
 }

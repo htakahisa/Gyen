@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Share
   m_EditorClassIdentifier: Assembly-CSharp::WeaponDatabase
   gunType: Rifle
+  logic: {fileID: 0}
   weaponName: Share
   description: "\u8EFD\u91CF\u7D1A\u30A2\u30B5\u30EB\u30C8\u30E9\u30A4\u30D5\u30EB\u3002\u706B\u529B\u3001\u9023\u5C04\u901F\u5EA6\u5171\u306B\u7533\u3057\u5206\u306A\u304F\u30013\u70B9\u30D0\u30FC\u30B9\u30C8\u306B\u3088\u308A\u9060\u8DDD\u96E2\u5C04\u6483\u3082\u304A\u624B\u306E\u7269\u306E\u3001\u30AA\u30FC\u30EB\u30E9\u30A6\u30F3\u30C0\u30FC\u306A\u6B66\u5668\u3002"
-  cost: 2000
+  cost: 2100
   damage: 45
-  headDamage: 135
+  headDamage: 155
   rate: 0.11
   Xrecoil: 0.25
   Yrecoil: 0.55
@@ -25,7 +26,7 @@ MonoBehaviour:
   reloadTime: 1.5
   zoomable: 1
   isNeedZoom: 0
-  zoomRatio: 70
+  zoomRatio: 65
   zoomSpeed: 0.07
   burst: 3
   burstRate: 0.055

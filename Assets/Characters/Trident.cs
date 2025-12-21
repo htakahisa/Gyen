@@ -1,6 +1,7 @@
 using Mirror;
 using StarterAssets;
 using UnityEngine;
+using static WeaponStatus;
 
 public class Trident : CharacterSkills
 {
@@ -16,10 +17,8 @@ public class Trident : CharacterSkills
     public ShootManager shootManager;
 
     public float singInterval;
-
-    public bool isSinging;
     public float singIntervalTimer;
-
+    public float notSingTime;
 
     [TextArea]
     public string memo = "Skill1 = Lime, Skill2 = Yellow, Skill3 = Singing";
@@ -29,46 +28,24 @@ public class Trident : CharacterSkills
 
         Skill1 = Lime;
         Skill2 = Yellow;
-        Skill3 = Singing;
+        Skill3 = Sing;
     }
+
 
     private void Update()
     {
-
-        if (Input.GetMouseButton(0) && isSinging && hpMaster.hp < 100)
+        notSingTime += Time.deltaTime;
+        if (notSingTime >= 1)
         {
-
-
-            if (currentCharacter.skill3Energy <= 0)
-            {
-                CmdDestroyHealEffect();
-                return;
-            }
-
-            singIntervalTimer += Time.deltaTime;
-
-            if (singIntervalTimer >= singInterval)
-            {
-                CmdSpawnHealEffect();
-                CmdSingHeal();
-                singIntervalTimer = 0;
-            }
-
+            CmdDestroyHealEffect();
+            return;
         }
-        else
-        {
-                CmdDestroyHealEffect();
-                singIntervalTimer = 0;
-        }
-
         if (healEffectInstance != null)
         {
             healEffectInstance.transform.position = transform.position;
         }
     }
 
-        
-    
 
     public void Lime()
     {
@@ -117,22 +94,36 @@ public class Trident : CharacterSkills
         currentCharacter.skill2Energy--;
     }
 
-    public void Singing()
+    public void RequestSing()
     {
-      
-        
-        if (!isSinging && hpMaster.hp < 100) {
 
-            shootManager.canShoot = false;
-            isSinging = true;
-
-        }
-        else
+        if (!isOwned) return;
+        if (currentCharacter.skill3Energy <= 0)
         {
-            shootManager.canShoot = true;
-            isSinging = false;
+            singIntervalTimer = 0;
+            CmdDestroyHealEffect();
+            return;
+
         }
 
+        singIntervalTimer += Time.deltaTime;
+
+        if (singIntervalTimer >= singInterval)
+        {
+            CmdSpawnHealEffect();
+            CmdSingHeal();
+            singIntervalTimer = 0;
+            notSingTime = 0;
+        }
+    }
+
+    public void Sing()
+    {
+        if (currentCharacter.skill3Energy <= 0)
+        {
+            return;
+        }
+        GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponType.Sing);
     }
 
     [Command]

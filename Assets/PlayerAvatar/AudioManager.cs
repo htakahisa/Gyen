@@ -24,6 +24,9 @@ public class AudioManager : NetworkBehaviour
     public AudioClip MeteorFinisher;
     public AudioClip Defuse;
     public AudioClip SpikeCountdown;
+    public AudioClip IAm;
+    public AudioClip IAmDestroyed;
+    public AudioClip breakSound;
 
     public LayerMask soundBlockLayer;
 
@@ -53,6 +56,9 @@ public class AudioManager : NetworkBehaviour
         METEORFINISHER,
         DEFUSE,
         SPIKECOUNTDOWN,
+        IAM,
+        IAMDESTROYED,
+        BREAK,
     }
 
     // Update is called once per frame
@@ -167,6 +173,15 @@ public class AudioManager : NetworkBehaviour
 
             case Sounds.SPIKECOUNTDOWN:
                 soundClip = SpikeCountdown;
+                break;
+            case Sounds.IAM:
+                soundClip = IAm;
+                break;
+            case Sounds.IAMDESTROYED:
+                soundClip = IAmDestroyed;
+                break;
+            case Sounds.BREAK:
+                soundClip = breakSound;
                 break;
 
             default:

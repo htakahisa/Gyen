@@ -2,6 +2,7 @@ using Mirror;
 using StarterAssets;
 using System.Collections;
 using UnityEngine;
+using static WeaponStatus;
 
 public class Overdose : CharacterSkills
 {
@@ -21,10 +22,8 @@ public class Overdose : CharacterSkills
 
     public Transform tweaksPreInstance;
 
-    public bool isTweaks;
-
     [Tooltip("最大到達距離 (m)")]
-    public float tweaksMaxDistance = 3f;
+    public float tweaksMaxDistance = 6f;
 
     [Tooltip("壁に当たったとき内側に押し戻すオフセット")]
     public float tweaksSurfaceOffset = 0.5f;
@@ -32,24 +31,39 @@ public class Overdose : CharacterSkills
     [Tooltip("地面に置くとき上に浮かせるオフセット")]
     public float tweaksUpOffset = 0.5f;
 
-    public bool isMirror;
-
     public GameObject mirror;
+
+    [Tooltip("最大到達距離 (m)")]
+    public float amMaxDistance = 5f;
+
+    [Tooltip("壁に当たったとき内側に押し戻すオフセット")]
+    public float amSurfaceOffset = 0.5f;
+
+    [Tooltip("地面に置くとき上に浮かせるオフセット")]
+    public float amUpOffset = 0.5f;
+
+    public GameObject am;
+    public GameObject amPre;
+
+    public Transform amPreInstance;
+    public Transform amInstance;
+
+    public bool isAm;
 
     [TextArea]
     public string memo = "Skill1 = Tweaks, Skill2 = Horus, Skill3 = Singing";
 
     private void Awake()
     {
-        Skill1 = Tweaks;
+        Skill1 = Am;
         Skill2 = Mirror;
-        //Skill3 = Mentum;
+        Skill3 = Tweaks;
     }
 
     private void Update()
     {
 
-        if (isTweaks)
+        if (GetComponentInChildren<WeaponManager>().GetCurrentWeaponType() == WeaponType.ITweaks)
         {
 
             Transform t = Camera.main.transform;
@@ -76,12 +90,6 @@ public class Overdose : CharacterSkills
 
                 // 仮設置（プレ表示）
                 TweaksPre(spawnPos, spawnRot);
-
-                // 左クリックで確定
-                if (Input.GetMouseButtonDown(0))
-                {
-                    CmdTweaks(spawnPos, spawnRot);
-                }
             }
             else
             {
@@ -89,31 +97,51 @@ public class Overdose : CharacterSkills
                 DestroyTweaksPre();
             }
 
-
-
         }
         else
         {
             DestroyTweaksPre();
         }
-        if (isMirror)
+
+        if (GetComponentInChildren<WeaponManager>().GetCurrentWeaponType() == WeaponType.IAm)
         {
-            // 左クリックで確定
-            if (Input.GetMouseButtonDown(0))
+
+            Transform t = Camera.main.transform;
+
+            if (am == null)
             {
-                CmdMirror(Camera.main.transform.position, Camera.main.transform.forward);
+                Debug.LogWarning("prefabToSpawn が設定されていません。");
+                return;
+            }
+
+            Vector3 origin = t.position;
+            Vector3 direction = t.forward;
+
+            RaycastHit hit;
+            Vector3 spawnPos;
+            Quaternion spawnRot = Quaternion.identity;
+
+            // ---- 1. 前方レイキャスト（壁チェックのみ） ----
+            if (Physics.Raycast(origin, direction, out hit, amMaxDistance, ground, QueryTriggerInteraction.Ignore))
+            {
+                // 壁の手前に配置
+                spawnPos = hit.point + hit.normal * amSurfaceOffset;
+                spawnRot = GetProjectedRotation(direction, hit.normal);
+
+                // 仮設置（プレ表示）
+                AmPre(spawnPos, spawnRot);
+
+            }
+            else
+            {
+                // 壁がなければプレビューを消す
+                DestroyAmPre();
             }
         }
-
-        if (shootManager.IsZooming && isMirror)
+        else
         {
-            ChangeMirror();
+            DestroyAmPre();
         }
-        if (shootManager.IsZooming && isTweaks)
-        {
-            ChangeTweaks();
-        }
-
 
     }
 
@@ -144,22 +172,16 @@ public class Overdose : CharacterSkills
                 return Quaternion.identity;
         }
     }
-
-
-
+    public void RequestTweaks()
+    {
+        if (!isOwned) return;
+        CmdTweaks(tweaksPreInstance.position, tweaksPreInstance.rotation);
+    }
 
     public void Tweaks()
     {
-
-        if (currentCharacter.skill1Energy <= 0)
-        {
-            return;
-        }
-
-        ChangeTweaks();
-
-
-
+        if (currentCharacter.skill3Energy <= 0) return;
+        GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponType.ITweaks);
     }
 
 
@@ -167,28 +189,11 @@ public class Overdose : CharacterSkills
     public void CmdTweaks(Vector3 spawnPos, Quaternion spawnRot)
     {
 
-        currentCharacter.skill1Energy--;
+        currentCharacter.skill3Energy--;
         TweaksSpawn(spawnPos, spawnRot);
 
     }
 
-
-    public void ChangeTweaks()
-    {
-        if (!isTweaks)
-        {
-
-            shootManager.canShoot = false;
-            isTweaks = true;
-            isMirror = false;
-        }
-        else
-        {
-            shootManager.canShoot = true;
-            isTweaks = false;
-            shootManager.shootInputAhead = true;
-        }
-    }
 
     public void TweaksPre(Vector3 pos, Quaternion dir)
     {
@@ -207,14 +212,8 @@ public class Overdose : CharacterSkills
     {
         var instance = RoundManager.rm.ObjectSpawn(tweaks, spawnPos, dir, true, false, connectionToClient);
         instance.GetComponent<SpawnOwner>().ownerNetId = netId;
-        RpcChangeTweaks(connectionToClient);
     }
 
-    [TargetRpc]
-    public void RpcChangeTweaks(NetworkConnection target)
-    {
-        ChangeTweaks();
-    }
 
     public void DestroyTweaksPre()
     {
@@ -225,6 +224,12 @@ public class Overdose : CharacterSkills
 
     }
 
+    public void RequestMirror()
+    {
+        if (!isOwned) return;
+        CmdMirror(Camera.main.transform.position, Camera.main.transform.forward);
+    }
+
     public void Mirror()
     {
 
@@ -232,8 +237,7 @@ public class Overdose : CharacterSkills
         {
             return;
         }
-
-        ChangeMirror();
+        GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponType.IMirror);
 
     }
 
@@ -245,36 +249,82 @@ public class Overdose : CharacterSkills
         MirrorSpawn(pos, dir);
 
     }
-    public void ChangeMirror()
-    {
-        if (!isMirror)
-        {
-
-            shootManager.canShoot = false;
-            isMirror = true;
-            isTweaks = false;
-        }
-        else
-        {
-            shootManager.canShoot = true;
-            isMirror = false;
-            shootManager.shootInputAhead = true;
-        }
-    }
 
     public void MirrorSpawn(Vector3 pos, Vector3 dir)
     {
         var instance = RoundManager.rm.ObjectSpawn(mirror, pos, Quaternion.LookRotation(dir), true, false, connectionToClient);
         instance.GetComponent<SpawnOwner>().ownerNetId = netId;
-        RpcChangeMirror(connectionToClient);
+
     }
 
-    [TargetRpc]
-    public void RpcChangeMirror(NetworkConnection target)
+    public void RequestAm()
     {
-        ChangeMirror();
+        if (!isOwned) return;
+        CmdAm(amPreInstance.position, amPreInstance.rotation);
     }
 
+    public void Am()
+    {
+        if (amInstance != null) 
+        {
+            GetComponentInChildren<ThirdPersonController>().ServerUpdateAllPositions(amInstance.transform.position, amInstance.transform.rotation.eulerAngles);
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IAM, amInstance.transform.position, 0.5f, 30);
+            CmdDestroyAm();
+        }
+        else
+        {
+            if (currentCharacter.skill1Energy <= 0)
+            {
+                return;
+            }
+            GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponType.IAm);
+        }
+
+    }
+
+    [Command]
+    public void CmdDestroyAm()
+    {
+        NetworkServer.Destroy(amInstance.gameObject);
+    }
+
+    [Command]
+    public void CmdAm(Vector3 spawnPos, Quaternion spawnRot)
+    {
+
+        currentCharacter.skill1Energy--;
+        AmSpawn(spawnPos, spawnRot);
+
+    }
+
+
+    public void AmPre(Vector3 pos, Quaternion dir)
+    {
+        if (amPreInstance == null)
+        {
+            amPreInstance = Instantiate(amPre, pos, dir).transform;
+        }
+        else
+        {
+            amPreInstance.transform.position = pos;
+            amPreInstance.transform.rotation = dir;
+        }
+    }
+
+    public void AmSpawn(Vector3 spawnPos, Quaternion dir)
+    {
+        amInstance = RoundManager.rm.ObjectSpawn(am, spawnPos, dir, true, false, connectionToClient).transform;
+        amInstance.GetComponent<SpawnOwner>().ownerNetId = netId;
+    }
+
+    public void DestroyAmPre()
+    {
+        if (amPreInstance != null)
+        {
+            Destroy(amPreInstance.gameObject);
+        }
+
+    }
 
 }
 

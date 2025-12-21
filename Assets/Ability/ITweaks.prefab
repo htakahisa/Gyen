@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6885006484711419631}
   - component: {fileID: 4860152057952676415}
   - component: {fileID: 6102431286603773891}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -128,7 +128,7 @@ GameObject:
   - component: {fileID: -1809848207890565621}
   - component: {fileID: -673341643335275502}
   - component: {fileID: 1354660646378008967}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: ITweaks
   m_TagString: Body
   m_Icon: {fileID: 0}
@@ -191,7 +191,9 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
+  penetrationRate: 0
   onDeath: 6
+  destroyObject: []
   lightLoadEffect: {fileID: 0}
 --- !u!33 &9023816951373079812
 MeshFilter:

@@ -5,6 +5,7 @@ using static WeaponStatus;
 public class WeaponDatabase : ScriptableObject
 {
     public string gunType;
+    public WeaponLogic logic;
     public string weaponName;
     public string description;
     public int cost;

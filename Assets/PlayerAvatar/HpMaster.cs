@@ -2,6 +2,7 @@ using UnityEngine;
 using Mirror;
 using UnityEngine.Events;
 using StarterAssets;
+using System.Collections.Generic;
 
 public class HpMaster : NetworkBehaviour
 {
@@ -21,6 +22,7 @@ public class HpMaster : NetworkBehaviour
 
     public EventOnDeath onDeath;
 
+    public List<GameObject> destroyObject = new List<GameObject>();
     public GameObject lightLoadEffect;
 
     private void OnHpChanged(int oldValue, int newValue)
@@ -152,7 +154,12 @@ public class HpMaster : NetworkBehaviour
         }
         if (onDeath == EventOnDeath.DESTROY)
         {
-            NetworkServer.Destroy(gameObject);
+            if (destroyObject == null) destroyObject.Add(gameObject);
+
+            foreach (var obj in destroyObject)
+            {
+                NetworkServer.Destroy(obj); 
+            }
         }
         if (onDeath == EventOnDeath.HORUSDESTROY)
         {
@@ -232,6 +239,22 @@ public class HpMaster : NetworkBehaviour
             FinisherManager.instance.PlayPlayerKillBanner(gameObject, headshot);
             NetworkServer.Destroy(gameObject);
         }
+        if (onDeath == EventOnDeath.IAMDESTROY)
+        {
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.IAMDESTROYED, GetComponent<Collider>().bounds.center, 1f, 30);
+            NetworkServer.Destroy(gameObject);
+        }
+        if(onDeath == EventOnDeath.MAPOBECTJDESTROY)
+        {
+            if (destroyObject == null) destroyObject.Add(gameObject);
+
+            AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.BREAK, GetComponent<Collider>().bounds.center, 0.5f, 30);
+
+            foreach (var obj in destroyObject)
+            {
+                obj.SetActive(false);
+            }
+        }
     }
 
     public enum EventOnDeath
@@ -248,6 +271,8 @@ public class HpMaster : NetworkBehaviour
         PLAYERRESPAWN,
         DUELLANDRETRY,
         DUELLANDKILL,
+        IAMDESTROY,
+        MAPOBECTJDESTROY,
     }
 
 

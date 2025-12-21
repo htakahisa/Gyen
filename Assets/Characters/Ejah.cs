@@ -2,6 +2,7 @@ using Mirror;
 using StarterAssets;
 using System.Collections;
 using UnityEngine;
+using static WeaponStatus;
 
 public class Ejah : CharacterSkills
 {
@@ -30,8 +31,6 @@ public class Ejah : CharacterSkills
 
     public Transform terraPreInstance;
 
-    public bool isTerra;
-
     [Tooltip("最大到達距離 (m)")]
     public float horusMaxDistance = 3f;
 
@@ -45,8 +44,6 @@ public class Ejah : CharacterSkills
 
     public GameObject horus;
     public GameObject horusPre;
-
-    public bool isHorus;
 
     public Transform horusPreInstance;
 
@@ -64,8 +61,6 @@ public class Ejah : CharacterSkills
 
     public Transform mentumPreInstance;
 
-    public bool isMentum;
-
 
     [TextArea]
     public string memo = "Skill1 = Terra, Skill2 = Horus, Skill3 = Singing";
@@ -79,11 +74,9 @@ public class Ejah : CharacterSkills
 
     private void Update()
     {
-        if (isTerra)
+        if (GetComponentInChildren<WeaponManager>().GetCurrentWeaponType() == WeaponType.Terra)
         {
-
-         
-            
+       
             Transform t = Camera.main.transform;
 
             if (terraPre == null)
@@ -119,24 +112,14 @@ public class Ejah : CharacterSkills
             }
 
             TerraPre(spawnPos, spawnRot);
-
-            if (Input.GetMouseButtonDown(0))
-            {
-                spawnPos = terraPreInstance.position;
-                CmdTerra(spawnPos);
-                
-
-            }
         }
         else
         {
             DestroyTerraPre();          
         }
 
-        if (isHorus)
+        if (GetComponentInChildren<WeaponManager>().GetCurrentWeaponType() == WeaponType.Horus)
         {
-
-
 
             Transform t = Camera.main.transform;
 
@@ -162,12 +145,6 @@ public class Ejah : CharacterSkills
 
                 // 仮設置（プレ表示）
                 HorusPre(spawnPos, spawnRot);
-
-                // 左クリックで確定
-                if (Input.GetMouseButtonDown(0))
-                {
-                    CmdHorus(spawnPos, spawnRot);
-                }
             }
             else
             {
@@ -182,7 +159,7 @@ public class Ejah : CharacterSkills
         {
             DestroyHorusPre();
         }
-        if (isMentum)
+        if (GetComponentInChildren<WeaponManager>().GetCurrentWeaponType() == WeaponType.Mentum)
         {
 
             Transform cam = Camera.main.transform;
@@ -216,30 +193,10 @@ public class Ejah : CharacterSkills
 
             MentumPre(spawnPos, spawnRot);
 
-            if (Input.GetMouseButtonDown(0))
-            {
-                CmdMentum(spawnPos, spawnRot);
-
-
-            }
-
         }
         else
         {
             DestroyMentumPre();
-        }
-
-        if (shootManager.IsZooming && isTerra)
-        {
-            ChangeTerra();
-        }
-        if (shootManager.IsZooming && isHorus)
-        {
-            ChangeHorus();
-        }
-        if (shootManager.IsZooming && isMentum)
-        {
-            ChangeMentum();
         }
     }
 
@@ -271,6 +228,11 @@ public class Ejah : CharacterSkills
         }
     }
 
+    public void RequestTerra()
+    {
+        if (!isOwned) return;
+        CmdTerra(terraPreInstance.position);
+    }
 
 
 
@@ -280,20 +242,9 @@ public class Ejah : CharacterSkills
         if (currentCharacter.skill1Energy <= 0)
         {
             return;
-        }      
-        
-        ChangeTerra();
-
-        
-
+        }
+        GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponType.Terra);
     }
-
-
-
-
-
-
-
 
     [Command]
     public void CmdTerra(Vector3 spawnPos, NetworkConnectionToClient conn = null)
@@ -319,14 +270,6 @@ public class Ejah : CharacterSkills
         GameObject terraPre = RoundManager.rm.ObjectSpawn(terra, spawnPos, Quaternion.identity);
         var ownerTag = terraPre.GetComponent<SpawnOwner>();
         ownerTag.ownerNetId = conn.identity.netId; // 依頼者のnetIdを記録
-
-        RpcChangeTerra(connectionToClient);
-    }
-
-    [TargetRpc]
-    public void RpcChangeTerra(NetworkConnection target)
-    {
-        ChangeTerra();
     }
 
 
@@ -351,26 +294,10 @@ public class Ejah : CharacterSkills
         }
         
     }
-
-    public void ChangeTerra()
+    public void RequestHorus()
     {
-
-        if (!isTerra)
-        {
-
-            shootManager.canShoot = false;
-            isTerra = true;
-            isHorus = false;
-            isMentum = false;
-
-        }
-        else
-        {
-            shootManager.canShoot = true;
-            isTerra = false;
-            shootManager.shootInputAhead = true;
-        }
-
+        if (!isOwned) return;
+        CmdHorus(horusPreInstance.position, horusPreInstance.rotation);
     }
 
     public void Horus()
@@ -380,10 +307,7 @@ public class Ejah : CharacterSkills
         {
             return;
         }
-
-        ChangeHorus();
-
-
+        GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponType.Horus);
 
     }
 
@@ -394,25 +318,6 @@ public class Ejah : CharacterSkills
         currentCharacter.skill2Energy--;
         HorusSpawn(spawnPos, spawnRot, conn);
 
-    }
-
-    public void ChangeHorus()
-    {
-        if (!isHorus)
-        {
-
-            shootManager.canShoot = false;
-            isHorus = true;
-            isTerra = false;
-            isMentum = false;
-
-        }
-        else
-        {
-            shootManager.canShoot = true;
-            isHorus = false;
-            shootManager.shootInputAhead = true;
-        }
     }
 
     public void HorusPre(Vector3 pos, Quaternion dir)
@@ -436,15 +341,8 @@ public class Ejah : CharacterSkills
         // 誰が生成依頼したかを記録
         var ownerTag = instance.GetComponent<SpawnOwner>();
         ownerTag.ownerNetId = conn.identity.netId; // 依頼者のnetIdを記録
-
-        RpcChangeHorus(connectionToClient);
     }
 
-    [TargetRpc]
-    public void RpcChangeHorus(NetworkConnection target)
-    {
-        ChangeHorus();
-    }
 
     public void DestroyHorusPre()
     {
@@ -454,6 +352,12 @@ public class Ejah : CharacterSkills
         }
 
     }
+    public void RequestMentum()
+    {
+        if (!isOwned) return;
+        CmdMentum(mentumPreInstance.position, mentumPreInstance.rotation);
+    }
+
     public void Mentum()
     {
 
@@ -461,10 +365,7 @@ public class Ejah : CharacterSkills
         {
             return;
         }
-
-        ChangeMentum();
-
-
+        GetComponentInChildren<WeaponManager>().CmdBuyWeapon(WeaponType.Mentum);
 
     }
 
@@ -477,24 +378,6 @@ public class Ejah : CharacterSkills
 
     }
 
-    public void ChangeMentum()
-    {
-        if (!isMentum)
-        {
-
-            shootManager.canShoot = false;
-            isMentum = true;
-            isTerra = false;
-            isHorus = false;
-
-        }
-        else
-        {
-            shootManager.canShoot = true;
-            isMentum = false;
-            shootManager.shootInputAhead = true;
-        }
-    }
 
     public void MentumPre(Vector3 pos, Quaternion dir)
     {
@@ -516,15 +399,8 @@ public class Ejah : CharacterSkills
         // 誰が生成依頼したかを記録
         var ownerTag = instance.GetComponent<SpawnOwner>();
         ownerTag.ownerNetId = conn.identity.netId; // 依頼者のnetIdを記録
-
-        RpcChangeMentum(connectionToClient);
     }
 
-    [TargetRpc]
-    public void RpcChangeMentum(NetworkConnection target)
-    {
-        ChangeMentum();
-    }
 
     public void DestroyMentumPre()
     {

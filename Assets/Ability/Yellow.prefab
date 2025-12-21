@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -1598814657562545648}
   - component: {fileID: 6095881153063902886}
   - component: {fileID: 8901242555360098641}
-  m_Layer: 6
+  m_Layer: 15
   m_Name: Yellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -186,5 +186,7 @@ MonoBehaviour:
   armer: 1
   isInvincible: 0
   isDead: 0
+  penetrationRate: 0
   onDeath: 4
+  destroyObject: []
   lightLoadEffect: {fileID: 0}

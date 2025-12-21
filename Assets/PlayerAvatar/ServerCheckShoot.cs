@@ -47,15 +47,6 @@ public class ServerCheckShoot : NetworkBehaviour
     }
 
 
-
-    // レイヤーごとの減衰率設定（1mあたりの減衰率）
-    private Dictionary<int, float> layerAttenuation = new Dictionary<int, float>()
-    {
-        { 3, 0.2f },  // Ground: 1mごとに exp(0.3*thickness) 減衰
-        { 9, 999f },  // PhaseWall: 通過不可（ほぼ即死）
-        { 10, 0.05f }, // Smoke: ほぼ影響なし（厚さ依存で微減衰）
-    };
-
     [Command(requiresAuthority = false)]
     public void CmdGetShoot(
       GameObject playerObject,
@@ -89,7 +80,7 @@ public class ServerCheckShoot : NetworkBehaviour
 
         // ② 銃口位置 → 命中点への方向で弾を可視化（元の挙動100%維持）
         Vector3 shootDir = (targetPoint - weaponPos).normalized;
-        DrawBulletLine(weaponPos, shootDir, playerObject);
+        DrawBulletLine(weaponPos, dir, playerObject);
 
         // 移動速度による射撃可否（元の挙動そのまま）
         if (tpc.GetSpeed() <= 1f && tpc.Grounded)
@@ -109,39 +100,29 @@ public class ServerCheckShoot : NetworkBehaviour
                 GameObject hitObject = hitpoint.collider.gameObject;
                 int hitLayer = hitObject.layer;
 
+                if (hitObject.GetComponentInParent<SpawnOwner>() != null && !hitObject.GetComponentInParent<SpawnOwner>().friendlyFire && playerObject.GetComponent<SpawnOwner>().ownerNetId == hitObject.GetComponentInParent<SpawnOwner>().ownerNetId) continue;
+
                 Debug.Log($"HitOrder: [{i}] {hitpoint.collider.name} (Dist: {hitpoint.distance:F3}) Layer:{hitLayer}");
 
                 // ■ 壁貫通の減衰（機能完全維持）
-                if (layerAttenuation != null && layerAttenuation.ContainsKey(hitLayer))
+                HpMaster hpMaster = hitObject.GetComponentInParent<HpMaster>();
+                PenetrationRate penetration = hitObject.GetComponentInParent<PenetrationRate>();
+
+                float k;
+                if (penetration != null)
                 {
-                    float k = layerAttenuation[hitLayer];
-                    float thickness = GetWallThickness(hitpoint, dir, 100f);
-
-                    if (k >= 999f)
-                    {
-                        GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
-                        NetworkServer.Spawn(fragment);
-
-                        currentDamageRate = 0f;
-                        Debug.Log($"Layer {hitLayer} is impassable. Stopping bullet.");
-                        break;
-                    }
-                    else if (thickness > 0f)
-                    {
-                        GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
-                        NetworkServer.Spawn(fragment);
-
-                        currentDamageRate *= Mathf.Exp(-k * thickness);
-                        Debug.Log($"{hitObject.gameObject.name} thickness {thickness:F3}m, k={k:F3} => damageRate={currentDamageRate:F4}");
-                    }
-
-                    continue;
+                    k = penetration.penetrationRate;
                 }
+                else
+                {
+                    k = 999f;
+                }
+                float thickness = GetWallThickness(hitpoint, dir, 100f);
+                
 
                 // ■ プレイヤーへのダメージ処理（完全維持）
                 if (hitLayer == 6)
                 {
-                    HpMaster hpMaster = hitObject.GetComponentInParent<HpMaster>();
                     if (hpMaster != null &&
                         playerObject.GetComponent<NetworkIdentity>().netId
                         != hitObject.GetComponentInParent<NetworkIdentity>().netId)
@@ -173,6 +154,12 @@ public class ServerCheckShoot : NetworkBehaviour
                                 if (isHeadShot) headShot++; else bodyShot++;
                             }
 
+                            var targetTpc = hpMaster.GetComponentInChildren<ThirdPersonController>();
+                            if (targetTpc != null)
+                            {
+                                targetTpc.ApplyPenalty();
+                            }
+
                             hpMaster.TakeDamage(finalDamage, headshot);
                             hitList.Add(hpMaster.gameObject);
 
@@ -183,6 +170,62 @@ public class ServerCheckShoot : NetworkBehaviour
                                 Darkness(hpMaster.transform, finalDamage, playerObject);
                             }
                         }
+                    }
+                }else
+                if (hitLayer == 15)
+                {
+                    if (hpMaster != null &&
+                        playerObject.GetComponent<NetworkIdentity>().netId
+                        != hitObject.GetComponentInParent<NetworkIdentity>().netId)
+                    {
+                        bool isHeadShot = hitpoint.collider.CompareTag("Head");
+
+                        if (!hitList.Contains(hpMaster.gameObject))
+                        {
+                            // 血のエフェクト（完全維持）
+                            if (isHeadShot)
+                            {
+                                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HEADBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f, 15);
+                            }
+                            else
+                            {
+                                AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.HITBLOOD, transform.TransformPoint(GetComponentInParent<CharacterController>().center), 0.1f, 15);
+                            }
+
+                            int finalDamage = (int)((isHeadShot ? originalHeadDamage : originalDamage) * currentDamageRate);
+
+                            bool headshot = false;
+                            if (GetComponentInParent<BotManager>() == null)
+                            {
+                                headshot = isHeadShot;
+                                if (isHeadShot) headShot++; else bodyShot++;
+                            }
+
+                            hpMaster.TakeDamage(finalDamage, headshot);
+                            hitList.Add(hpMaster.gameObject);
+
+                            Debug.Log($"ヒット: {hitpoint.collider.tag}, ダメージ {finalDamage}");
+                        }
+                    }
+                }
+                else
+                {
+                    if (k >= 999f)
+                    {
+                        GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
+                        NetworkServer.Spawn(fragment);
+
+                        currentDamageRate = 0f;
+                        Debug.Log($"Layer {hitLayer} is impassable. Stopping bullet.");
+                        break;
+                    }
+                    else if (thickness > 0f)
+                    {
+                        GameObject fragment = Instantiate(Fragment, hitpoint.point, Quaternion.identity);
+                        NetworkServer.Spawn(fragment);
+
+                        currentDamageRate *= Mathf.Exp(-k * thickness);
+                        Debug.Log($"{hitObject.gameObject.name} thickness {thickness:F3}m, k={k:F3} => damageRate={currentDamageRate:F4}");
                     }
                 }
             } // for
@@ -248,7 +291,8 @@ public class ServerCheckShoot : NetworkBehaviour
                 // 誰が生成依頼したかを記録
                 var ownerTag = darkOrbPrefab.GetComponent<SpawnOwner>();
                 // 依頼者のnetIdを記録
-                ownerTag.ownerNetId = playerObject.GetComponent<NetworkIdentity>().netId; 
+                ownerTag.ownerNetId = playerObject.GetComponent<NetworkIdentity>().netId;
+                ownerTag.friendlyFire = true;
                 NetworkServer.Spawn(darkOrbPrefab);
                 darkOrbPrefab.GetComponent<Darkness>().SetSize(damage);
                 darkOrbPrefabs.Add(darkOrbPrefab);
@@ -262,28 +306,26 @@ public class ServerCheckShoot : NetworkBehaviour
 
     public GameObject GetDarkOrb()
     {
-        if (darkOrbPrefabs.Count != 0)
-        {
-            GameObject smallest = darkOrbPrefabs[0];
-            float smallestScale = darkOrbPrefabs[0].transform.localScale.magnitude;
+        var orbs = FindObjectsOfType<Darkness>();
 
-            foreach (var orb in darkOrbPrefabs)
+        if (orbs.Length == 0) return null;
+
+        Darkness smallest = orbs[0];
+        float smallestScale = orbs[0].transform.localScale.magnitude;
+
+        foreach (var orb in orbs)
+        {
+            float orbScale = orb.transform.localScale.magnitude;
+            if (orbScale < smallestScale)
             {
-                float orbScale = orb.transform.localScale.magnitude;
-                if (orbScale < smallestScale)
-                {
-                    smallest = orb;
-                    smallestScale = orbScale;
-                }
+                smallest = orb;
+                smallestScale = orbScale;
             }
+        }
 
-            return smallest;
-        }
-        else
-        {
-            return null;
-        }
+        return smallest.gameObject;
     }
+
 
     public void DestroyOrb(GameObject orb)
     {
@@ -315,9 +357,22 @@ public class ServerCheckShoot : NetworkBehaviour
         if (playerObject.GetComponent<NetworkIdentity>().isLocalPlayer) return; // 自分自身は無視
 
         Vector3 endPoint = origin + direction * maxDistance;
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, maxDistance, hitMask))
+        Transform self = transform; // 自分の Transform。Awake 等でセットしておく。
+
+        RaycastHit[] hits = Physics.RaycastAll(origin, direction, maxDistance, hitMask);
+
+        // 距離順にソート（RaycastAll は順不同）
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (var hit in hits)
         {
+            // 自分自身または子オブジェクトならスルー
+            if (hit.transform == self || hit.transform.IsChildOf(self))
+                continue;
+
+            // ★ 自分以外のオブジェクトに当たった！
             endPoint = hit.point;
+            break;
         }
 
         if(drawCoroutine != null)
@@ -338,16 +393,10 @@ public class ServerCheckShoot : NetworkBehaviour
 
         yield return new WaitForSeconds(lineDuration);
 
-        lineRenderer.enabled = false;
         drawCoroutine = null;
         lineRenderer.SetPosition(0, Vector3.zero);
         lineRenderer.SetPosition(1, Vector3.zero);
-    }
-
-    private void OnDisable()
-    {
-        if (lineRenderer != null)
-            lineRenderer.enabled = false;
+        lineRenderer.enabled = false;
     }
 
 }

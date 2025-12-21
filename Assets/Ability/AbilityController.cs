@@ -161,7 +161,7 @@ public class AbilityController : NetworkBehaviour
             YellowManager yellowManager = nowControlled.GetComponentInChildren<YellowManager>();
             yellowManager.StartChange();
         }
-        nowGeometry = nowControlled.GetComponent<FormManager>().geometry;
+        nowGeometry = nowControlled.GetComponent<FormManager>().character;
         nowCamera = nowControlled.GetComponent<FormManager>().camera;
 
         StartCoroutine(DisableNowControlled());
@@ -214,13 +214,13 @@ public class AbilityController : NetworkBehaviour
         {
             if (obj == nowControlled && obj != null)
             {
-                obj.GetComponent<FormManager>().geometry.SetActive(true);
-                obj.GetComponent<FormManager>().camera.SetActive(true);
+                obj.GetComponent<FormManager>().character.SetActive(true);
+                obj.GetComponent<FormManager>().camera.GetComponent<Camera>().enabled = true;
             }
             else
             {
-                obj.GetComponent<FormManager>().geometry.SetActive(false);
-                obj.GetComponent<FormManager>().camera.SetActive(false);
+                obj.GetComponent<FormManager>().character.SetActive(false);
+                obj.GetComponent<FormManager>().camera.GetComponent<Camera>().enabled = false;
             }
         }
     }

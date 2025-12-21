@@ -92,12 +92,17 @@ public class RoundManager : NetworkBehaviour
     public Coroutine startGetting;
     public bool isFanatics;
 
+    [SyncVar]
     public bool hasMapLoad;
 
     public GameObject botPrefab;
 
     // --- 追加: ボムアーム中フラグ（重複実行防止） ---
     private bool isArmingBomb = false;
+
+    public bool isWriting = false;
+
+    public List<ThirdPersonController> recordGuys = new List<ThirdPersonController>();
 
     public enum Mode
     {
@@ -181,16 +186,30 @@ public class RoundManager : NetworkBehaviour
             ServerResetAllObjects();
             ResetStatus();
         }
-
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            StartCoroutine(RecordRoutine());
+        }
     }
 
     public void RoundEnd(GameObject loser)
     {
-        if (hasRoundEnded) return;
+        StartCoroutine(RoundEndCoroutine(loser));
+    }
+
+    public IEnumerator RoundEndCoroutine(GameObject loser)
+    {
+        if (hasRoundEnded) yield break;
         hasRoundEnded = true;
+        yield return new WaitWhile(() => isWriting);
         Round++;
 
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
+
+        if (Round == 13)
+        {
+            RpcSideChange();
+        }
 
         RpcSwitchBuyPhase();
         StartCoroutine(ResetRound(winner == myPlayer));
@@ -199,7 +218,7 @@ public class RoundManager : NetworkBehaviour
 
         RpcResultText(loser);
         Invoke("RpcSwitchBattlePhase", 20f);
-    }
+    } 
 
     public void DuelLandRetry(bool win)
     {
@@ -218,6 +237,14 @@ public class RoundManager : NetworkBehaviour
         FinisherManager.instance.PlayPlayerKillBanner(loser, headshot);
         FinisherManager.instance.PlayPlayerFinisher(winner.GetComponentInChildren<WeaponManager>().GetCurrentWeaponStats(), loser);
 
+    }
+
+    [ClientRpc]
+    public void RpcSideChange()
+    {
+        var formerAttacker = attacker;
+        attacker = defender;
+        defender = formerAttacker;
     }
 
     [ClientRpc]
@@ -331,12 +358,12 @@ public class RoundManager : NetworkBehaviour
     [Server]
     public void ServerResetAllObjects()
     {
-
         // クライアント側でオブジェクトをリセット
         foreach (var spawn in spawns)
         {
             NetworkServer.Destroy(spawn);
         }
+        recordGuys.Clear();
 
         foreach (var item in respawns)
         {
@@ -403,23 +430,7 @@ public class RoundManager : NetworkBehaviour
                     spawnedGimmicks.Add(prefab);
                     spawns.Add(prefab);
                 }
-                // クライアント側でオブジェクトをリセット
-                foreach (var item in respawns)
-                {
-                    if (item.prefab != null)
-                    {
-                        ObjectSpawn(item.prefab, item.position);
-                        if (item.prefab.GetComponent<CharacterTransfromNetwork>() != null && item.prefab.GetComponent<BotManager>() != null)
-                        {
-                            item.prefab.transform.rotation = item.rotation;
-                            item.prefab.GetComponent<SpawnOwner>().ownerNetId = 12345;
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Prefabが設定されていません。");
-                    }
-                }
+
             }
             else
             {
@@ -435,11 +446,8 @@ public class RoundManager : NetworkBehaviour
             }
         }
 
-
-        if (!Application.isEditor)
-        {
-            StartCoroutine(RecordRoutine());
-        }
+        StartCoroutine(RecordStopRoutine());
+        
 
         StartCoroutine(WaitMapLoad());
         StartCoroutine(BombArmCoroutine());
@@ -879,7 +887,6 @@ public class RoundManager : NetworkBehaviour
                 }
                 attacker.GetComponentInParent<CharacterTransfromNetwork>().SetSynchronize(false);
                 attacker.GetComponentInChildren<ThirdPersonController>().ResetPos(spawnPos, attackSpawnRot);
-                yield return new WaitWhile(() => attacker.transform.rotation != Quaternion.Euler(attackSpawnRot));
                 attacker.GetComponentInParent<CharacterTransfromNetwork>().SetSynchronize(true);
 
             }
@@ -904,21 +911,38 @@ public class RoundManager : NetworkBehaviour
                 }
                 defender.GetComponentInParent<CharacterTransfromNetwork>().SetSynchronize(false);
                 defender.GetComponentInChildren<ThirdPersonController>().ResetPos(spawnPos, defenceSpawnRot);
-                yield return new WaitWhile(() => defender.transform.rotation != Quaternion.Euler(defenceSpawnRot));
                 defender.GetComponentInParent<CharacterTransfromNetwork>().SetSynchronize(true);
             }
         }
 
 
     }
-    IEnumerator RecordRoutine()
+
+    IEnumerator RecordStopRoutine()
     {
+        yield return new WaitWhile(() => isWriting);
         if (currentMode == Mode.DUELLAND)
         {
             MatchRecorder recorder = GetComponent<MatchRecorder>();
             yield return recorder.StopRecordingAndWait().AsCoroutine();
-            recorder.ClearCamera();
+            yield return recorder.ClearCamera().AsCoroutine();
+            foreach (var recordGuy in recordGuys)
+            {
+                recordGuy.SetRecordCamera();
+            }
             recorder.StartRecording();
+        }
+    }
+
+    IEnumerator RecordRoutine()
+    {
+        if (isWriting) yield break;
+        isWriting = true;
+        if (currentMode == Mode.DUELLAND)
+        {
+            MatchRecorder recorder = GetComponent<MatchRecorder>();
+            yield return recorder.WriteRecordingAndWait().AsCoroutine();
+            isWriting = false;
 
         }
     }
@@ -975,6 +999,7 @@ public class RoundManager : NetworkBehaviour
             player.GetComponentInChildren<ThirdPersonController>().RpcControllerEnabled(true);
             player.GetComponent<HpMaster>().ResetHp();
             player.GetComponentInChildren<ShootManager>().StopFoundDelay();
+            player.GetComponentInChildren<ServerCheckShoot>().darkOrbPrefabs.Clear();
 
             if (currentMode == Mode.ONEVSONE || currentMode == Mode.DOUBLETAP || player.GetComponentInChildren<WeaponManager>().GetCurrentWeaponSlot() == null)
             {

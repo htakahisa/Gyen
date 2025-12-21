@@ -26,18 +26,13 @@ public class Lucifer : CharacterSkills
         serverCheckShoot.isDarkness = true;
     }
 
-    private void OnDisable()
-    {
-        Debug.Log("Dont hurt me!");
-    }
-
 
     public void Rebelliousness()
     {
-        if (currentCharacter.skill2Energy != 0)
+        if (currentCharacter.skill1Energy != 0)
         {
             weaponManager.CmdBuyWeapon(WeaponStatus.WeaponType.Rebelliousness);
-            currentCharacter.skill2Energy--;
+            currentCharacter.skill1Energy--;
         }
         else
         {
@@ -62,11 +57,16 @@ public class Lucifer : CharacterSkills
     [Command]
     public void CmdCollectOrb()
     {
-        GetComponentInChildren<ServerCheckShoot>().GetDarkOrb().GetComponent<Darkness>().Collected();
+        var orb = GetComponentInChildren<ServerCheckShoot>().GetDarkOrb();
+        if (orb == null) return;
+
+        orb.GetComponent<Darkness>().Collected();
         currentCharacter.skill2Energy--;
-        GetComponentInChildren<ServerCheckShoot>().DestroyOrb(GetComponentInChildren<ServerCheckShoot>().GetDarkOrb());
+
+        GetComponentInChildren<ServerCheckShoot>().DestroyOrb(orb);
         GetComponentInChildren<ScanCamera>().CameraTimeOn(1f);
     }
+
 
 
 
