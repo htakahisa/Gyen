@@ -215,12 +215,12 @@ public class AbilityController : NetworkBehaviour
             if (obj == nowControlled && obj != null)
             {
                 obj.GetComponent<FormManager>().character.SetActive(true);
-                obj.GetComponent<FormManager>().camera.GetComponent<Camera>().enabled = true;
+                obj.GetComponent<FormManager>().camera.SetActive(true);
             }
             else
             {
                 obj.GetComponent<FormManager>().character.SetActive(false);
-                obj.GetComponent<FormManager>().camera.GetComponent<Camera>().enabled = false;
+                obj.GetComponent<FormManager>().camera.SetActive(false);
             }
         }
     }
