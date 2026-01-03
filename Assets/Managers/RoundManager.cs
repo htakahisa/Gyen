@@ -40,6 +40,10 @@ public class RoundManager : NetworkBehaviour
 
     [SyncVar]
     public int Round = 1;
+
+    [SyncVar]
+    public int allRound = 1;
+
     public Phase CurrentPhase;
 
     public Mode currentMode;
@@ -203,6 +207,7 @@ public class RoundManager : NetworkBehaviour
         hasRoundEnded = true;
         yield return new WaitWhile(() => isWriting);
         Round++;
+        allRound++;
 
         GameObject winner = myPlayer == loser ? otherPlayer : myPlayer;
 
@@ -225,6 +230,7 @@ public class RoundManager : NetworkBehaviour
         if (hasRoundEnded) return;
         hasRoundEnded = true;
         Round++;
+        allRound++;
 
         StartCoroutine(ResetRound(win));
     }
@@ -242,9 +248,16 @@ public class RoundManager : NetworkBehaviour
     [ClientRpc]
     public void RpcSideChange()
     {
+        Round = 0;
         var formerAttacker = attacker;
         attacker = defender;
         defender = formerAttacker;
+        var formerAttackSpawnPos = attackSpawnPos;
+        var formerAttackSpawnRot = attackSpawnRot;
+        attackSpawnPos = defenceSpawnPos;
+        attackSpawnRot = defenceSpawnRot;
+        defenceSpawnPos = formerAttackSpawnPos;
+        defenceSpawnRot = formerAttackSpawnRot;
     }
 
     [ClientRpc]

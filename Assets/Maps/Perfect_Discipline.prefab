@@ -1795,6 +1795,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   ownerNetId: 12345
+  friendlyFire: 0
 --- !u!1 &6543373885000957092
 GameObject:
   m_ObjectHideFlags: 0
@@ -1823,7 +1824,7 @@ Transform:
   m_GameObject: {fileID: 6543373885000957092}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -45.7, y: 0, z: -18.55}
+  m_LocalPosition: {x: -45.7, y: 0, z: -17.26}
   m_LocalScale: {x: 1, y: 100, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children: []

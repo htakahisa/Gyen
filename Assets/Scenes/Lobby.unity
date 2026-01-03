@@ -1649,7 +1649,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -540.99994, y: 379}
+  m_AnchoredPosition: {x: -541, y: 379}
   m_SizeDelta: {x: -995.281, y: -749.999}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &188830260
@@ -5455,6 +5455,7 @@ MonoBehaviour:
   - {fileID: 5951389075367758475, guid: 30b828885125dd149950cea75da0342e, type: 3}
   - {fileID: 4178278509775477463, guid: 6857828e714bf094eb1f7ea47c2d8100, type: 3}
   - {fileID: 707285249987993866, guid: 28b5d522a72255c459088b9971155c31, type: 3}
+  - {fileID: 3539715179979286606, guid: 8aa8c7a662eac0e44938321aecd3fe11, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2

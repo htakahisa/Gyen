@@ -250,10 +250,16 @@ public class HpMaster : NetworkBehaviour
 
             AudioManager.Instance.CmdPlaySoundAtPoint(AudioManager.Sounds.BREAK, GetComponent<Collider>().bounds.center, 0.5f, 30);
 
-            foreach (var obj in destroyObject)
-            {
-                obj.SetActive(false);
-            }
+            RpcSetActive();
+        }
+    }
+
+    [ClientRpc]
+    public void RpcSetActive()
+    {
+        foreach (var obj in destroyObject)
+        {
+            obj.SetActive(false);
         }
     }
 
