@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultMoveSpeed: 4
   defaultSprintSpeed: 5
-  defaultJumpHeight: 0.55
-  defaultGravity: -10
+  defaultJumpHeight: 0.8
+  defaultGravity: -25
   defaultAssistRange: 30
   defaultMaxAssistAngle: 6
   defaultAssistStrength: 10
   defaultFootStepTime: 1
   defaultGroundAcceleration: 5
   defaultGroundDeceleration: 30
-  defaultAirControl: 0.3
+  defaultAirControl: 0.2
   defaultMaxAirSpeedMultiplier: 0.9
   defaultCounterStrafeStrength: 10
   defaultRecoverSpeed: 0.5
