@@ -1297,8 +1297,7 @@ namespace StarterAssets
 
             if (Grounded)
             {
-                // 空中に0.55秒以上いた場合にOnLand()を呼び出す
-                if (_airTime >= 0.55f)
+                if (_airTime >= 0.45f)
                 {
                     OnLand();
                 }
@@ -1634,8 +1633,7 @@ namespace StarterAssets
             
             if (Grounded)
             {
-                // 空中に0.55秒以上いた場合にOnLand()を呼び出す
-                if (_airTime >= 0.55f)
+                if (_airTime >= 0.45f)
                 {
                     OnLand();
                 }
