@@ -2752,7 +2752,7 @@ MonoBehaviour:
   syncInterval: 0
   panel: {fileID: 1948922708}
   weaponPanel: {fileID: 2101073122}
-  botsettingPanel: {fileID: 0}
+  botsettingPanel: {fileID: 239738565}
   isCursorLocked: 1
   cursorUI: {fileID: 1787982611}
   cursorSpeed: 1000

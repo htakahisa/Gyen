@@ -1931,7 +1931,7 @@ namespace StarterAssets
             yield return new WaitForSeconds(0.05f);
 
             // 必要ならサーバー側へ「完了した」と通知
-            RoundManager.rm.CmdHasReset();
+            RoundManager.rm.RpcHasReset();
 
             // Move 再開
             RpcControllerEnabled(true);

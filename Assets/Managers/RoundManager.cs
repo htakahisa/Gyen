@@ -83,7 +83,6 @@ public class RoundManager : NetworkBehaviour
     public float timeInRound;
     public bool hasRoundEnded;
 
-    [SyncVar]
     public bool hasReset;
 
     public MapDatas mapData;
@@ -99,7 +98,6 @@ public class RoundManager : NetworkBehaviour
     public Coroutine startGetting;
     public bool isFanatics;
 
-    [SyncVar]
     public bool hasMapLoad;
 
     public GameObject botPrefab;
@@ -486,7 +484,13 @@ public class RoundManager : NetworkBehaviour
     public IEnumerator WaitMapLoad()
     {
         yield return new WaitForSeconds(0.1f);
-        hasMapLoad = true;
+        RpcHasMapLoad(true);
+    }
+
+    [ClientRpc]
+    public void RpcHasMapLoad(bool valid)
+    {
+        hasMapLoad = valid;
     }
 
     public IEnumerator SpawnBotCoroutine(int gimmicks)
@@ -817,20 +821,17 @@ public class RoundManager : NetworkBehaviour
 
                 defenders.Add(defenderBot);
             }
-        }
 
-        players.Add(myPlayer);
-        if (attacker != null)
-        {
-            attackers.Add(attacker);
-        }
-        if (defender != null)
-        {
-            defenders.Add(defender);
-        }
+            players.Add(myPlayer);
+            if (attacker != null)
+            {
+                attackers.Add(attacker);
+            }
+            if (defender != null)
+            {
+                defenders.Add(defender);
+            }
 
-        if (isServer)
-        {
             foreach (var attack in attackers)
             {
                 attack.GetComponent<SpawnOwner>().ownerNetId = attacker.GetComponent<NetworkIdentity>().netId;
@@ -857,13 +858,24 @@ public class RoundManager : NetworkBehaviour
 
             SetConditions();
             yield return new WaitWhile(() => !hasReset);
+            RpcHasReset(false);
+            RpcHasLoaded(true);
             ServerResetAllObjects();
-            hasReset = false;
             ResetStatus();
-
         }
 
-        hasLoaded = true;
+    }
+
+    [ClientRpc]
+    public void RpcHasReset(bool valid)
+    {
+        hasReset = valid;
+    }
+
+    [ClientRpc]
+    public void RpcHasLoaded(bool valid)
+    {
+        hasLoaded = valid;
     }
 
     [Server]
@@ -1066,9 +1078,8 @@ public class RoundManager : NetworkBehaviour
         player.GetComponentInChildren<WeaponManager>().CmdSwitchWeapon(currentType);
     }
 
-
-    [Command(requiresAuthority = false)]
-    public void CmdHasReset()
+    [ClientRpc]
+    public void RpcHasReset()
     {
         hasReset = true;
     }

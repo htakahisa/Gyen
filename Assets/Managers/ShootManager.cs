@@ -121,7 +121,7 @@ namespace StarterAssets
 
             if (!isLocalPlayer && RoundManager.rm.currentMode != RoundManager.Mode.PRACTICE) return;
 
-            if (RoundManager.rm.hasLoaded && GetComponentInParent<PlayerManager>().hasLoaded && !hasLoaded)
+            if (RoundManager.rm.hasMapLoad && GetComponentInParent<PlayerManager>().hasLoaded && !hasLoaded)
             {
                 StartGetTpc();
                 hasLoaded = true;

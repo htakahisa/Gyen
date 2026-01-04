@@ -94,7 +94,7 @@ public class AudioManager : NetworkBehaviour
     [ClientRpc]
     private void RpcPlaySoundAtPoint(Sounds name, Vector3 position, float volume, float maxDistance)
     {
-        if (!RoundManager.rm.hasLoaded)
+        if (!RoundManager.rm.hasMapLoad)
         {
             return;
         }
