@@ -174,8 +174,8 @@ public class BuyPanel : NetworkBehaviour
 
     public void OpenPanel() {
 
-
         panel.SetActive(!panel.activeSelf);
+        weaponPanel.SetActive(true);
         // ‰ŠúˆÊ’u‚ğ‰æ–Ê’†‰›‚É
         cursorPos = new Vector2(Screen.width / 2f, Screen.height / 2f);
         if (isCursorLocked)

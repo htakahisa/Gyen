@@ -806,7 +806,8 @@ public class RoundManager : NetworkBehaviour
                 NetworkConnectionToClient attConn = attNetId.connectionToClient;
                 var attackerBot = ObjectSpawn(botPrefab, attackSpawnPos, Quaternion.Euler(attackSpawnRot), false, false, attConn);
                 attackerBot.GetComponent<SpawnOwner>().ownerNetId = attacker.GetComponent<NetworkIdentity>().netId;
-                
+
+                attackers.Add(attackerBot);
 
                 NetworkIdentity defNetId = defender.GetComponent<NetworkIdentity>();
                 NetworkConnectionToClient defConn = defNetId.connectionToClient;
