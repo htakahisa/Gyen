@@ -1480,6 +1480,7 @@ namespace StarterAssets
 
         public void BotMove(float horiMove, float verMove, bool isWalk, bool isCrouch)
         {
+            if (!RoundManager.rm.hasMapLoad) return;
             if (GetComponentInParent<SpawnOwner>() == null) return;
             if (GetComponentInParent<SpawnOwner>().ownerNetId != 12345 && !GetComponentInParent<SpawnOwner>().IsMine()) return;
             if (!canMove) return;
@@ -1630,6 +1631,7 @@ namespace StarterAssets
 
         public void BotJumpAndGravity()
         {
+            if (!RoundManager.rm.hasMapLoad) return;
             jump = jumpBot;
             
             if (Grounded)

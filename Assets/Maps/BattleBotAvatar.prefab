@@ -955,6 +955,7 @@ MonoBehaviour:
     m_Bits: 2568
   _speed: 0
   recoverSpeed: 0.5
+  airSoundTime: 0.45
   statusSpeed: 1
   middleBrow: {fileID: 4549604650611393894}
   head: {fileID: 6551465118505969049}
@@ -974,6 +975,7 @@ MonoBehaviour:
   lockManager: {fileID: 728472207448528687}
   footStepTime: 0
   jumpBot: 0
+  jumpRequested: 0
 --- !u!114 &8334744245603090709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -998,7 +1000,7 @@ MonoBehaviour:
   shootInputAhead: 0
   wallMask:
     serializedVersion: 2
-    m_Bits: 1544
+    m_Bits: 34312
   transformNetwork: {fileID: -4732923928998472460}
   parentOfPlayer: {fileID: 3543936278411775571}
   hazardScope: {fileID: 2517295520851128215}
@@ -3516,6 +3518,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   ownerNetId: 0
+  friendlyFire: 0
 --- !u!114 &7535765861924788460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3552,6 +3555,7 @@ MonoBehaviour:
   foundDelayTimeDelta: 0
   maxSpeedBonus: 0.2
   maxSpeed: 10
+  crouchRequired: 0
 --- !u!114 &2271529659643322744
 MonoBehaviour:
   m_ObjectHideFlags: 0
