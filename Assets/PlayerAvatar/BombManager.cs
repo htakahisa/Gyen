@@ -121,6 +121,7 @@ public class BombManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdStartDefuse(NetworkIdentity playerIdentity)
     {
+        if (!playerIdentity.GetComponent<PlayerActionLockManager>().CanShoot) return;
         if (RoundManager.rm.hasRoundEnded) return;
         if (!isArmed) CmdStopDefuse(playerIdentity);
         if (RoundManager.rm.attacker == playerIdentity.gameObject) return;

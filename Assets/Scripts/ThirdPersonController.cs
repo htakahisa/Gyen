@@ -1903,7 +1903,7 @@ namespace StarterAssets
             RpcControllerEnabled(false);
 
             // 全クライアントで Controller OFF が反映されるまで少し待つ
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.3f);
 
             // ② 同期 OFF
             ct.SetSynchronize(false);

@@ -9,9 +9,10 @@ using UnityEngine.UI;
 
 public class BuyPanel : NetworkBehaviour
 {
-    private GameObject player;
 
     public GameObject panel;
+    public GameObject weaponPanel;
+    public GameObject botsettingPanel;
 
     public bool isCursorLocked = true;
 
@@ -42,11 +43,6 @@ public class BuyPanel : NetworkBehaviour
 
     
 
-    void StartGetPlayer()
-    {
-        player = RoundManager.rm.GetMyPlayer();
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -54,16 +50,24 @@ public class BuyPanel : NetworkBehaviour
         {
             if (RoundManager.rm.hasLoaded && RoundManager.rm.GetMyPlayer().GetComponent<PlayerManager>().hasLoaded && !hasLoaded)
             {
-                StartGetPlayer();
                 hasLoaded = true;
             }
         }
 
+
         if (RoundManager.rm.CurrentPhase != RoundManager.Phase.BUY)
         {
-            panel.SetActive(false);
-            LockCursor();
+            weaponPanel.SetActive(false);
+            if(RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
+            {
+                LockCursor();
+            }
         }
+        if (RoundManager.rm.currentMode == RoundManager.Mode.ONEVSONE)
+        {
+            botsettingPanel.SetActive(false);
+        }
+        
 
         Vector2 input = inputActions.Player.Look.ReadValue<Vector2>();
 
@@ -176,11 +180,11 @@ public class BuyPanel : NetworkBehaviour
         cursorPos = new Vector2(Screen.width / 2f, Screen.height / 2f);
         if (isCursorLocked)
         {
-                UnlockCursor();
+            UnlockCursor();
         }
         else
         {
-                LockCursor();
+            LockCursor();
             
         }
     }

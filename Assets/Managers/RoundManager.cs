@@ -13,11 +13,13 @@ public class RoundManager : NetworkBehaviour
     private GameObject myPlayer;
     private GameObject otherPlayer;
 
+    [SyncVar]
     public GameObject attacker;
+    [SyncVar]
     public GameObject defender;
 
-    public List<GameObject> attackers = new List<GameObject>();
-    public List<GameObject> defenders = new List<GameObject>();
+    public SyncList<GameObject> attackers = new SyncList<GameObject>();
+    public SyncList<GameObject> defenders = new SyncList<GameObject>();
 
     public List<GameObject> dead = new List<GameObject>();
 
@@ -213,7 +215,7 @@ public class RoundManager : NetworkBehaviour
 
         if (Round == 13)
         {
-            RpcSideChange();
+            ServerSideChange();
         }
 
         RpcSwitchBuyPhase();
@@ -222,7 +224,7 @@ public class RoundManager : NetworkBehaviour
         GiveRound(winner);
 
         RpcResultText(loser);
-        Invoke("RpcSwitchBattlePhase", 20f);
+        Invoke("RpcSwitchBattlePhase", 25f);
     } 
 
     public void DuelLandRetry(bool win)
@@ -245,25 +247,22 @@ public class RoundManager : NetworkBehaviour
 
     }
 
-    [ClientRpc]
-    public void RpcSideChange()
+    [Server]
+    public void ServerSideChange()
     {
         Round = 0;
-        GetMyPlayer().GetComponent<CreditManager>().credit = 0;
+        foreach (var player in players)
+        {
+            player.GetComponent<CreditManager>().credit = 0;
+        }
         var formerAttacker = attacker;
         attacker = defender;
         defender = formerAttacker;
-        var formerAttackSpawnPos = attackSpawnPos;
-        var formerAttackSpawnRot = attackSpawnRot;
-        attackSpawnPos = defenceSpawnPos;
-        attackSpawnRot = defenceSpawnRot;
-        defenceSpawnPos = formerAttackSpawnPos;
-        defenceSpawnRot = formerAttackSpawnRot;
 
         attackers.Clear();
         defenders.Clear();
 
-        List<GameObject> formerAttackers = new List<GameObject>();
+        SyncList<GameObject> formerAttackers = new SyncList<GameObject>();
         formerAttackers = attackers;
 
         foreach (var defender in defenders)
