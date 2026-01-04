@@ -26,6 +26,7 @@ public class ReloadBar : MonoBehaviour
             {
                 weaponManager = RoundManager.rm.GetMyPlayer().GetComponentInChildren<WeaponManager>();
             }
+            reloadBar.gameObject.SetActive(false);
         }
         else
         {

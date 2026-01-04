@@ -83,6 +83,7 @@ public class RoundManager : NetworkBehaviour
     public float timeInRound;
     public bool hasRoundEnded;
 
+    [SyncVar]
     public bool hasReset;
 
     public MapDatas mapData;
