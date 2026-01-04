@@ -1924,8 +1924,9 @@ namespace StarterAssets
 
         public IEnumerator StartToMove()
         {
-            lockManager.RemoveLock(PlayerAction.Move, "StopSynchronized");
-            lockManager.RemoveLock(PlayerAction.Shoot, "StopSynchronized");
+            lockManager.ServerRemoveLockAll(PlayerAction.Move);
+            lockManager.ServerRemoveLockAll(PlayerAction.Shoot);
+            lockManager.ServerRemoveLockAll(PlayerAction.Ability);
 
             // クライアント側で Controller が ON になる前に少し待つ
             yield return new WaitForSeconds(0.05f);

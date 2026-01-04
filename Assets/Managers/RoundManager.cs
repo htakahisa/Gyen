@@ -918,9 +918,9 @@ public class RoundManager : NetworkBehaviour
                 yield return new WaitWhile(() => attacker.GetComponent<AbilityController>().currentForm != AbilityController.PlayerForm.Human);
 
                 attacker.GetComponentInChildren<ThirdPersonController>().RpcEndPraying();
-                attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Move);
-                attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Shoot);
-                attacker.GetComponent<PlayerActionLockManager>().ServerRemoveLockAll(PlayerAction.Ability);
+                attacker.GetComponent<PlayerActionLockManager>().CmdAddLock(PlayerAction.Move, "Teleport");
+                attacker.GetComponent<PlayerActionLockManager>().CmdAddLock(PlayerAction.Shoot, "Teleport");
+                attacker.GetComponent<PlayerActionLockManager>().CmdAddLock(PlayerAction.Ability, "Teleport");
                 Vector3 spawnPos = attackSpawnPos;
                 if (attacker.GetComponent<BotManager>() != null)
                 {
