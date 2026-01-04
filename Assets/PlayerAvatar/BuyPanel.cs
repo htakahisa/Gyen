@@ -67,6 +67,10 @@ public class BuyPanel : NetworkBehaviour
         {
             botsettingPanel.SetActive(false);
         }
+        else
+        {
+            botsettingPanel.SetActive(true);
+        }
         
 
         Vector2 input = inputActions.Player.Look.ReadValue<Vector2>();
