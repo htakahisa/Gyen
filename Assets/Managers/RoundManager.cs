@@ -249,6 +249,7 @@ public class RoundManager : NetworkBehaviour
     public void RpcSideChange()
     {
         Round = 0;
+        GetMyPlayer().GetComponent<CreditManager>().credit = 0;
         var formerAttacker = attacker;
         attacker = defender;
         defender = formerAttacker;
@@ -258,6 +259,21 @@ public class RoundManager : NetworkBehaviour
         attackSpawnRot = defenceSpawnRot;
         defenceSpawnPos = formerAttackSpawnPos;
         defenceSpawnRot = formerAttackSpawnRot;
+
+        attackers.Clear();
+        defenders.Clear();
+
+        List<GameObject> formerAttackers = new List<GameObject>();
+        formerAttackers = attackers;
+
+        foreach (var defender in defenders)
+        {
+            attackers.Add(defender); 
+        }
+        foreach (var attacker in formerAttackers)
+        {
+            defenders.Add(attacker);
+        }
     }
 
     [ClientRpc]
@@ -791,7 +807,7 @@ public class RoundManager : NetworkBehaviour
                 NetworkConnectionToClient attConn = attNetId.connectionToClient;
                 var attackerBot = ObjectSpawn(botPrefab, attackSpawnPos, Quaternion.Euler(attackSpawnRot), false, false, attConn);
                 attackerBot.GetComponent<SpawnOwner>().ownerNetId = attacker.GetComponent<NetworkIdentity>().netId;
-                attackers.Add(attackerBot);
+                
 
                 NetworkIdentity defNetId = defender.GetComponent<NetworkIdentity>();
                 NetworkConnectionToClient defConn = defNetId.connectionToClient;

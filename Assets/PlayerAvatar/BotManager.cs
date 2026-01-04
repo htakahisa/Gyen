@@ -36,6 +36,10 @@ public class BotManager : NetworkBehaviour
     // 速度の最大想定値（走っている時の最大速度に合わせる）
     public float maxSpeed = 10f;
 
+
+    public bool crouchRequired;
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public void Start()
     {
@@ -101,7 +105,10 @@ public class BotManager : NetworkBehaviour
                 }
             }
         }
-        if (RoundManager.rm.currentMode == RoundManager.Mode.DOUBLETAP) return;
+        if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
+        {
+            sm.StartFoundDelay(foundDelayTimeDelta);
+        }
 
         if (movingAsScript)
         {
@@ -109,69 +116,90 @@ public class BotManager : NetworkBehaviour
         }
         else
         {
-        
+
+
             if (RoundManager.rm.currentBotMove != RoundManager.BotMove.STOP)
             {
-                if (RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK || RoundManager.rm.currentBotMove == RoundManager.BotMove.RUN)
-                {
 
-                    if (moveTime <= 0)
+                if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
+                {
+                    if (RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK || RoundManager.rm.currentBotMove == RoundManager.BotMove.RUN)
                     {
-                        currentMoveDirection = Random.Range(-1, 2);
-                        moveDuration = Random.Range(0.3f, 1f);
+
+                        if (moveTime <= 0)
+                        {
+                            currentMoveDirection = Random.Range(-1, 2);
+                            moveDuration = Random.Range(0.3f, 1f);
+                        }
+                    }
+                    else
+                    {
+                        currentMoveDirection = 0;
                     }
                 }
-                else
-                {
-                    currentMoveDirection = 0;
-                }
+                
+            }
+            
 
-                // 移動実行
-                tpc.BotMove(currentMoveDirection, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchTime < crouchDuration && sm.hasFound);
-                moveTime += Time.deltaTime;
+            // 移動実行
+            tpc.BotMove(currentMoveDirection, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchRequired);
+            moveTime += Time.deltaTime;
 
-                // 移動時間が終了したらリセット
-                if (moveTime >= moveDuration)
-                {
-                    moveTime = 0;
-                }
+            // 移動時間が終了したらリセット
+            if (moveTime >= moveDuration)
+            {
+                moveTime = 0;
+            }
 
-                if (RoundManager.rm.currentBotMove == RoundManager.BotMove.JUMP)
+            if (RoundManager.rm.currentBotMove == RoundManager.BotMove.JUMP)
+            {
+                if (tpc.Grounded)
                 {
-                    if (tpc.Grounded)
+                    jumpTime += Time.deltaTime;
+
+                    if (jumpTime >= jumpDuration)
                     {
-                        jumpTime += Time.deltaTime;
-
-                        if (jumpTime >= jumpDuration)
-                        {
-                            jump = true;
-                            jumpTime = 0;
-                            jumpDuration = Random.Range(1.0f, 5.0f);
-                        }
-
-                    }
-
-                }
-
-                if (RoundManager.rm.currentBotMove == RoundManager.BotMove.CROUCH)
-                {
-                    if (tpc.Grounded)
-                    {
-                        crouchTime += Time.deltaTime;
-
-                        if (crouchTime >= crouchDuration + Random.Range(1f, 2.0f))
-                        {
-                            crouchTime = 0;
-                            crouchDuration = Random.Range(0.3f, 1.0f);
-                        }
-
-
+                        jump = true;
+                        jumpTime = 0;
+                        jumpDuration = Random.Range(0.5f, 2.0f);
                     }
 
                 }
 
             }
 
+            if (RoundManager.rm.currentBotMove == RoundManager.BotMove.CROUCH)
+            {
+                if (tpc.Grounded)
+                {
+                    crouchTime += Time.deltaTime;
+
+                    if (crouchTime >= crouchDuration + Random.Range(1f, 2.0f))
+                    {
+                        crouchTime = 0;
+                        crouchDuration = Random.Range(0.3f, 1.0f);
+                    }
+
+                }
+
+                if(tpc.Grounded && crouchTime < crouchDuration && sm.hasFound)
+                {
+                    crouchRequired = true;
+                }
+                else
+                {
+                    crouchRequired = false;
+                }
+
+            }
+            else
+            {
+                crouchRequired = false;
+            }
+
+                
+
+            
         }
 
         tpc.jumpBot = jump;

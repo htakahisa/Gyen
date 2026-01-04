@@ -91,6 +91,7 @@ namespace StarterAssets
         private float airControl = 0.3f; // 0〜1。0なら慣性固定
         private float maxAirSpeedMultiplier = 0.9f;
         public float recoverSpeed = 0.5f;  // 1秒あたりの回復量
+        public float airSoundTime = 0.45f;
 
         public float statusSpeed = 1;
 
@@ -532,26 +533,26 @@ namespace StarterAssets
                                         Quaternion bodyRot = Quaternion.LookRotation(bodyDir, Vector3.up);
                                         parentOfPlayer.transform.rotation = Quaternion.Euler(0, bodyRot.eulerAngles.y, 0);
                                     }
-                                    BotMove(0, 1, false, false);
+                                    BotMove(0, 1, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, false);
                                 }
                                 else
                                 {
-                                    BotMove(0, 0, false, true);
+                                    BotMove(0, 0, false, GetComponentInParent<BotManager>().crouchRequired);
                                 }
                             }
                             else
                             {
-                                BotMove(0, 0, false, true);
+                                BotMove(0, 0, false, GetComponentInParent<BotManager>().crouchRequired);
                             }
                         }
                         else
                         {
-                            BotMove(0, 0, false, true);
+                            BotMove(0, 0, false, GetComponentInParent<BotManager>().crouchRequired);
                         }
                     }
                     else
                     {
-                        BotMove(0, 0, false, true);
+                        BotMove(0, 0, false, GetComponentInParent<BotManager>().crouchRequired);
                     }
                 }
             }
@@ -1297,7 +1298,7 @@ namespace StarterAssets
 
             if (Grounded)
             {
-                if (_airTime >= 0.45f)
+                if (_airTime >= airSoundTime)
                 {
                     OnLand();
                 }
@@ -1633,7 +1634,7 @@ namespace StarterAssets
             
             if (Grounded)
             {
-                if (_airTime >= 0.45f)
+                if (_airTime >= airSoundTime)
                 {
                     OnLand();
                 }
