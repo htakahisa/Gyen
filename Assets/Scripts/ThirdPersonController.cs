@@ -1901,7 +1901,7 @@ namespace StarterAssets
             RpcControllerEnabled(false);
 
             // 全クライアントで Controller OFF が反映されるまで少し待つ
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(0.1f);
 
             // ② 同期 OFF
             ct.SetSynchronize(false);
@@ -1910,7 +1910,7 @@ namespace StarterAssets
             ct.ForceSetPosition(newPos, newRot.y);
 
             // 位置が確実に反映されるまで待つ
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(0.1f);
 
             // ④ 同期 ON
             ct.SetSynchronize(true);

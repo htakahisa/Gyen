@@ -139,10 +139,12 @@ public class BotManager : NetworkBehaviour
                 }
                 
             }
-            
 
-            // 移動実行
-            tpc.BotMove(currentMoveDirection, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchRequired);
+            if (RoundManager.rm.currentMode == RoundManager.Mode.PRACTICE)
+            {
+                // 移動実行
+                tpc.BotMove(currentMoveDirection, 0, RoundManager.rm.currentBotMove == RoundManager.BotMove.WALK, crouchRequired);
+            }
             moveTime += Time.deltaTime;
 
             // 移動時間が終了したらリセット
